@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>IM Crop</title>
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script>
+            var conf = {
+                prop1: '',
+                prop2: ''
+            };
+        </script>
+
+        <link rel="stylesheet" href="css/imcrop.css">
+    </head>
+
+
+    <body>
+        <div id="imc_container"></div>
+
+        <script src="js/imcrop.object.js"></script>
+
+        <script src="js/imcrop.js"></script>
+        <script src="js/imcrop.image.js"></script>
+        <script src="js/imcrop.rect.js"></script>
+
+        <script>
+            var canvas = new IMCropCanvas(
+                    document.getElementById('imc_container')
+            );
+
+            canvas.loadImage(
+                    'examples/picture.jpg',
+                    function(image) {
+                        canvas.addSoftcrop(16, 9, true);
+                        canvas.addSoftcrop(4, 3, false);
+                        canvas.addSoftcrop(1, 1, false);
+                    }
+            );
+
+        </script>
+    </body>
+</html>
