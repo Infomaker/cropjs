@@ -79,12 +79,12 @@ var IMCropImg = IMCropObject.extend({
      * @param {number} zoomLevel
      * @param {object} offset
      */
-    redraw: function(zoomLevel, offset) {
+    redraw: function(zoomLevel) {
         if (!this.isReady()) {
             return;
         }
 
-        this._calculateDrawDimensions(zoomLevel, offset);
+        this._calculateDrawDimensions(zoomLevel, {x: 0, y: 0});
 
         this._ctx.drawImage(
             this._image,
@@ -95,10 +95,17 @@ var IMCropImg = IMCropObject.extend({
         );
 
         if (this._crop instanceof IMSoftcrop) {
-            this._crop.redraw(zoomLevel, offset);
+            this._crop.redraw(zoomLevel);
         }
     },
 
+
+    /**
+     * Experimental - not used
+     *
+     * @param zoomLevel
+     * @param offset
+     */
     drawCrop: function(zoomLevel, offset) {
         if (!this.isReady() || this._crop instanceof IMSoftcrop != true) {
             return;

@@ -115,6 +115,7 @@ var IMCropObject = Class.extend({
             return false;
         }
 
+
         return this.inCalculatedArea(
             point,
             this._drawX,
@@ -134,14 +135,27 @@ var IMCropObject = Class.extend({
     },
 
     move: function(point) {
-        this._x += point.x;
-        this._y += point.y;
+        this._x += Math.round(point.x);
+        this._y += Math.round(point.y);
     },
 
     getCoordinates: function() {
         return {
             x: this._x,
             y: this._y
+        };
+    },
+
+    /**
+     * Return crop coordinates and dimensions
+     * @returns {{x: *, y: *, w: *, h: *}}
+     */
+    getDimensions: function() {
+        return {
+            x: this._x,
+            y: this._y,
+            w: this._w,
+            h: this._h
         };
     },
 
@@ -157,6 +171,7 @@ var IMCropObject = Class.extend({
      */
     _calculateDrawDimensions: function(zoomLevel, offset) {
         var dim = this._cropCanvas.getDimensions();
+
         this._drawW = Math.round(this._w * zoomLevel);
         this._drawH = Math.round(this._h * zoomLevel);
         this._drawX = Math.round((this._x + offset.x) * zoomLevel) + dim.margin;

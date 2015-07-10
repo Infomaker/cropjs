@@ -19,6 +19,7 @@ var IMCropCanvas = Class.extend({
     _x: 0,
     _y: 0,
     _zoomLevel: 1,
+    _keepCenter: false,
 
     _margin: 10,
     _offsetX: 0,
@@ -66,10 +67,18 @@ var IMCropCanvas = Class.extend({
             this._previewContainer.innerHTML = '';
             this._previewContainer.id = this._image.id;
 
-            for(var n in this._image.getCrops()) {
+            var crops = this._image.getCrops();
+            for(var n in crops) {
+                // Create image
                 var pvDiv = document.createElement('div');
                 pvDiv.className = 'im_preview_image';
                 pvDiv.id = this._image.id;
+
+                var cropDim = crops[n].getDimensions();
+                if (cropDim.h < cropDim.w) {
+                    pvDiv.style.width = 40 * (cropDim.w / cropDim.h) + 'px';
+                }
+
 
                 var pvImg = document.createElement('img');
                 pvImg.src = this._image._src;
@@ -101,25 +110,24 @@ var IMCropCanvas = Class.extend({
         this._canvas.height = this._container.clientHeight;
 
         if (this._image instanceof IMCropImg) {
-            this._image.redraw(
-                this._zoomLevel,
+            this._image.redraw(this._zoomLevel, {x: 0, y: 0});
+            this._renderPreviews();
+
+            this.drawCross(
+                'red',
                 {
-                    x: this._offsetX,
-                    y: this._offsetY
+                    x: this._container.clientWidth / 2,
+                    y: this._container.clientHeight / 2
                 }
             );
 
-            this._renderPreviews();
-
-            /*
-                this._image.drawCrop(
-                    this._zoomLevel,
-                    {
-                        x: this._canvas.width - 50 - (this._margin),
-                        y: this._canvas.height - 50 - (this._margin)
-                    }
-                );
-            */
+            this.drawCross(
+                'green',
+                {
+                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
+                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
+                }
+            );
         }
     },
 
@@ -132,14 +140,12 @@ var IMCropCanvas = Class.extend({
     loadImage: function(url, cbFunc) {
         var _this = this;
 
-        // FIXME: Replace hard coded zoom with automatic zoom based on img size
-        this._zoomLevel = 0.458;
-
         this._image = new IMCropImg(this);
         this._image.load(
             this.hashFnv32a(url),
             url,
             function() {
+                _this.setZoomToImage(false);
                 _this.redraw();
 
                 if (typeof cbFunc === 'function') {
@@ -147,6 +153,110 @@ var IMCropCanvas = Class.extend({
                 }
             }
         );
+    },
+
+    /**
+     * Center image around a point in the drawing area
+     * @param redraw
+     * @param point
+     * @param factor
+     */
+    centerImage: function(redraw, point, factor) {
+        var cx, cy;
+
+        // TODO: Should remove 1 when calculation below is fixed
+        if (1 || typeof point === 'undefined') {
+            this._keepCenter = true;
+            cx = this._container.clientWidth / 2;
+            cy = this._container.clientHeight / 2;
+        }
+        else {
+            cx = point.x;
+            cy = point.y;
+        }
+
+        var ix = ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin;
+        var iy = ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin;
+
+        var x = 0;
+        var y = 0;
+
+
+        // TODO: Should remove 0 and fix calculation
+        if (0 && typeof factor == 'number') {
+            if (cx != ix) {
+                x = ((cx - ix) * factor) * this._zoomLevel;
+            }
+
+            if (cy != iy) {
+                y = (cy - iy) / this._zoomLevel;
+            }
+
+            this._image.move({x: x, y: y});
+        }
+        else {
+            if (cx != ix) {
+                x = (cx - ix) / this._zoomLevel;
+            }
+
+            if (cy != iy) {
+                y = (cy - iy) / this._zoomLevel;
+            }
+
+            this._image.move({x: x, y: y});
+        }
+
+        if (redraw === true) {
+            this.redraw();
+        }
+    },
+
+    /**
+     * Set zoom by percent
+     *
+     * @param zoomLevel
+     * @param redraw
+     */
+    setZoom: function(zoomLevel, redraw) {
+        this._zoomLevel = zoomLevel / 100;
+
+        if (this._keepCenter) {
+            this.centerImage(false);
+        }
+
+        if (redraw === true) {
+            this.redraw();
+        }
+    },
+
+    /**
+     * Fill drawing area with image as best as possible
+     * @param redraw
+     */
+    setZoomToImage: function(redraw) {
+        var imgDim = this._image.getDimensions();
+        var vFactor = (this._container.clientHeight - this._margin * 2) / imgDim.h;
+        var hFactor = (this._container.clientWidth - this._margin * 2) / imgDim.w;
+
+        // Set correct zoom level
+        if (vFactor < hFactor && vFactor < 1 && this._zoomLevel > vFactor) {
+            // Fill vertical
+            this._zoomLevel = vFactor;
+            this.centerImage(false);
+        }
+        else if (hFactor < 1 && this._zoomLevel > hFactor) {
+            // Fill horizontal
+            this._zoomLevel = hFactor;
+            this.centerImage(false);
+        }
+        else {
+            // No need to redraw
+            return;
+        }
+
+        if (redraw === true) {
+            this.redraw();
+        }
     },
 
     /**
@@ -224,8 +334,14 @@ var IMCropCanvas = Class.extend({
 
     /**
      * On window resize handler
+     *
+     * @todo Should use zoomToImage(false) for keepCenter
      */
     onResize: function() {
+        if (this._keepCenter) {
+            this.centerImage(false);
+        }
+
         this.redraw();
         this.calculateViewport();
     },
@@ -284,6 +400,10 @@ var IMCropCanvas = Class.extend({
                 );
             }
             else {
+                if (this._dragObject instanceof IMCropImg) {
+                    this._keepCenter = false;
+                }
+
                 this._dragObject.move({
                         x: (point.x - this._dragPoint.x) / this._zoomLevel,
                         y: (point.y - this._dragPoint.y) / this._zoomLevel
@@ -322,8 +442,8 @@ var IMCropCanvas = Class.extend({
         }
 
         this._canvas.style.cursor = 'default';
-
     },
+
 
     /**
      * On mouse wheel event handler.
@@ -335,19 +455,28 @@ var IMCropCanvas = Class.extend({
     onMouseWheel: function(event) {
         var point = this.getMousePoint(event);
         var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+        var zoom = 0;
 
         if (delta < 0 && this._zoomLevel < this._zoomMax) {
             // Zoom in
-            this._zoomLevel += this._zoomLevel < 1 ? 0.01 : 0.02;
+            zoom = this._zoomLevel < 1 ? 0.01 : 0.02;
+            this._zoomLevel += zoom;
         }
         else if (delta > 0 && this._zoomLevel > this._zoomMin) {
             // Zoom out
-            this._zoomLevel -= this._zoomLevel < 1 ? 0.01 : 0.02;
+            zoom = this._zoomLevel < 1 ? -0.01 : -0.02;
+            this._zoomLevel += zoom;
+        }
+        else {
+            return;
         }
 
-        // FIXME: Not working, not being used
-        // this._offsetX = (point.x - (point.x * this._zoomLevel));
-        // this._offsetY = (point.y - (point.y * this._zoomLevel));
+        if (0 && this._keepCenter) {
+            this.centerImage(false);
+        }
+        else {
+            this.centerImage(false, point, zoom);
+        }
 
         this.redraw();
     },
@@ -432,5 +561,32 @@ var IMCropCanvas = Class.extend({
         }
 
         return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+    },
+
+    /**
+     * Helper function for drawing a cross mark
+     * @param string
+     * @param point
+     */
+    drawCross: function(color, point) {
+        var ctx = this._canvas.getContext('2d');
+
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+
+        ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI, false);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(point.x - 50, point.y);
+        ctx.lineTo(point.x + 50, point.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(point.x, point.y - 50);
+        ctx.lineTo(point.x, point.y + 50);
+        ctx.stroke();
     }
 });

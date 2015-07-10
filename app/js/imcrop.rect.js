@@ -48,24 +48,11 @@ var IMSoftcrop = IMCropObject.extend({
     },
 
     /**
-     * Return crop coordinates and dimensions
-     * @returns {{x: *, y: *, w: *, h: *}}
-     */
-    getDimensions: function() {
-        return {
-            x: this._x,
-            y: this._y,
-            w: this._w,
-            h: this._h
-        };
-    },
-
-    /**
      * Redraw image
      * @param {number} zoomLevel
      * @param {object} offset
      */
-    redraw: function(zoomLevel, offset) {
+    redraw: function(zoomLevel) {
         if (!this.isReady()) {
             return;
         }
@@ -99,40 +86,64 @@ var IMSoftcrop = IMCropObject.extend({
             return;
         }
 
+        var i = this._parent.getDimensions();
         var ratio = this._w / this._h;
+        var x = this._x;
+        var y = this._y;
+        var w = this._w;
+        var h = this._h;
 
         switch(handle) {
             case 'n':
-                this._y += point.y;
-                this._h -= point.y;
-                this._w = this._h * ratio;
-                this._x += (point.y / 2) * ratio;
+                y += point.y;
+                h -= point.y;
+                w = h * ratio;
+                x += (point.y / 2) * ratio;
                 break;
 
             case 'e':
-                this._w += point.x;
-                this._h = this._w / ratio;
-                this._y -= (point.x / 2) / ratio;
+                w += point.x;
+                h = w / ratio;
+                y -= (point.x / 2) / ratio;
                 break;
 
             case 's':
-                this._h += point.y;
-                this._w = this._h * ratio;
-                this._x -= (point.y / 2) * ratio;
+                h += point.y;
+                w = h * ratio;
+                x -= (point.y / 2) * ratio;
                 break;
 
             case 'w':
-                this._w -= point.x;
-                this._x += point.x;
-                this._h = this._w / ratio;
-                this._y += (point.x / 2) / ratio;
+                w -= point.x;
+                x += point.x;
+                h = w / ratio;
+                y += (point.x / 2) / ratio;
                 break;
 
             // TODO: Implement nw, ne, se, sw
         }
 
+        if (x < 0 || y < 0 || w > i.w || h > i.h) {
+            return;
+        }
+
+        this._x = x;
+        this._y = y;
+        this._w = w;
+        this._h = h;
     },
 
+
+    move: function(point) {
+        var i = this._parent.getDimensions();
+
+        if (this._x + point.x < 0 || this._y + point.y < 0) {
+            return;
+        }
+
+        // TODO: Check outer boundaries as well!!
+        this._super(point);
+    },
 
     /**
      * Return handle name if mouse hover over it
