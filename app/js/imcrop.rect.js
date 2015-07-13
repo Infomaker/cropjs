@@ -1,4 +1,5 @@
 var IMSoftcrop = IMCropObject.extend({
+    id: undefined,
     _lineWidth: 1,
     _lineColor: '#6699ff',
 
@@ -32,6 +33,8 @@ var IMSoftcrop = IMCropObject.extend({
     /**
      * Soft crop constructor
      * @param parent
+     * @param hRatio
+     * @param vRatio
      * @param x
      * @param y
      * @param w
@@ -39,8 +42,10 @@ var IMSoftcrop = IMCropObject.extend({
      * @param respectRatio
      * @private
      */
-    _construct: function(parent, x, y, w, h, respectRatio) {
+    _construct: function(parent, hRatio, vRatio, x, y, w, h, respectRatio) {
+        this.id = hRatio + ':' + vRatio;
         this._super(parent);
+
         this._x = x;
         this._y = y;
         this._w = w;
@@ -48,9 +53,9 @@ var IMSoftcrop = IMCropObject.extend({
 
         this.respectRatio = respectRatio;
         this.ratio = {
-            w: w,
-            h: h,
-            f: w / h
+            w: hRatio,
+            h: vRatio,
+            f: hRatio / vRatio
         };
 
         this.isReady(true);

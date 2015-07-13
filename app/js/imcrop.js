@@ -68,7 +68,40 @@ var IMCropCanvas = Class.extend({
 
         this._workContainer.appendChild(this._previewContainer);
         this._container.appendChild(this._workContainer);
+
+        var _this = this;
+        document.addEventListener(
+            'keydown',
+            function(e) {
+                var keyCode = e.keyCode || e.which;
+                if (keyCode == 9) {
+
+                    var crops = _this._image.getCrops();
+                    var current = undefined;
+                    for(var n = 0; n < crops.length; n++) {
+                        if (_this._crop === crops[n]) {
+                            current = n;
+                            break;
+                        }
+                    }
+
+                    if (typeof current != 'undefined') {
+                        if (n + 2 > crops.length) {
+                            _this.setActiveCrop(crops[0]);
+                        }
+                        else {
+                            _this.setActiveCrop(crops[++n]);
+                        }
+                    }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            },
+            false
+        );
     },
+
 
     /**
      * Render preview area for all soft crops
@@ -79,43 +112,86 @@ var IMCropCanvas = Class.extend({
             return;
         }
 
-        if (this._previewContainer.id !== this._image.id) {
+        // Render preview area
+        if (this._previewContainer.id != this._image.id) {
             this._previewContainer.innerHTML = '';
             this._previewContainer.id = this._image.id;
-
-            var crops = this._image.getCrops();
-            for(var n in crops) {
-                var cropDim = crops[n].getDimensions();
-                var imgDim = this._image.getDimensions();
-
-                var previewHeight = 80;
-                var previewWidth = previewHeight * crops[n].ratio.f;
-
-                // Create container element
-                var pvDiv = document.createElement('div');
-                pvDiv.className = 'imc_preview_image';
-                pvDiv.id = this._image.id;
-                pvDiv.style.width = previewWidth + 'px';
-
-
-                // Create image element
-                var cropRatio = previewWidth / cropDim.w;
-                var pvImg = document.createElement('img');
-                pvImg.src = this._image._src;
-                pvImg.style.height = imgDim.h * cropRatio + 'px';
-                pvImg.style.marginTop = '-' + cropDim.y * cropRatio + 'px';
-                pvImg.style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
-
-                // Put it together
-                pvDiv.appendChild(pvImg);
-                this._previewContainer.appendChild(pvDiv);
-            }
         }
-        else {
 
+        // Recalculate current preview
+        if (typeof this._crop != 'undefined') {
+            this._renderUpdatedPreview(this._crop);
         }
 
     },
+
+
+    /**
+     * Add and render specific crop preview
+     *
+     * @param crop
+     * @param setAsCurrent
+     * @private
+     */
+    _renderNewPreview: function(crop, setAsCurrent) {
+        var previewHeight = 80;
+        var _this = this;
+
+        // Create container element
+        var pvDiv = document.createElement('div');
+        pvDiv.id = this._image.id + '_' + crop.id;
+        pvDiv.classList.add('imc_preview_image');
+        pvDiv.style.width = previewHeight * crop.ratio.f + 'px';
+
+        if (setAsCurrent) {
+            pvDiv.classList.add('active');
+        }
+
+        pvDiv.addEventListener(
+            'click',
+            function () {
+                _this.setActiveCrop(crop);
+            }
+        );
+
+        // Create image element
+        var pvImg = document.createElement('img');
+        pvImg.src = this._image._src;
+
+
+        // Put it together
+        pvDiv.appendChild(pvImg);
+        this._previewContainer.appendChild(pvDiv);
+
+
+        // Render update
+        this._renderUpdatedPreview(crop);
+    },
+
+
+    /**
+     * Update rendering of current crop preview
+     * @param crop
+     * @private
+     */
+    _renderUpdatedPreview: function(crop) {
+        var pvDiv = document.getElementById(this._image.id + '_' + crop.id);
+        if (typeof pvDiv != 'object') {
+            return;
+        }
+
+        var imgDim = this._image.getDimensions();
+        var previewHeight = 80;
+        var previewWidth = previewHeight * crop.ratio.f;
+        var cropDim = crop.getDimensions();
+        var cropRatio = previewWidth / cropDim.w;
+        var pvImg = pvDiv.getElementsByTagName('IMG');
+
+        pvImg[0].style.height = imgDim.h * cropRatio + 'px';
+        pvImg[0].style.marginTop = '-' + cropDim.y * cropRatio + 'px';
+        pvImg[0].style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
+    },
+
 
     /**
      * Render and output debug position and dimensions
@@ -328,9 +404,33 @@ var IMCropCanvas = Class.extend({
                 this._crop = crop;
             }
 
+            this._renderNewPreview(crop, setAsCurrent);
             this.redraw();
         }
     },
+
+    /**
+     * Set active crop
+     * @param crop
+     */
+    setActiveCrop: function(crop) {
+        if (crop instanceof IMSoftcrop !== true) {
+            return;
+        }
+
+        var div = document.getElementById(this._image.id + '_' + crop.id);
+        var divs = this._previewContainer.getElementsByClassName('imc_preview_image');
+        for(var n = 0; n < divs.length; n++) {
+            divs[n].classList.remove('active');
+        }
+
+        div.classList.add('active');
+
+        this._crop = crop;
+        this._image.setActiveCrop(crop);
+        this.redraw();
+    },
+
 
     /**
      * Add all event listeners required

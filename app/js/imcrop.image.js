@@ -29,7 +29,10 @@ var IMCropImg = IMCropObject.extend({
         );
 
         image.src = url;
+
+        this.id = id;
         this._src = url;
+
     },
 
     /**
@@ -60,7 +63,7 @@ var IMCropImg = IMCropObject.extend({
             x = (this._w - w) / 2;
         }
 
-        var crop = new IMSoftcrop(this, x, y, w, h, true);
+        var crop = new IMSoftcrop(this, hRatio, vRatio, x, y, w, h, true);
         this._crops.push(crop);
 
         if (setAsCurrent) {
@@ -73,6 +76,12 @@ var IMCropImg = IMCropObject.extend({
     getCrops: function() {
         return this._crops;
     },
+
+
+    setActiveCrop: function(crop) {
+        this._crop = crop;
+    },
+
 
     /**
      * Redraw image
