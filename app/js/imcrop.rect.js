@@ -22,8 +22,12 @@ var IMSoftcrop = IMCropObject.extend({
     _handle: undefined,
 
     // Ratio handling
-    _ratio: 1,
-    _respectRatio: true,
+    ratio: {
+        w: 1,
+        h: 1,
+        f: 1
+    },
+    respectRatio: true,
 
     /**
      * Soft crop constructor
@@ -41,8 +45,13 @@ var IMSoftcrop = IMCropObject.extend({
         this._y = y;
         this._w = w;
         this._h = h;
-        this._respectRatio = respectRatio;
-        this._ratio = w / h;
+
+        this.respectRatio = respectRatio;
+        this.ratio = {
+            w: w,
+            h: h,
+            f: w / h
+        };
 
         this.isReady(true);
     },
@@ -90,7 +99,6 @@ var IMSoftcrop = IMCropObject.extend({
         }
 
         var i = this._parent.getDimensions();
-        var ratio = this._w / this._h;
         var x = this._x;
         var y = this._y;
         var w = this._w;
@@ -100,27 +108,27 @@ var IMSoftcrop = IMCropObject.extend({
             case 'n':
                 y += point.y;
                 h -= point.y;
-                w = h * ratio;
-                x += (point.y / 2) * ratio;
+                w = h * this.ratio.f;
+                x += (point.y / 2) * this.ratio.f;
                 break;
 
             case 'e':
                 w += point.x;
-                h = w / ratio;
-                y -= (point.x / 2) / ratio;
+                h = w / this.ratio.f;
+                y -= (point.x / 2) / this.ratio.f;
                 break;
 
             case 's':
                 h += point.y;
-                w = h * ratio;
-                x -= (point.y / 2) * ratio;
+                w = h * this.ratio.f;
+                x -= (point.y / 2) * this.ratio.f;
                 break;
 
             case 'w':
                 w -= point.x;
                 x += point.x;
-                h = w / ratio;
-                y += (point.x / 2) / ratio;
+                h = w / this.ratio.f;
+                y += (point.x / 2) / this.ratio.f;
                 break;
 
             // TODO: Implement nw, ne, se, sw

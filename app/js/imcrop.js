@@ -52,6 +52,10 @@ var IMCropCanvas = Class.extend({
         }
     },
 
+    /**
+     * Render main gui elements
+     * @private
+     */
     _renderGui: function() {
         this._canvas = document.createElement('canvas');
         this._container.appendChild(this._canvas);
@@ -66,6 +70,10 @@ var IMCropCanvas = Class.extend({
         this._container.appendChild(this._workContainer);
     },
 
+    /**
+     * Render preview area for all soft crops
+     * @private
+     */
     _renderPreviews: function() {
         if (!this._image.isReady()) {
             return;
@@ -77,21 +85,29 @@ var IMCropCanvas = Class.extend({
 
             var crops = this._image.getCrops();
             for(var n in crops) {
-                // Create image
-                var pvDiv = document.createElement('div');
-                pvDiv.className = 'im_preview_image';
-                pvDiv.id = this._image.id;
-
                 var cropDim = crops[n].getDimensions();
-                if (cropDim.h < cropDim.w) {
-                    pvDiv.style.width = 40 * (cropDim.w / cropDim.h) + 'px';
-                }
+                var imgDim = this._image.getDimensions();
+
+                var previewHeight = 80;
+                var previewWidth = previewHeight * crops[n].ratio.f;
+
+                // Create container element
+                var pvDiv = document.createElement('div');
+                pvDiv.className = 'imc_preview_image';
+                pvDiv.id = this._image.id;
+                pvDiv.style.width = previewWidth + 'px';
 
 
+                // Create image element
+                var cropRatio = previewWidth / cropDim.w;
                 var pvImg = document.createElement('img');
                 pvImg.src = this._image._src;
-                pvDiv.appendChild(pvImg);
+                pvImg.style.height = imgDim.h * cropRatio + 'px';
+                pvImg.style.marginTop = '-' + cropDim.y * cropRatio + 'px';
+                pvImg.style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
 
+                // Put it together
+                pvDiv.appendChild(pvImg);
                 this._previewContainer.appendChild(pvDiv);
             }
         }
@@ -101,6 +117,10 @@ var IMCropCanvas = Class.extend({
 
     },
 
+    /**
+     * Render and output debug position and dimensions
+     * @private
+     */
     _renderDebug: function() {
         if (typeof this._debugContainer != 'undefined') {
             var str = '<pre>';
@@ -121,6 +141,10 @@ var IMCropCanvas = Class.extend({
         }
     },
 
+    /**
+     * Get dimensions
+     * @returns {{margin: number, width: number, height: number}}
+     */
     getDimensions: function() {
         return {
             margin: this._margin,

@@ -24,6 +24,7 @@
         <div id="imc_debug"></div>
 
 
+        <script src="js/imcrop.numbers.js"></script>
         <script src="js/imcrop.object.js"></script>
 
         <script src="js/imcrop.js"></script>
@@ -42,6 +43,7 @@
                     'examples/picture.jpg',
                     function(image) {
                         canvas.addSoftcrop(16, 9, true);
+                        canvas.addSoftcrop(9, 16, false);
                         canvas.addSoftcrop(4, 3, false);
                         canvas.addSoftcrop(1, 1, false);
                     }

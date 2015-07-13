@@ -10,7 +10,7 @@ body {
     background: url('../img/bg_canvas.png') 0 0;
 
     /* Adjust for work container below img container */
-    margin-bottom: 70px;
+    margin-bottom: 100px;
 }
 
 #imc_container canvas {
@@ -23,25 +23,34 @@ body {
 
     left: 0;
     right: 0;
-    bottom: -60px;
-    height: 60px;
+    bottom: -100px;
+    height: 100px;
 
     background: #f5f5f5;
 }
 
-.im_preview_image {
+/**
+ * Preview area and preview images
+ */
+
+.imc_preview_image {
     margin: 10px 0 0 10px;
-    height: 40px;
-    width: 40px;
+    height: 80px;
+    width: 80px;
     overflow: hidden;
     float: left;
 }
 
-.im_preview_image:hover {
+.imc_preview_image.warn {
+    margin: 9px -1px -1px 9px;
+    border: 1px solid #ff778d;
+}
+
+.imc_preview_image:hover {
     margin: 9px -1px -1px 9px;
     border: 1px solid #6699ff;
 }
 
-.im_preview_image > img {
+.imc_preview_image > img {
 
 }
