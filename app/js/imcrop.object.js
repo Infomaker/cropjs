@@ -163,8 +163,6 @@ var IMCropObject = Class.extend({
      * Calcuate actual drawing coordinates and dimensions taking
      * zoom level and factor into account.
      *
-     * @todo Implement support for offsets used when zoom different areas
-     *
      * @param zoomLevel
      * @param offset
      * @private
