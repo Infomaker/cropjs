@@ -6,6 +6,7 @@ var IMCropCanvas = Class.extend({
     // Other html gui objects
     _workContainer: undefined,
     _previewContainer: undefined,
+    _debugContainer: undefined,
 
     // Current objects
     _image: undefined,
@@ -35,13 +36,20 @@ var IMCropCanvas = Class.extend({
      * @param container
      * @private
      */
-    _construct: function(container) {
+    _construct: function(container, options) {
         this._container = container;
 
         this._renderGui();
 
         this.calculateViewport();
         this.addEventListeners();
+
+        // Options
+        if (typeof options == 'object') {
+            if (typeof options.debugElement != 'undefined') {
+                this._debugContainer = options.debugElement;
+            }
+        }
     },
 
     _renderGui: function() {
@@ -93,6 +101,26 @@ var IMCropCanvas = Class.extend({
 
     },
 
+    _renderDebug: function() {
+        if (typeof this._debugContainer != 'undefined') {
+            var str = '<pre>';
+            if (typeof this._image != 'undefined') {
+                str += 'Image w: ' + this._image._w + "\n";
+                str += '      h: ' + this._image._h + "\n";
+                str += "\n";
+                if (typeof this._image._crop != 'undefined') {
+                    str += 'Crop  x: ' + this._image._crop._x + "\n";
+                    str += '      y: ' + this._image._crop._y + "\n";
+                    str += '      w: ' + this._image._crop._w + "\n";
+                    str += '      h: ' + this._image._crop._h + "\n";
+                }
+            }
+            str += '</pre>';
+
+            this._debugContainer.innerHTML = str;
+        }
+    },
+
     getDimensions: function() {
         return {
             margin: this._margin,
@@ -129,6 +157,8 @@ var IMCropCanvas = Class.extend({
                 }
             );
         }
+
+        this._renderDebug();
     },
 
 

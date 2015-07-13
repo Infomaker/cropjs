@@ -21,6 +21,7 @@
 
     <body>
         <div id="imc_container"></div>
+        <div id="imc_debug"></div>
 
 
         <script src="js/imcrop.object.js"></script>
@@ -31,7 +32,10 @@
 
         <script>
             var canvas = new IMCropCanvas(
-                    document.getElementById('imc_container')
+                    document.getElementById('imc_container'),
+                    {
+                        debugElement: document.getElementById('imc_debug')
+                    }
             );
 
             canvas.loadImage(

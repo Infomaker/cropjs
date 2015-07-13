@@ -78,6 +78,9 @@ var IMSoftcrop = IMCropObject.extend({
 
     /**
      * Drag a handle
+     *
+     * @fixme Must enforce dimensions throught any drag events
+     *
      * @param handle
      * @param point
      */
@@ -123,27 +126,72 @@ var IMSoftcrop = IMCropObject.extend({
             // TODO: Implement nw, ne, se, sw
         }
 
-        if (x < 0 || y < 0 || w > i.w || h > i.h) {
+        // Stop reversing of dimensions
+        if (h < 10 || w < 10) {
             return;
         }
 
-        this._x = x;
-        this._y = y;
-        this._w = w;
-        this._h = h;
+        // Enforce width/height and top/left boundaries
+        if (w > i.w || h > i.h) {
+            x = 0;
+            y = 0;
+            w = i.w;
+            h = i.h;
+        }
+
+        // Enforce bottom/right boundaries
+        if (x + w > i.w || y + h > i.h) {
+            return;
+        }
+
+        if (x < 0) {
+            x = 0;
+        }
+
+        if (y < 0) {
+            y = 0;
+        }
+
+
+        this._x = Math.round(x);
+        this._y = Math.round(y);
+        this._w = Math.round(w);
+        this._h = Math.round(h);
     },
 
 
+    /**
+     * Move crop area
+     *
+     * @param point
+     */
     move: function(point) {
         var i = this._parent.getDimensions();
 
-        if (this._x + point.x < 0 || this._y + point.y < 0) {
+        if (this._x + point.x < 0) {
+            this._x = 0;
+            point.x = 0;
+        }
+
+        if (this._y + point.y < 0) {
+            point.y = 0;
+            this.y = 0;
+        }
+
+        if (this._w + this._x + Math.round(point.x) > i.w) {
+            point.x = i.w - this._w;
             return;
         }
 
-        // TODO: Check outer boundaries as well!!
+        if (this._h + this._y + Math.round(point.y) > i.h) {
+            point.y = i.h - this._h;
+            return;
+        }
+
+
         this._super(point);
     },
+
 
     /**
      * Return handle name if mouse hover over it
