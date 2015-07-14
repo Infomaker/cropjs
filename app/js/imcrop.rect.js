@@ -4,8 +4,8 @@ var IMSoftcrop = IMCropObject.extend({
     _lineColor: 'rgba(255, 255, 255, 1)',
     _lineColorActive: 'rgba(0, 255, 255, 1)',
 
-    _handleThickness: 3,
-    _handleLength: 14,
+    _handleThickness: 2,
+    _handleLength: 10,
 
     // Drawing positions of handles
     _handles: {
@@ -112,7 +112,7 @@ var IMSoftcrop = IMCropObject.extend({
         }
 
         // Stop reversing of dimensions
-        if (h < 10 || w < 10) {
+        if (h < 40 || w < 40) {
             return;
         }
 
