@@ -77,7 +77,7 @@ var IMCropCanvas = Class.extend({
                 if (keyCode == 9) {
 
                     var crops = _this._image.getCrops();
-                    var current = undefined;
+                    var current;
                     for(var n = 0; n < crops.length; n++) {
                         if (_this._crop === crops[n]) {
                             current = n;
@@ -86,13 +86,17 @@ var IMCropCanvas = Class.extend({
                     }
 
                     if (typeof current != 'undefined') {
-                        if (n + 2 > crops.length) {
-                            _this.setActiveCrop(crops[0]);
+                        n += (!e.shiftKey) ? 1 : -1;
+
+                        if (n < 0) {
+                            n = crops.length - 1;
                         }
-                        else {
-                            _this.setActiveCrop(crops[++n]);
+                        else if (n + 1 > crops.length) {
+                            n = 0;
                         }
+                        _this.setActiveCrop(crops[n]);
                     }
+
                     e.preventDefault();
                     e.stopPropagation();
                     return false;
