@@ -354,7 +354,7 @@ var IMSoftcrop = IMCropObject.extend({
             this._drawXW,
             this._drawY,
             imgDim.w,
-            this._drawYH
+            this._drawH
         );
 
         this._ctx.fill();
