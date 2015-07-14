@@ -30,6 +30,9 @@ var IMCropCanvas = Class.extend({
     _zoomMax: 5,
     _zoomMin: 0.1,
 
+    // Debug
+    _debugMarkers: false,
+
 
     /**
      * Constructor
@@ -48,6 +51,10 @@ var IMCropCanvas = Class.extend({
         if (typeof options == 'object') {
             if (typeof options.debugElement != 'undefined') {
                 this._debugContainer = options.debugElement;
+            }
+
+            if (options.debugMarkers === true) {
+                this._debugMarkers = true;
             }
         }
     },
@@ -202,6 +209,24 @@ var IMCropCanvas = Class.extend({
      * @private
      */
     _renderDebug: function() {
+        if (this._debugMarkers) {
+            this.drawCross(
+                'red',
+                {
+                    x: this._container.clientWidth / 2,
+                    y: this._container.clientHeight / 2
+                }
+            );
+
+            this.drawCross(
+                'green',
+                {
+                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
+                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
+                }
+            );
+        }
+
         if (typeof this._debugContainer != 'undefined') {
             var str = '<pre>';
             if (typeof this._image != 'undefined') {
@@ -244,22 +269,6 @@ var IMCropCanvas = Class.extend({
         if (this._image instanceof IMCropImg) {
             this._image.redraw(this._zoomLevel, {x: 0, y: 0});
             this._renderPreviews();
-
-            this.drawCross(
-                'red',
-                {
-                    x: this._container.clientWidth / 2,
-                    y: this._container.clientHeight / 2
-                }
-            );
-
-            this.drawCross(
-                'green',
-                {
-                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
-                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
-                }
-            );
         }
 
         this._renderDebug();
