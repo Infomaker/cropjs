@@ -4,8 +4,8 @@ var IMSoftcrop = IMCropObject.extend({
     _lineColor: 'rgba(255, 255, 255, 1)',
     _lineColorActive: 'rgba(0, 255, 255, 1)',
 
-    _handleThickness: 2,
-    _handleLength: 10,
+    _handleThickness: 3,
+    _handleLength: 14,
 
     // Drawing positions of handles
     _handles: {

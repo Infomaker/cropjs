@@ -148,7 +148,7 @@ var IMCropCanvas = Class.extend({
         var previewHeight = 80;
         var _this = this;
 
-        // Create container element
+        // Create image container element
         var pvDiv = document.createElement('div');
         pvDiv.id = this._image.id + '_' + crop.id;
         pvDiv.classList.add('imc_preview_image');
