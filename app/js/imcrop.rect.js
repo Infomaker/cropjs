@@ -118,10 +118,7 @@ var IMSoftcrop = IMCropObject.extend({
 
         // Enforce width/height and top/left boundaries
         if (w > i.w || h > i.h) {
-            x = 0;
-            y = 0;
-            w = i.w;
-            h = i.h;
+            return;
         }
 
         // Enforce bottom/right boundaries
