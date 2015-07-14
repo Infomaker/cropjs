@@ -638,12 +638,12 @@ var IMCropCanvas = Class.extend({
 
         if (delta < 0 && this._zoomLevel < this._zoomMax) {
             // Zoom in
-            zoom = this._zoomLevel < 1 ? 0.01 : 0.02;
+            zoom = this._zoomLevel < 1 ? 0.01 : 0.03;
             this._zoomLevel += zoom;
         }
         else if (delta > 0 && this._zoomLevel > this._zoomMin) {
             // Zoom out
-            zoom = this._zoomLevel < 1 ? -0.01 : -0.02;
+            zoom = this._zoomLevel < 1 ? -0.01 : -0.03;
             this._zoomLevel += zoom;
         }
         else {
