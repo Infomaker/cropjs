@@ -1,11 +1,11 @@
 var IMSoftcrop = IMCropObject.extend({
     id: undefined,
     _lineWidth: 1,
-    _lineColor: '#6699ff',
+    _lineColor: 'rgba(255, 255, 255, 1)',
+    _lineColorActive: 'rgba(0, 255, 255, 1)',
 
-    _handleRadiusLarge: 5,
-    _handleColor: '#6699ff',
-    _handleColorActive: '#66ccee',
+    _handleThickness: 3,
+    _handleLength: 14,
 
     // Drawing positions of handles
     _handles: {
@@ -59,34 +59,6 @@ var IMSoftcrop = IMCropObject.extend({
         };
 
         this.isReady(true);
-    },
-
-    /**
-     * Redraw image
-     * @param {number} zoomLevel
-     * @param {object} offset
-     */
-    redraw: function(zoomLevel) {
-        if (!this.isReady()) {
-            return;
-        }
-
-        this._calculateDrawDimensions(
-            zoomLevel,
-            this._parent.getCoordinates()
-        );
-
-        this.drawRect();
-
-        this._drawHandle('nw', false, this._drawX, this._drawY, this._handleRadiusLarge);
-        this._drawHandle('ne', false, this._drawX + this._drawW, this._drawY, this._handleRadiusLarge);
-        this._drawHandle('se', false, this._drawX + this._drawW, this._drawY + this._drawH, this._handleRadiusLarge);
-        this._drawHandle('sw', false, this._drawX, this._drawY + this._drawH, this._handleRadiusLarge);
-
-        this._drawHandle('n', false, this._drawX + (this._drawW / 2), this._drawY, 3);
-        this._drawHandle('e', false, this._drawX + this._drawW, this._drawY + (this._drawH / 2), 3);
-        this._drawHandle('s', false, this._drawX + (this._drawW / 2), this._drawY + this._drawH, 3);
-        this._drawHandle('w', false, this._drawX, this._drawY + (this._drawH / 2), 3);
     },
 
 
@@ -208,44 +180,32 @@ var IMSoftcrop = IMCropObject.extend({
 
     /**
      * Return handle name if mouse hover over it
+     *
      * @param point
      * @returns {*}
      */
     overHandle: function(point) {
-        var radiusWidth = this._handleRadiusLarge * 2;
-        var inArea = this.inCalculatedArea(
-            point,
-            this._drawX - this._handleRadiusLarge,
-            this._drawY - this._handleRadiusLarge,
-            this._drawW + radiusWidth,
-            this._drawH + radiusWidth
-        );
+        var handle = '';
+        var vDir = this._overVerticalArea(point);
+        var hDir = this._overHorizontalArea(point);
 
-        var withinArea = this.inCalculatedArea(
-            point,
-            this._drawX + this._handleRadiusLarge,
-            this._drawY + this._handleRadiusLarge,
-            this._drawW - radiusWidth,
-            this._drawH - radiusWidth
-        );
+        if ((hDir || vDir) && (!hDir || !vDir)) {
+            handle = '';
+        }
+        else if (hDir == vDir) {
+            handle = '';
+        }
+        else {
+            handle = hDir + vDir;
+            handle = handle.replace('m', '');
+        }
 
-        if (!inArea || withinArea) {
+
+        if (handle === '') {
             this._handle = false;
         }
         else {
-            // Check for hover over handles
-            for (var n in this._handles) {
-                var cr = this._handles[n][2];
-                var cx = this._handles[n][0];
-                var cy = this._handles[n][1];
-
-                if (point.x > cx - cr && point.x <= cx + cr) {
-                    if (point.y > cy - cr && point.y <= cy + cr) {
-                        this._handle = n;
-                        break;
-                    }
-                }
-            }
+            this._handle = handle;
         }
 
         return this._handle;
@@ -253,21 +213,151 @@ var IMSoftcrop = IMCropObject.extend({
 
 
     /**
-     * Draw rectangle
+     * Find out if and if so which horizontal area mouse is over
+     * @param point
+     * @returns {string}
+     * @private
      */
-    drawRect: function(z) {
-        this._ctx.beginPath();
+    _overHorizontalArea: function(point) {
+        var left = this._drawX - this._handleThickness;
+        var right = this._drawX + this._drawW + this._handleThickness;
 
-        this._ctx.rect(
-            this._drawX -0.5,
-            this._drawY -0.5,
-            this._drawW,
-            this._drawH
+        if (this.withinCoordinates(
+                point,
+                left, this._drawY + this._drawH - this._handleLength + this._handleThickness,
+                right, this._drawY + this._drawH + this._handleThickness)) {
+            // Is in southern area
+            return 's';
+        }
+        else if (this.withinCoordinates(
+                point,
+                left, this._drawY + (this._drawH / 2) - this._handleLength,
+                right, this._drawY + (this._drawH / 2) + this._handleLength)) {
+            // Is in middle area
+            return 'm';
+        }
+        else if (this.withinCoordinates(
+                point,
+                left, this._drawY - this._handleThickness,
+                right, this._drawY + this._handleLength)) {
+            // Is in northern area
+            return 'n';
+        }
+
+        return '';
+    },
+
+    /**
+     * Find out if and if so which vertical area mouse is over
+     * @param point
+     * @returns {string}
+     * @private
+     */
+    _overVerticalArea: function(point) {
+        var top = this._drawY - this._handleThickness;
+        var bottom = this._drawY + this._drawH + this._handleThickness;
+
+        if (this.withinCoordinates(
+                point,
+                this._drawX + this._drawW - this._handleLength, top,
+                this._drawX + this._drawW + this._handleThickness, bottom)) {
+            // Is in western drag area
+            return 'e';
+        }
+        else if (this.withinCoordinates(
+                point,
+                this._drawX + (this._drawW / 2) - this._handleLength, top,
+                this._drawX + (this._drawW / 2) + this._handleLength, bottom)) {
+            // Is in western drag area
+            return 'm';
+        }
+        else if (this.withinCoordinates(
+                point,
+                this._drawX - this._handleThickness, top,
+                this._drawX + this._handleLength, bottom)) {
+            // Is in western drag area
+            return 'w';
+        }
+
+        return '';
+    },
+
+
+    /**
+     * Redraw image
+     * @param {number} zoomLevel
+     * @param {object} offset
+     */
+    redraw: function(zoomLevel) {
+        if (!this.isReady()) {
+            return;
+        }
+
+        this._calculateDrawDimensions(
+            zoomLevel,
+            this._parent.getCoordinates()
         );
 
-        this._ctx.lineWidth = this._lineWidth;
-        this._ctx.strokeStyle = this._lineColor;
+        this._drawRect();
+
+        var doubleLength = this._handleLength * 2;
+
+        this._ctx.beginPath();
+        this._drawHandle('nw', false, this._drawX, this._drawY, this._handleLength, this._handleThickness);
+        this._drawHandle('se', false, this._drawXW, this._drawYH, this._handleLength, this._handleThickness);
+        this._drawHandle('ne', false, this._drawXW, this._drawY, this._handleLength, this._handleThickness);
+        this._drawHandle('sw', false, this._drawX, this._drawYH, this._handleLength, this._handleThickness);
+
+        var halfDrawWidth = this._drawW / 2;
+        var halfDrawHeight = this._drawH / 2;
+        this._drawHandle('n', false, this._drawX + halfDrawWidth, this._drawY, doubleLength, this._handleThickness);
+        this._drawHandle('e', false, this._drawXW, this._drawY + halfDrawHeight, doubleLength, this._handleThickness);
+        this._drawHandle('s', false, this._drawX + halfDrawWidth, this._drawYH, doubleLength, this._handleThickness);
+        this._drawHandle('w', false, this._drawX, this._drawY + halfDrawHeight, doubleLength, this._handleThickness);
         this._ctx.stroke();
+    },
+
+
+    /**
+     * Draw rectangle
+     *
+     * @protected
+     */
+    _drawRect: function() {
+        var imgDim = this._parent.getDimensions();
+
+        this._ctx.beginPath();
+        this._ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+
+        this._ctx.rect(
+            0,
+            0,
+            imgDim.w,
+            this._drawY
+        );
+
+        this._ctx.rect(
+            0,
+            0,
+            this._drawX,
+            imgDim.h
+        );
+
+        this._ctx.rect(
+            this._drawX,
+            this._drawYH,
+            imgDim.w,
+            imgDim.h
+        );
+
+        this._ctx.rect(
+            this._drawXW,
+            this._drawY,
+            imgDim.w,
+            this._drawYH
+        );
+
+        this._ctx.fill();
     },
 
 
@@ -277,26 +367,65 @@ var IMSoftcrop = IMCropObject.extend({
      * @param active
      * @param x
      * @param y
-     * @param radius
+     * @param length
+     * @param thickness
+     *
+     * @protected
      */
-    _drawHandle: function(name, active, x, y, radius) {
-        this._handles[name] = [x, y, radius];
+    _drawHandle: function(name, active, x, y, length, thickness) {
+        var wOffset = thickness / 2;
+        var lOffset = length / 2;
 
-        this._ctx.beginPath();
-        this._ctx.fillStyle = (active === true) ? this._handleColorActive : this._handleColor;
+        this._ctx.lineWidth = thickness;
+        this._ctx.strokeStyle = !active ? this._lineColor : this._lineColorActive;
 
-        if (0) {
-            this._ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+        switch(name) {
+            case 'se':
+                // Just mirror values and fall through to nw
+                wOffset = wOffset * -1;
+                length = length * -1;
+
+            case 'nw':
+                this._ctx.moveTo(x - wOffset, y + length);
+                this._ctx.lineTo(x - wOffset, y - wOffset);
+                this._ctx.lineTo(x + length, y - wOffset);
+
+                this._handles[name] = [x, y, thickness, length];
+                break;
+
+            case 'sw':
+                // Just mirror values and fall through to ne
+                wOffset = wOffset * -1;
+                length = length * -1;
+
+            case 'ne':
+                this._ctx.moveTo(x - length, y - wOffset);
+                this._ctx.lineTo(x + wOffset, y - wOffset);
+                this._ctx.lineTo(x + wOffset, y + length);
+
+                this._handles[name] = [x, y, thickness, length];
+                break;
+
+            case 'n':
+                this._ctx.moveTo(x - lOffset, y - wOffset);
+                this._ctx.lineTo(x + lOffset, y - wOffset);
+                break;
+
+            case 's':
+                this._ctx.moveTo(x - lOffset, y + wOffset);
+                this._ctx.lineTo(x + lOffset, y + wOffset);
+                break;
+
+            case 'w':
+                this._ctx.moveTo(x - wOffset, y + lOffset);
+                this._ctx.lineTo(x - wOffset, y - lOffset);
+                break;
+
+            case 'e':
+                this._ctx.moveTo(x + wOffset, y + lOffset);
+                this._ctx.lineTo(x + wOffset, y - lOffset);
+                break;
         }
-        else {
-            this._ctx.rect(
-                x - radius,
-                y - radius,
-                radius * 2,
-                radius * 2
-            );
-        }
-
-        this._ctx.fill();
     }
 });

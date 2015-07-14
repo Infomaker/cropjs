@@ -22,7 +22,7 @@ var IMCropCanvas = Class.extend({
     _zoomLevel: 1,
     _keepCenter: false,
 
-    _margin: 10,
+    _margin: 5,
     _offsetX: 0,
     _offsetY: 0,
 
@@ -578,8 +578,20 @@ var IMCropCanvas = Class.extend({
         if (this._crop instanceof IMSoftcrop) {
             var handle = this._crop.overHandle(point);
 
-            if (handle !== false && !this._handle) {
-                this._canvas.style.cursor = handle + '-resize';
+            if (handle !== false && this._handle != handle) {
+                if (handle == 'nw' || handle == 'se') {
+                    this._canvas.style.cursor = 'nwse-resize';
+                }
+                else if (handle == 'ne' || handle == 'sw') {
+                    this._canvas.style.cursor = 'nesw-resize';
+                }
+                else if (handle == 'n' || handle == 's') {
+                    this._canvas.style.cursor = 'ns-resize';
+                }
+                else {
+                    this._canvas.style.cursor = 'ew-resize';
+                }
+
                 this._handle = handle;
                 return;
             }

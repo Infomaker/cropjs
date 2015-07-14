@@ -75,6 +75,8 @@ var IMCropObject = Class.extend({
     _drawY: 0,
     _drawW: 0,
     _drawH: 0,
+    _drawXW: 0,
+    _drawYH: 0,
 
     _construct: function(parent) {
         // Get access to canvas helper object
@@ -123,6 +125,18 @@ var IMCropObject = Class.extend({
             this._drawW,
             this._drawH
         );
+    },
+
+    withinCoordinates: function(point, x1, y1, x2, y2) {
+        if (point.x < x1 || point.x > x2) {
+            return false;
+        }
+
+        if (point.y < y1 || point.y > y2) {
+            return false;
+        }
+
+        return true;
     },
 
     inCalculatedArea: function(point, ax, ay, aw, ah) {
@@ -174,5 +188,8 @@ var IMCropObject = Class.extend({
         this._drawH = Math.round(this._h * zoomLevel);
         this._drawX = Math.round((this._x + offset.x) * zoomLevel) + dim.margin;
         this._drawY = Math.round((this._y + offset.y) * zoomLevel) + dim.margin;
+        this._drawXW = this._drawW + this._drawX;
+        this._drawYH = this._drawY + this._drawH;
+
     }
 });
