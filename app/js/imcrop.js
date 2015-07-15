@@ -304,11 +304,9 @@ var IMCropCanvas = Class.extend({
             return;
         }
 
-        var tracker = new tracking.ObjectTracker(['face', 'eye']);
-        tracker.setStepSize(1.7)
-
-        //var tracker = new tracking.ObjectTracker('face');
         var _this = this;
+        var tracker = new tracking.ObjectTracker(['face', 'eye']);
+        tracker.setStepSize(1.3);
 
         tracker.on('track', function(event) {
             event.data.forEach(function(rect) {
