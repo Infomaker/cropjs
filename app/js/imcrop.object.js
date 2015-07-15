@@ -177,19 +177,50 @@ var IMCropObject = Class.extend({
      * Calcuate actual drawing coordinates and dimensions taking
      * zoom level and factor into account.
      *
-     * @param zoomLevel
      * @param offset
      * @private
      */
-    _calculateDrawDimensions: function(zoomLevel, offset) {
+    getDimensionsInCanvas: function(offset) {
+        if (typeof offset == 'undefined') {
+            offset = {x: 0, y: 0};
+        }
+
         var dim = this._cropCanvas.getDimensions();
+        var zoomLevel = this._cropCanvas.getZoom(true);
 
         this._drawW = Math.round(this._w * zoomLevel);
         this._drawH = Math.round(this._h * zoomLevel);
         this._drawX = Math.round((this._x + offset.x) * zoomLevel) + dim.margin;
         this._drawY = Math.round((this._y + offset.y) * zoomLevel) + dim.margin;
-        this._drawXW = this._drawW + this._drawX;
+        this._drawXW = this._drawX + this._drawW;
         this._drawYH = this._drawY + this._drawH;
+    },
 
+    getPointInCanvas: function(x, y, offset) {
+        if (typeof offset == 'undefined') {
+            offset = {x: 0, y: 0};
+        }
+
+        var dim = this._cropCanvas.getDimensions();
+        var zoomLevel = this._cropCanvas.getZoom(true);
+
+        return {
+            x: Math.round((x + offset.x) * zoomLevel) + dim.margin,
+            y: Math.round((y + offset.y) * zoomLevel) + dim.margin
+        };
+    },
+
+    getPointInImage: function(x, y, offset) {
+        if (typeof offset == 'undefined') {
+            offset = {x: 0, y: 0};
+        }
+
+        var dim = this._cropCanvas.getDimensions();
+        var zoomLevel = this._cropCanvas.getZoom(true);
+
+        return {
+            x: Math.round((x - offset.x) / zoomLevel),
+            y: Math.round((y - offset.y) / zoomLevel)
+        };
     }
 });

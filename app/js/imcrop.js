@@ -21,6 +21,7 @@ var IMCropCanvas = Class.extend({
     _y: 0,
     _zoomLevel: 1,
     _keepCenter: false,
+    _scale: 1,
 
     _margin: 5,
     _offsetX: 0,
@@ -30,7 +31,8 @@ var IMCropCanvas = Class.extend({
     _zoomMax: 5,
     _zoomMin: 0.1,
 
-    // Debug
+    // Options
+    _detectFaces: false,
     _debugMarkers: false,
 
 
@@ -43,6 +45,7 @@ var IMCropCanvas = Class.extend({
         this._container = container;
 
         this._renderGui();
+        this.adjustForPixelRatio();
 
         this.calculateViewport();
         this.addEventListeners();
@@ -56,8 +59,13 @@ var IMCropCanvas = Class.extend({
             if (options.debugMarkers === true) {
                 this._debugMarkers = true;
             }
+
+            if (options.detectFaces === true) {
+                this._detectFaces = true;
+            }
         }
     },
+
 
     /**
      * Render main gui elements
@@ -203,49 +211,6 @@ var IMCropCanvas = Class.extend({
         pvImg[0].style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
     },
 
-
-    /**
-     * Render and output debug position and dimensions
-     * @private
-     */
-    _renderDebug: function() {
-        if (this._debugMarkers) {
-            this.drawCross(
-                'red',
-                {
-                    x: this._container.clientWidth / 2,
-                    y: this._container.clientHeight / 2
-                }
-            );
-
-            this.drawCross(
-                'green',
-                {
-                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
-                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
-                }
-            );
-        }
-
-        if (typeof this._debugContainer != 'undefined') {
-            var str = '<pre>';
-            if (typeof this._image != 'undefined') {
-                str += 'Image w: ' + this._image._w + "\n";
-                str += '      h: ' + this._image._h + "\n";
-                str += "\n";
-                if (typeof this._image._crop != 'undefined') {
-                    str += 'Crop  x: ' + this._image._crop._x + "\n";
-                    str += '      y: ' + this._image._crop._y + "\n";
-                    str += '      w: ' + this._image._crop._w + "\n";
-                    str += '      h: ' + this._image._crop._h + "\n";
-                }
-            }
-            str += '</pre>';
-
-            this._debugContainer.innerHTML = str;
-        }
-    },
-
     /**
      * Get dimensions
      * @returns {{margin: number, width: number, height: number}}
@@ -263,15 +228,47 @@ var IMCropCanvas = Class.extend({
      * Redraw canvas
      */
     redraw: function() {
-        this._canvas.width = this._container.clientWidth;
-        this._canvas.height = this._container.clientHeight;
+        this.adjustForPixelRatio();
 
         if (this._image instanceof IMCropImg) {
-            this._image.redraw(this._zoomLevel, {x: 0, y: 0});
+            this._image.redraw();
             this._renderPreviews();
         }
 
         this._renderDebug();
+    },
+
+    adjustForPixelRatio: function() {
+        var ctx = this._canvas.getContext('2d');
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        var backingStoreRatio =
+            ctx.webkitBackingStorePixelRatio ||
+            ctx.mozBackingStorePixelRatio ||
+            ctx.msBackingStorePixelRatio ||
+            ctx.oBackingStorePixelRatio ||
+            ctx.backingStorePixelRatio || 1;
+        var ratio = devicePixelRatio / backingStoreRatio;
+
+        if (devicePixelRatio !== backingStoreRatio) {
+            var oldWidth = this._container.clientWidth;
+            var oldHeight = this._container.clientHeight;
+
+            this._canvas.width = oldWidth * ratio;
+            this._canvas.height = oldHeight * ratio;
+
+            this._canvas.style.width = oldWidth + 'px';
+            this._canvas.style.height = oldHeight + 'px';
+
+            // now scale the context to counter
+            // the fact that we've manually scaled
+            // our canvas element
+            ctx.scale(ratio, ratio);
+            this._scale = ratio;
+        }
+        else {
+            this._canvas.width = this._container.clientWidth;
+            this._canvas.height = this._container.clientHeight;
+        }
     },
 
 
@@ -291,11 +288,42 @@ var IMCropCanvas = Class.extend({
                 _this.setZoomToImage(false);
                 _this.redraw();
 
+                if (_this._detectFaces) {
+                    _this.detectFaces();
+                }
+
                 if (typeof cbFunc === 'function') {
                     cbFunc(_this._image);
                 }
             }
         );
+    },
+
+    detectFaces: function() {
+        if (!this._image instanceof IMCropImg || !this._image.isReady()) {
+            return;
+        }
+
+        var tracker = new tracking.ObjectTracker(['face', 'eye']);
+        tracker.setStepSize(1.7)
+
+        //var tracker = new tracking.ObjectTracker('face');
+        var _this = this;
+
+        tracker.on('track', function(event) {
+            event.data.forEach(function(rect) {
+
+                // Tracking.js does not understand scale, so adjust for it
+                var w = (rect.width / _this._scale) / 1.7;
+                var h = (rect.height / _this._scale) / 1.7;
+                var x = rect.x / _this._scale + w;
+                var y = rect.y / _this._scale + h;
+
+                _this._image.addFocusPoint(x, y, (w > h ? w : h));
+            });
+        });
+
+        tracking.track(this._canvas, tracker);
     },
 
     /**
@@ -355,9 +383,19 @@ var IMCropCanvas = Class.extend({
     },
 
     /**
+     * Return current zoom level in percent, or decimal if decimal parameter is true
+     * @param decimal
+     * @returns {number}
+     */
+    getZoom: function(decimal) {
+        return decimal === true ? this._zoomLevel : this._zoomLevel * 100;
+    },
+
+
+    /**
      * Set zoom by percent
      *
-     * @param zoomLevel
+     * @param zoomLevel§
      * @param redraw
      */
     setZoom: function(zoomLevel, redraw) {
@@ -742,12 +780,58 @@ var IMCropCanvas = Class.extend({
         return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
     },
 
+
+    /**
+     * Render and output debug position and dimensions
+     * @private
+     */
+    _renderDebug: function() {
+        if (this._debugMarkers) {
+            this._drawCross(
+                'red',
+                {
+                    x: this._container.clientWidth / 2,
+                    y: this._container.clientHeight / 2
+                }
+            );
+
+            this._drawCross(
+                'green',
+                {
+                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
+                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
+                }
+            );
+        }
+
+        if (typeof this._debugContainer != 'undefined') {
+            var str = '<pre>';
+            str += 'Zoom level: ' + this._zoomLevel + "\n";
+
+            if (typeof this._image != 'undefined') {
+                str += 'Image w: ' + this._image._w + "\n";
+                str += '      h: ' + this._image._h + "\n";
+                str += "\n";
+                if (typeof this._image._crop != 'undefined') {
+                    str += 'Crop  x: ' + this._image._crop._x + "\n";
+                    str += '      y: ' + this._image._crop._y + "\n";
+                    str += '      w: ' + this._image._crop._w + "\n";
+                    str += '      h: ' + this._image._crop._h + "\n";
+                }
+            }
+            str += '</pre>';
+
+            this._debugContainer.innerHTML = str;
+        }
+    },
+
+
     /**
      * Helper function for drawing a cross mark
      * @param string
      * @param point
      */
-    drawCross: function(color, point) {
+    _drawCross: function(color, point) {
         var ctx = this._canvas.getContext('2d');
 
         ctx.beginPath();

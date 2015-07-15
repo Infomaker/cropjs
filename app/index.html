@@ -21,8 +21,20 @@
 
     <body>
         <div id="imc_container"></div>
-        <div id="imc_debug"></div>
 
+        <a href="#" class="option">
+            <em>Visa ansikten</em>
+            <span>
+                <span class="on">On</span>
+                <span class="off">Off</span>
+            </span>
+        </a>
+
+        <div id="imc_debug"></div>
+        <script src="js/tracking.js-master/build/tracking-min.js"></script>
+        <script src="js/tracking.js-master/build/data/face-min.js"></script>
+        <script src="js/tracking.js-master/build/data/eye-min.js"></script>
+        <script src="js/tracking.js-master/build/data/mouth-min.js"></script>
 
         <script src="js/imcrop.object.js"></script>
 
@@ -34,13 +46,14 @@
             var canvas = new IMCropCanvas(
                     document.getElementById('imc_container'),
                     {
-                        debugMarkers: false,
+                        detectFaces: true,
+                        debugMarkers: true,
                         debugElement: document.getElementById('imc_debug')
                     }
             );
 
             canvas.loadImage(
-                    'examples/picture.jpg',
+                    'examples/picture4.jpg',
                     function(image) {
                         canvas.addSoftcrop(16, 9, true);
                         canvas.addSoftcrop(9, 16, false);

@@ -1,6 +1,9 @@
 body {
     margin: 10px;
     padding: 10px;
+    font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    font-weight: 200;
+    letter-spacing: 1px;
 }
 
 #imc_container {
@@ -8,6 +11,7 @@ body {
     width: 80%;
     height: 350px;
     -background: url('../img/bg_canvas.png') 0 0;
+    background: #EFF3F2;
 
     /* Adjust for work container below img container */
     margin-bottom: 100px;
@@ -63,4 +67,80 @@ body {
 
 .imc_preview_image > img {
 
+}
+
+
+/**
+ * Option, defaults to off
+ */
+a.option {
+    display: inline-block;
+    height: 20px;
+    text-decoration: none;
+    font-size: 12px;
+    color: #6C828C;
+}
+
+a.option em {
+    display: inline-block;
+    line-height: 20px;
+    font-style: normal;
+    vertical-align: middle;
+}
+
+a.option > span {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 2px;
+    padding: 0;
+
+    width: 50px;
+    height: 20px;
+    border-radius: 10px;
+
+    line-height: 14px;
+
+
+    position: relative;
+
+    background: #839595;
+    color: #fff;
+}
+
+a.option > span span {
+    display: block;
+    position: absolute;
+    overflow: visible;
+
+    width: 14px;
+    height: 14px;
+    top: 3px;
+    left: 3px;
+    border-radius: 7px;
+    text-indent: 20px;
+
+    background: #6C797A;
+
+}
+
+a.option > span span.on {
+    display: none;
+}
+
+
+/* Option on state */
+a.option > span.on {
+    background: #6C797A;
+}
+
+a.option.on > span span.on {
+    display: block;
+    background: #839595;
+    left: auto;
+    right: 3px;
+    text-indent: -23px;
+}
+
+a.option.on > span span.off {
+    display: none;
 }

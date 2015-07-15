@@ -282,24 +282,24 @@ var IMSoftcrop = IMCropObject.extend({
 
     /**
      * Redraw image
-     * @param {number} zoomLevel
      * @param {object} offset
      */
-    redraw: function(zoomLevel) {
+    redraw: function() {
         if (!this.isReady()) {
             return;
         }
 
-        this._calculateDrawDimensions(
-            zoomLevel,
-            this._parent.getCoordinates()
-        );
+        this.getDimensionsInCanvas(this._parent.getCoordinates());
 
         this._drawRect();
 
         var doubleLength = this._handleLength * 2;
 
         this._ctx.beginPath();
+        if(this._ctx.setLineDash) {
+            this._ctx.setLineDash([]);
+        }
+
         this._drawHandle('nw', false, this._drawX, this._drawY, this._handleLength, this._handleThickness);
         this._drawHandle('se', false, this._drawXW, this._drawYH, this._handleLength, this._handleThickness);
         this._drawHandle('ne', false, this._drawXW, this._drawY, this._handleLength, this._handleThickness);
