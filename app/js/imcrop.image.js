@@ -157,6 +157,7 @@ var IMCropImg = IMCropObject.extend({
 
         if (this._crop instanceof IMSoftcrop) {
             this._crop.redraw();
+            this._crop.draw
         }
     },
 
@@ -196,6 +197,10 @@ var IMCropImg = IMCropObject.extend({
             this._ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, false);
             this._ctx.stroke();
             this._ctx.closePath();
+
+            if(this._ctx.setLineDash) {
+                this._ctx.setLineDash([]);
+            }
         }
     }
 });

@@ -291,15 +291,13 @@ var IMSoftcrop = IMCropObject.extend({
 
         this.getDimensionsInCanvas(this._parent.getCoordinates());
 
-        this._drawRect();
+        // Draw area outside crop
+        this._drawCropMargins();
 
+        // Draw crop handles
         var doubleLength = this._handleLength * 2;
 
         this._ctx.beginPath();
-        if(this._ctx.setLineDash) {
-            this._ctx.setLineDash([]);
-        }
-
         this._drawHandle('nw', false, this._drawX, this._drawY, this._handleLength, this._handleThickness);
         this._drawHandle('se', false, this._drawXW, this._drawYH, this._handleLength, this._handleThickness);
         this._drawHandle('ne', false, this._drawXW, this._drawY, this._handleLength, this._handleThickness);
@@ -312,15 +310,88 @@ var IMSoftcrop = IMCropObject.extend({
         this._drawHandle('s', false, this._drawX + halfDrawWidth, this._drawYH, doubleLength, this._handleThickness);
         this._drawHandle('w', false, this._drawX, this._drawY + halfDrawHeight, doubleLength, this._handleThickness);
         this._ctx.stroke();
+        this._ctx.closePath();
+
+        // Draw border
+        this._drawCropBorder();
+
+        // Draw guidelines inside crop
+        this._drawCropGuidelines();
     },
 
 
     /**
-     * Draw rectangle
+     * Draw guide lines inside crop
      *
-     * @protected
+     * @private
      */
-    _drawRect: function() {
+    _drawCropGuidelines: function() {
+        this._ctx.closePath();
+        this._ctx.beginPath();
+
+        if(this._ctx.setLineDash) {
+            this._ctx.setLineDash([3, 3]);
+        }
+        this._ctx.strokeStyle = 'rgba(99, 99, 99, 0.4)';
+        this._ctx.lineWidth = 1;
+
+        var stepY = this._drawH / 3,
+            stepX = this._drawW / 3;
+
+        // Horizontal line 1
+        this._ctx.moveTo(this._drawX, this._drawY + stepY);
+        this._ctx.lineTo(this._drawX + this._drawW, this._drawY + stepY);
+
+        // Horizontal line 2
+        this._ctx.moveTo(this._drawX, this._drawY + stepY + stepY);
+        this._ctx.lineTo(this._drawX + this._drawW, this._drawY + stepY + stepY);
+
+        // Vertical line 1
+        this._ctx.moveTo(this._drawX + stepX, this._drawY);
+        this._ctx.lineTo(this._drawX + stepX, this._drawY + this._drawH);
+
+        // Horizontal line 2
+        this._ctx.moveTo(this._drawX + stepX + stepX, this._drawY);
+        this._ctx.lineTo(this._drawX + stepX + stepX, this._drawY + this._drawH);
+
+        this._ctx.stroke();
+
+        if(this._ctx.setLineDash) {
+            this._ctx.setLineDash([]);
+        }
+
+        this._ctx.closePath();
+    },
+
+
+    /**
+     * Draw crop border
+     *
+     * @private
+     */
+    _drawCropBorder: function() {
+        this._ctx.beginPath();
+
+        this._ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+        this._ctx.lineWidth = 1;
+        this._ctx.rect(
+            this._drawX - 0.5,
+            this._drawY - 0.5,
+            this._drawW + 1,
+            this._drawH + 1
+        );
+
+        this._ctx.stroke();
+        this._ctx.closePath();
+    },
+
+
+    /**
+     * Draw dark areas outside crop area
+     *
+     * @private
+     */
+    _drawCropMargins: function() {
         var imgDim = this._parent.getDimensions();
 
         this._ctx.beginPath();
@@ -355,6 +426,7 @@ var IMSoftcrop = IMCropObject.extend({
         );
 
         this._ctx.fill();
+        this._ctx.closePath;
     },
 
 
