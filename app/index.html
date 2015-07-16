@@ -22,7 +22,16 @@
     <body>
         <div id="imc_container"></div>
 
-        <a href="#" class="option">
+
+        <a href="#" id="imc_toggle_guides" class="toggle on">
+            <em>Guide lines</em>
+            <span>
+                <span class="on">On</span>
+                <span class="off">Off</span>
+            </span>
+        </a>
+
+        <a href="#" id="imc_toggle_faces" class="toggle">
             <em>Visa ansikten</em>
             <span>
                 <span class="on">On</span>
@@ -36,6 +45,9 @@
         <script src="js/tracking.js-master/build/data/eye-min.js"></script>
         <script src="js/tracking.js-master/build/data/mouth-min.js"></script>
 
+
+        <script src="js/imcrop.ui.js"></script>
+
         <script src="js/imcrop.object.js"></script>
 
         <script src="js/imcrop.js"></script>
@@ -46,7 +58,7 @@
             var canvas = new IMCropCanvas(
                     document.getElementById('imc_container'),
                     {
-                        detectFaces: false,
+                        detectFaces: true,
                         debugMarkers: false,
                         debugElement: document.getElementById('imc_debug')
                     }

@@ -284,7 +284,7 @@ var IMSoftcrop = IMCropObject.extend({
      * Redraw image
      * @param {object} offset
      */
-    redraw: function() {
+    redraw: function(options) {
         if (!this.isReady()) {
             return;
         }
@@ -316,7 +316,9 @@ var IMSoftcrop = IMCropObject.extend({
         this._drawCropBorder();
 
         // Draw guidelines inside crop
-        this._drawCropGuidelines();
+        if (typeof options == 'object' && options.guides === true) {
+            this._drawCropGuidelines();
+        }
     },
 
 

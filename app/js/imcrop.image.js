@@ -138,7 +138,7 @@ var IMCropImg = IMCropObject.extend({
     /**
      * Redraw image
      */
-    redraw: function() {
+    redraw: function(options) {
         if (!this.isReady()) {
             return;
         }
@@ -153,10 +153,12 @@ var IMCropImg = IMCropObject.extend({
             this._drawH
         );
 
-        this.drawFocusPoints();
+        if (typeof options == 'object' && options.focuspoints === true) {
+            this.drawFocusPoints();
+        }
 
         if (this._crop instanceof IMSoftcrop) {
-            this._crop.redraw();
+            this._crop.redraw(options);
             this._crop.draw
         }
     },

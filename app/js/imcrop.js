@@ -35,6 +35,8 @@ var IMCropCanvas = Class.extend({
     _detectFaces: false,
     _debugMarkers: false,
 
+    _drawGuides: undefined,
+    _drawFocusPoints: undefined,
 
     /**
      * Constructor
@@ -48,7 +50,7 @@ var IMCropCanvas = Class.extend({
         this.adjustForPixelRatio();
 
         this.calculateViewport();
-        this.addEventListeners();
+        this.addCanvasEventListeners();
 
         // Options
         if (typeof options == 'object') {
@@ -59,6 +61,24 @@ var IMCropCanvas = Class.extend({
             if (options.debugMarkers === true) {
                 this._debugMarkers = true;
             }
+
+            // Draw guides toggle
+            var _this = this;
+            this._drawGuides = new IMCropUI.Toggle(
+                'imc_toggle_guides',
+                function() {
+                    _this.redraw();
+                }
+            );
+
+            // Draw faces toggle
+            var _this = this;
+            this._drawFocusPoints = new IMCropUI.Toggle(
+                'imc_toggle_faces',
+                function() {
+                    _this.redraw();
+                }
+            );
 
             if (options.detectFaces === true) {
                 this._detectFaces = true;
@@ -231,7 +251,12 @@ var IMCropCanvas = Class.extend({
         this.adjustForPixelRatio();
 
         if (this._image instanceof IMCropImg) {
-            this._image.redraw();
+
+            this._image.redraw({
+                guides: this._drawGuides.on,
+                focuspoints: this._drawFocusPoints.on
+            });
+
             this._renderPreviews();
         }
 
@@ -393,7 +418,7 @@ var IMCropCanvas = Class.extend({
     /**
      * Set zoom by percent
      *
-     * @param zoomLevel§
+     * @param zoomLevel
      * @param redraw
      */
     setZoom: function(zoomLevel, redraw) {
@@ -482,9 +507,9 @@ var IMCropCanvas = Class.extend({
 
 
     /**
-     * Add all event listeners required
+     * Add all event listeners required for drawing and dragging
      */
-    addEventListeners: function() {
+    addCanvasEventListeners: function() {
         var _this = this;
 
         window.addEventListener(

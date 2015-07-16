@@ -71,9 +71,9 @@ body {
 
 
 /**
- * Option, defaults to off
+ * Toggle option, defaults to off
  */
-a.option {
+a.toggle {
     display: inline-block;
     height: 20px;
     text-decoration: none;
@@ -81,14 +81,14 @@ a.option {
     color: #6C828C;
 }
 
-a.option em {
+a.toggle em {
     display: inline-block;
     line-height: 20px;
     font-style: normal;
     vertical-align: middle;
 }
 
-a.option > span {
+a.toggle > span {
     display: inline-block;
     vertical-align: middle;
     margin: 2px;
@@ -107,7 +107,7 @@ a.option > span {
     color: #fff;
 }
 
-a.option > span span {
+a.toggle > span span {
     display: block;
     position: absolute;
     overflow: visible;
@@ -123,17 +123,17 @@ a.option > span span {
 
 }
 
-a.option > span span.on {
+a.toggle > span span.on {
     display: none;
 }
 
 
 /* Option on state */
-a.option > span.on {
+a.toggle.on > span {
     background: #6C797A;
 }
 
-a.option.on > span span.on {
+a.toggle.on > span span.on {
     display: block;
     background: #839595;
     left: auto;
@@ -141,6 +141,6 @@ a.option.on > span span.on {
     text-indent: -23px;
 }
 
-a.option.on > span span.off {
+a.toggle.on > span span.off {
     display: none;
 }
