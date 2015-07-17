@@ -54,13 +54,12 @@
             var h = this._h;
 
             if (imgRatio > cropRatio) {
-                // Horisontal crop fills horisontal but not vertical
-                h = this._h * cropRatio;
+                // Crop fills horizontal but not vertical
+                h = this._w * cropRatio;
                 y = (this._h - h) / 2;
             }
             else {
                 // Crop will fill vertical but not horizontal
-                // FIXME: Not correct
                 var invertCropRatio = hRatio / vRatio;
                 w = this._h * invertCropRatio;
                 x = (this._w - w) / 2;
