@@ -18,6 +18,20 @@
             _on = true;
         }
 
+        this.toggle = function() {
+            var private = function(){
+
+                },
+
+                public = function () {
+                    private();
+                }
+
+            return {
+                public : public(),
+            }
+        };
+
         Object.defineProperty(
             this,
             'on',
@@ -48,7 +62,6 @@
                 return false;
             }
         );
-
     };
 })();
 

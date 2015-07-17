@@ -46,17 +46,19 @@
         <script src="js/tracking.js-master/build/data/mouth-min.js"></script>
 
 
+        <script src="js/imcrop.core.js"></script>
         <script src="js/imcrop.ui.js"></script>
 
-        <script src="js/imcrop.object.js"></script>
 
-        <script src="js/imcrop.js"></script>
+        <script src="js/imcrop.editor.js"></script>
+        <script src="js/imcrop.object.js"></script>
         <script src="js/imcrop.image.js"></script>
         <script src="js/imcrop.rect.js"></script>
 
         <script>
-            var canvas = new IMCropCanvas(
-                    document.getElementById('imc_container'),
+
+            var editor = new IMSoftcrop.Editor(
+                    'imc_container',
                     {
                         detectFaces: true,
                         debugMarkers: false,
@@ -64,15 +66,16 @@
                     }
             );
 
-            canvas.loadImage(
+            editor.loadImage(
                     'examples/picture4.jpg',
                     function(image) {
-                        canvas.addSoftcrop(16, 9, true);
-                        canvas.addSoftcrop(9, 16, false);
-                        canvas.addSoftcrop(4, 3, false);
-                        canvas.addSoftcrop(1, 1, false);
+                        this.addSoftcrop(16, 9, true);
+                        this.addSoftcrop(9, 16, false);
+                        this.addSoftcrop(4, 3, false);
+                        this.addSoftcrop(1, 1, false);
                     }
             );
+
 
         </script>
     </body>
