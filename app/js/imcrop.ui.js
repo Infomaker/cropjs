@@ -18,20 +18,6 @@
             _on = true;
         }
 
-        this.toggle = function() {
-            var private = function(){
-
-                },
-
-                public = function () {
-                    private();
-                }
-
-            return {
-                public : public(),
-            }
-        };
-
         Object.defineProperty(
             this,
             'on',
@@ -54,6 +40,33 @@
                 event.stopPropagation();
 
                 _on = this.classList.contains('on');
+
+                if (typeof _onClick == 'function') {
+                    _onClick.call(_this, event);
+                }
+
+                return false;
+            }
+        );
+    };
+
+    IMCropUI.Button = function(id, onClick) {
+        var _id = id;
+        var _element;
+        var _onClick = onClick;
+        var _this = this;
+
+        _element = document.getElementById(_id);
+        if (!_element) {
+            console.log('Element not found: ' + _id);
+            return;
+        }
+
+        _element.addEventListener(
+            'click',
+            function(event) {
+                event.preventDefault();
+                event.stopPropagation();
 
                 if (typeof _onClick == 'function') {
                     _onClick.call(_this, event);

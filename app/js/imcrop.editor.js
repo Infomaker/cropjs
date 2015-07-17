@@ -45,10 +45,17 @@ var IMSoftcrop = (function() {
 
         // Options
         _detectFaces: false,
-        _debugMarkers: false,
+        _debug: false,
 
+        // IMCropUI.Toggle for drawing guides
         _drawGuides: undefined,
+
+        // IMCropUI.Toggle for drawing focus points
         _drawFocusPoints: undefined,
+
+        // IMCropUI.Button for auto crop
+        _autocropButton: undefined,
+
 
         /**
          * Constructor
@@ -66,36 +73,52 @@ var IMSoftcrop = (function() {
 
             // Options
             if (typeof options == 'object') {
-                if (typeof options.debugElement != 'undefined') {
-                    this._debugContainer = options.debugElement;
+                var _this = this;
+
+                if (options.debug === true) {
+                    if (typeof options.debug != 'undefined') {
+                        this._debugContainer = options.debugElement;
+                    }
+
+                    this._debug = true;
                 }
 
-                if (options.debugMarkers === true) {
-                    this._debugMarkers = true;
-                }
-
-                // Draw guides toggle
-                var _this = this;
-                this._drawGuides = new IMCropUI.Toggle(
-                    'imc_toggle_guides',
-                    function () {
-                        _this.redraw();
-                    }
-                );
-
-                // Draw faces toggle
-                var _this = this;
-                this._drawFocusPoints = new IMCropUI.Toggle(
-                    'imc_toggle_faces',
-                    function () {
-                        _this.redraw();
-                    }
-                );
-
-                if (options.detectFaces === true) {
+                if (options.autocrop === true) {
                     this._detectFaces = true;
                 }
             }
+
+            // Draw guides toggle
+            this._drawGuides = new IMCropUI.Toggle(
+                'imc_toggle_guides',
+                function () {
+                    _this.redraw();
+                }
+            );
+
+            // Draw focuspoints toggle
+            this._drawFocusPoints = new IMCropUI.Toggle(
+                'imc_toggle_focuspoints',
+                function () {
+                    _this.redraw();
+                }
+            );
+
+            // Draw button
+            this._autocropButton = new IMCropUI.Button(
+                'imc_auto_crop',
+                function () {
+                    _this.toggleWait();
+                    setTimeout(
+                        function() {
+                            _this.detectFaces();
+                            _this.redraw();
+                            _this.toggleWait();
+                        },
+                        100
+                    );
+                }
+            );
         },
 
 
@@ -121,6 +144,19 @@ var IMSoftcrop = (function() {
             this._container.appendChild(workContainer);
         },
 
+        /**
+         * Display please wait animation
+         */
+        toggleWait: function() {
+            var img = document.getElementById('imc_wait');
+
+            if (img.classList.contains('visible')) {
+                img.classList.remove('visible');
+            }
+            else {
+                img.classList.add('visible');
+            }
+        },
 
         /**
          * Render preview area for all soft crops
@@ -240,7 +276,9 @@ var IMSoftcrop = (function() {
                 this._renderPreviews();
             }
 
-            this._renderDebug();
+            if (this._debug) {
+                this._renderDebug();
+            }
         },
 
         /**
@@ -830,23 +868,21 @@ var IMSoftcrop = (function() {
          * @private
          */
         _renderDebug: function () {
-            if (this._debugMarkers) {
-                this._drawCross(
-                    'red',
-                    {
-                        x: this._container.clientWidth / 2,
-                        y: this._container.clientHeight / 2
-                    }
-                );
+            this._drawCross(
+                'red',
+                {
+                    x: this._container.clientWidth / 2,
+                    y: this._container.clientHeight / 2
+                }
+            );
 
-                this._drawCross(
-                    'green',
-                    {
-                        x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
-                        y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
-                    }
-                );
-            }
+            this._drawCross(
+                'green',
+                {
+                    x: ((this._image._w * this._zoomLevel) / 2) + (this._image._x * this._zoomLevel) + this._margin,
+                    y: ((this._image._h * this._zoomLevel) / 2) + (this._image._y * this._zoomLevel) + this._margin
+                }
+            );
 
             if (typeof this._debugContainer != 'undefined') {
                 var str = '<pre>';
