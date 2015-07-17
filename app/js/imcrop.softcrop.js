@@ -109,7 +109,59 @@
                     y += (point.x / 2) / this.ratio.f;
                     break;
 
-                // TODO: Implement nw, ne, se, sw
+                case 'nw':
+                    if (Math.abs(point.x) > Math.abs(point.y)) {
+                        w -= point.x;
+                        x += point.x;
+                        h -= point.x / this.ratio.f;
+                        y += point.x / this.ratio.f;
+                    }
+                    else {
+                        h -= point.y;
+                        y += point.y;
+                        w -= point.y * this.ratio.f;
+                        x += point.y * this.ratio.f;
+                    }
+                    break;
+
+                case 'ne':
+                    if (Math.abs(point.x) > Math.abs(point.y)) {
+                        w += point.x;
+                        h += point.x / this.ratio.f;
+                        y -= point.x / this.ratio.f;
+
+                    }
+                    else {
+                        w -= point.y * this.ratio.f;
+                        h -= point.y;
+                        y += point.y;
+                    }
+                    break;
+
+                case 'se':
+                    if (Math.abs(point.x) > Math.abs(point.y)) {
+                        w += point.x;
+                        h += point.x / this.ratio.f;
+                    }
+                    else {
+                        h += point.y;
+                        w += point.y * this.ratio.f;
+                    }
+                    break;
+
+                case 'sw':
+                    if (Math.abs(point.x) > Math.abs(point.y)) {
+                        w -= point.x;
+                        x += point.x;
+                        h -= point.x / this.ratio.f;
+                    }
+                    else {
+                        w += point.y * this.ratio.f;
+                        x -= point.y * this.ratio.f;
+                        h += point.y;
+                    }
+                    break;
+
             }
 
             // Stop reversing of dimensions
