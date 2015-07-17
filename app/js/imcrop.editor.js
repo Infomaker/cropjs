@@ -44,17 +44,20 @@ var IMSoftcrop = (function() {
         _zoomMin: 0.1,
 
         // Options
-        _detectFaces: false,
+        autodetect: false,
         _debug: false,
 
         // IMCropUI.Toggle for drawing guides
-        _drawGuides: undefined,
+        _guidesToggle: undefined,
 
         // IMCropUI.Toggle for drawing focus points
-        _drawFocusPoints: undefined,
+        _focusPointsToggle: undefined,
+
+        // IMCropUI.Toggle for drawing focus points
+        _autoCropToggle: undefined,
 
         // IMCropUI.Button for auto crop
-        _autocropButton: undefined,
+        _detectAndCropButton: undefined,
 
 
         /**
@@ -83,35 +86,44 @@ var IMSoftcrop = (function() {
                     this._debug = true;
                 }
 
-                if (options.autocrop === true) {
-                    this._detectFaces = true;
+                if (options.autodetect === true) {
+                    this.autodetect = true;
                 }
             }
 
+            // Auto crop
+            this._autoCropToggle = new IMCropUI.Toggle(
+                'imc_autocrop',
+                function () {
+                    //_this.redraw();
+                }
+            );
+
             // Draw guides toggle
-            this._drawGuides = new IMCropUI.Toggle(
-                'imc_toggle_guides',
+            this._guidesToggle = new IMCropUI.Toggle(
+                'imc_guides',
                 function () {
                     _this.redraw();
                 }
             );
 
             // Draw focuspoints toggle
-            this._drawFocusPoints = new IMCropUI.Toggle(
-                'imc_toggle_focuspoints',
+            this._focusPointsToggle = new IMCropUI.Toggle(
+                'imc_focuspoints',
                 function () {
                     _this.redraw();
                 }
             );
 
             // Draw button
-            this._autocropButton = new IMCropUI.Button(
-                'imc_auto_crop',
+            this._detectAndCropButton = new IMCropUI.Button(
+                'imc_detectandcrop',
                 function () {
                     _this.toggleWait();
                     setTimeout(
                         function() {
                             _this.detectFaces();
+                            _this._image.autoCropFocusPoints();
                             _this.redraw();
                             _this.toggleWait();
                         },
@@ -269,8 +281,8 @@ var IMSoftcrop = (function() {
             if (this._image instanceof IMSoftcrop.Image) {
 
                 this._image.redraw({
-                    guides: this._drawGuides.on,
-                    focuspoints: this._drawFocusPoints.on
+                    guides: this._guidesToggle.on,
+                    focuspoints: this._focusPointsToggle.on
                 });
 
                 this._renderPreviews();
@@ -336,7 +348,7 @@ var IMSoftcrop = (function() {
                     _this.setZoomToImage(false);
                     _this.redraw();
 
-                    if (_this._detectFaces) {
+                    if (_this.autodetect) {
                         _this.detectFaces();
                     }
 

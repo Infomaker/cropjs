@@ -5,6 +5,12 @@
         _image: undefined,
         _crops: [],
         _focusPoints: [],
+        _focusArea: {
+            x1: undefined,
+            y1: undefined,
+            x2: undefined,
+            y2: undefined
+        },
 
         /**
          * Load image from url and draw
@@ -89,31 +95,6 @@
         },
 
         /**
-         * Detect faces, must know scale of canvas to get correct values
-         * @param scale
-         */
-        detectFaces: function (scale) {
-            var tracker = new tracking.ObjectTracker('face');
-            var img = this._parent._canvas;
-            var _this = this;
-
-            tracker.on('track', function (event) {
-                event.data.forEach(function (rect) {
-                    var w = (rect.width * scale) / 2;
-                    var h = (rect.height * scale) / 2;
-
-                    _this.addFocusPoint(
-                        (rect.x * scale) + w,
-                        (rect.y * scale) + h,
-                        (w > h ? w : h)
-                    );
-                });
-            });
-
-            tracking.track(img, tracker);
-        },
-
-        /**
          * Add focus point to guide automatic cropping areas
          * @param x
          * @param y
@@ -129,7 +110,53 @@
                     y: this._drawY
                 }
             );
-            point.r = radius / zoomLevel;
+            point.r = Math.round(radius / zoomLevel);
+
+            if (typeof this._focusArea.x1 == 'undefined') {
+                // Init focus area
+                this._focusArea = {
+                    x1: point.x - point.r,
+                    y1: point.y - point.r,
+                    x2: point.x + point.r,
+                    y2: point.y + point.r
+                }
+            }
+            else {
+                // Recalculate focus area
+                if (point.x - point.r < this._focusArea.x1) {
+                    this._focusArea.x1 = point.x - point.r;
+                }
+
+                if (point.x + point.r > this._focusArea.x2) {
+                    this._focusArea.x2 = point.x + point.r;
+                }
+
+                if (point.y - point.r < this._focusArea.y1) {
+                    this._focusArea.y1 = point.y - point.r;
+                }
+
+                if (point.y + point.r > this._focusArea.y2) {
+                    this._focusArea.y2 = point.y + point.r;
+                }
+
+                // Keep within image dimensions
+                if (this._focusArea.x1 < 0) {
+                    this._focusArea.x1 = 0;
+                }
+
+                if (this._focusArea.x2 > this._w) {
+                    this._focusArea.x1 = this._w;
+                }
+
+                if (this._focusArea.y1 < 0) {
+                    this._focusArea.y1 = 0;
+                }
+
+                if (this._focusArea.y2 > this._h) {
+                    this._focusArea.y1 = this._h;
+                }
+            }
+
 
             this._focusPoints.push(point);
         },
@@ -159,7 +186,6 @@
 
             if (this._crop instanceof IMSoftcrop.Softcrop) {
                 this._crop.redraw(options);
-                this._crop.draw
             }
         },
 
@@ -204,6 +230,50 @@
                     this._ctx.setLineDash([]);
                 }
             }
+        },
+
+
+        /**
+         * Automatically alter crop(s) by focus points total focus area
+         *
+         * @todo Implement algorithm as this is work in progress!
+         *
+         * @param crop
+         */
+        autoCropFocusPoints: function(crop) {
+            var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
+
+            var fpMiddle = {
+                x: this._focusArea.x1 + ((this._focusArea.x2 - this._focusArea.x1) / 2),
+                y: this._focusArea.y1 + ((this._focusArea.y2 - this._focusArea.y1) / 2)
+            };
+
+            for(var n = 0; n < crops.length; n++) {
+                var cropDim = crops[n].getDimensions();
+                var cropMiddle = {
+                    x: cropDim.x + (cropDim.w / 2),
+                    y: cropDim.y + (cropDim.h / 2)
+                };
+
+                var yDiff = fpMiddle.y - cropMiddle.y;
+
+                console.log(yDiff);
+                crops[n].move({
+                    x: 0,
+                    y: yDiff
+                });
+            }
+
+            /*
+            this._ctx.rect(
+                pt1.x,
+                pt1.y,
+                pt2.x - pt1.x,
+                pt2.y - pt1.y
+            );
+            this._ctx.stroke();
+            this._ctx.closePath();
+            */
         }
     });
     return this;

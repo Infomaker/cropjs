@@ -26,9 +26,9 @@
 
 
         <div class="toolbar">
-            <a href="#" id="imc_auto_crop" class="button">Autocrop</a>
+            <a href="#" id="imc_detectandcrop" class="button">Detect &amp; crop</a>
 
-            <a href="#" id="imc_toggle_guides" class="toggle on">
+            <a href="#" id="imc_guides" class="toggle on">
                 <em>Guide lines</em>
                 <span>
                     <span class="on">On</span>
@@ -36,7 +36,15 @@
                 </span>
             </a>
 
-            <a href="#" id="imc_toggle_focuspoints" class="toggle on">
+            <a href="#" id="imc_autocrop" class="toggle on">
+                <em>Automatisk crop</em>
+                <span>
+                    <span class="on">On</span>
+                    <span class="off">Off</span>
+                </span>
+            </a>
+
+            <a href="#" id="imc_focuspoints" class="toggle on">
                 <em>Visa fokusområden</em>
                 <span>
                     <span class="on">On</span>
@@ -67,7 +75,7 @@
             var editor = new IMSoftcrop.Editor(
                     'imc_container',
                     {
-                        autocrop: false,
+                        autodetect: false,
                         debug: false,
                         debugElement: document.getElementById('imc_debug')
                     }
