@@ -97,8 +97,13 @@ a.toggle {
     text-decoration: none;
     font-size: 12px;
     vertical-align: middle;
+    padding: 1px;
 }
 
+
+/**
+ * Simple button
+ */
 a.button {
     background: #6C797A;
     color: #fff;
@@ -106,6 +111,11 @@ a.button {
     padding: 0 8px;
     border-radius: 5px;
 }
+
+a.button:hover {
+    background-color: #839595;
+}
+
 
 /**
  * Toggle option, defaults to off
