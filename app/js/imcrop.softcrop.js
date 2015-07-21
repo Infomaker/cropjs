@@ -31,6 +31,9 @@
         },
         respectRatio: true,
 
+        // Warning for possible bad cropping
+        autoCropWarning: false,
+
         /**
          * Soft crop constructor
          * @param parent

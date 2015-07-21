@@ -186,12 +186,16 @@ var IMSoftcrop = (function() {
             }
 
             // Recalculate current preview
-            if (typeof this._crop != 'undefined') {
-                this._renderUpdatedPreview(this._crop);
+            var crops = this._image.getCrops();
+            for(var n = 0; n < crops.length; n++) {
+                this._renderUpdatedPreview(crops[n]);
             }
 
-        },
+            /* if (typeof this._crop != 'undefined') {
+                this._renderUpdatedPreview(this._crop);
+            }*/
 
+        },
 
         /**
          * Add and render specific crop preview
@@ -257,6 +261,13 @@ var IMSoftcrop = (function() {
             pvImg[0].style.height = imgDim.h * cropRatio + 'px';
             pvImg[0].style.marginTop = '-' + cropDim.y * cropRatio + 'px';
             pvImg[0].style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
+
+            if (crop.autoCropWarning == true) {
+                pvDiv.classList.add('warning');
+            }
+            else {
+                pvDiv.classList.remove('warning');
+            }
         },
 
         /**

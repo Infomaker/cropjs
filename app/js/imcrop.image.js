@@ -268,7 +268,6 @@
                 }
                 else {
                     // Increase width and then calculate new height based on ratio
-                    console.log('Increasing width...');
                     newWidth = this._focusArea.x2 - this._focusArea.x1;
                     newHeight = IMSoftcrop.Ratio.height(newWidth, crops[n].ratio.f);
                 }
@@ -277,30 +276,25 @@
                 if (newHeight != 0 && newWidth != 0) {
                     if (newWidth <= this._w && newHeight <= this._h) {
                         // Perfect, we can set both width and height
-                        console.log('Crop <' + n + '> fits completely');
                         crops[n]._w = newWidth;
                         crops[n]._h = newHeight;
                     }
                     else if (newWidth > this._w) {
                         // Width is too big, set to image width and recalculate height
-                        console.log('Crop <' + n + '> is too wide');
                         crops[n]._w = this._w;
                         crops[n]._h = IMSoftcrop.Ratio.height(this._w, crops[n].ratio.f);
-                        // TODO: Should warn that crop might not be perfect
+                        crops[n].autoCropWarning = true;
                     }
                     else if (newHeight > this._h) {
                         // Height is too big, set to image height and recalculate width
-                        console.log('Crop <' + n + '> is too high, setting it to ' + this._h + ' instead of ' + newHeight);
                         crops[n]._h = this._h;
                         crops[n]._w = IMSoftcrop.Ratio.width(this._h,  crops[n].ratio.f);
-                        console.log('    <' + n + '> width calculated to ' + crops[n]._w + ' based on ' + crops[n].ratio.f);
-
-                        // TODO: Should warn that crop might not be perfect
+                        crops[n].autoCropWarning = true;
                     }
                     else {
-                        // Unable to change size
+                        // Unable to change size, should not happen!
                         console.log('Crop <' + n + '> just does not fit?!?');
-                        // TODO: Should warn that crop might not be perfect
+                        crops[n].autoCropWarning = true;
                     }
                 }
 
