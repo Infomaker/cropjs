@@ -391,7 +391,7 @@ var IMSoftcrop = (function() {
             tracker.on('track', function (event) {
                 event.data.forEach(function (rect) {
 
-                    // Tracking.js does not understand scale, so adjust for it
+                    // Tracking does not understand scale, so adjust for it
                     var w = (rect.width / _this._scale) / 1.7;
                     var h = (rect.height / _this._scale) / 1.7;
                     var x = rect.x / _this._scale + w;

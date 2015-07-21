@@ -47,31 +47,29 @@
         /**
          * Add soft crop to this image
          *
-         * @param hRatio
-         * @param vRatio
+         * @param width
+         * @param height
          * @param setAsCurrent
          */
-        addSoftcrop: function (hRatio, vRatio, setAsCurrent) {
-            var imgRatio = this._h / this._w;
-            var cropRatio = vRatio / hRatio;
+        addSoftcrop: function (width, height, setAsCurrent) {
+            var cropRatio = IMSoftcrop.Ratio.decimal(width, height);
             var x = 0;
             var y = 0;
             var w = this._w;
             var h = this._h;
 
-            if (imgRatio > cropRatio) {
+            if (cropRatio < IMSoftcrop.Ratio.decimal(this._w, this._h)) {
                 // Crop fills horizontal but not vertical
-                h = this._w * cropRatio;
+                h = IMSoftcrop.Ratio.height(w, cropRatio);
                 y = (this._h - h) / 2;
             }
             else {
                 // Crop will fill vertical but not horizontal
-                var invertCropRatio = hRatio / vRatio;
-                w = this._h * invertCropRatio;
+                w = IMSoftcrop.Ratio.width(h, cropRatio);
                 x = (this._w - w) / 2;
             }
 
-            var crop = new IMSoftcrop.Softcrop(this, hRatio, vRatio, x, y, w, h, true);
+            var crop = new IMSoftcrop.Softcrop(this, width, height, x, y, w, h, true);
             this._crops.push(crop);
 
             if (setAsCurrent) {
@@ -243,24 +241,80 @@
         autoCropFocusPoints: function(crop) {
             var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
 
-            var fpMiddle = {
+            var fpCenter = {
                 x: this._focusArea.x1 + ((this._focusArea.x2 - this._focusArea.x1) / 2),
                 y: this._focusArea.y1 + ((this._focusArea.y2 - this._focusArea.y1) / 2)
             };
 
+            var imgMiddle = {
+                x: this._w / 2,
+                y: this._h / 2
+            };
+
+            // Resize and move all crops based on focus points
             for(var n = 0; n < crops.length; n++) {
-                var cropDim = crops[n].getDimensions();
-                var cropMiddle = {
-                    x: cropDim.x + (cropDim.w / 2),
-                    y: cropDim.y + (cropDim.h / 2)
-                };
+                var cropDim = crops[n].getDimensions(),
+                    xRatio = (this._focusArea.x2 - this._focusArea.x1) / cropDim.w,
+                    yRatio = (this._focusArea.y2 - this._focusArea.y1)  / cropDim.h,
+                    newWidth = 0,
+                    newHeight = 0;
 
-                var yDiff = fpMiddle.y - cropMiddle.y;
+                // Calculate optimal (tight fit) around focus area
+                if (xRatio < yRatio) {
+                    // Increase height and then calculate new width based on ratio
+                    console.log('Increasing height...');
+                    newHeight = this._focusArea.y2 - this._focusArea.y1 < this._w;
+                    newWidth = IMSoftcrop.Ratio.width(newHeight, crops[n].ratio.f);
+                }
+                else {
+                    // Increase width and then calculate new height based on ratio
+                    console.log('Increasing width...');
+                    newWidth = this._focusArea.x2 - this._focusArea.x1;
+                    newHeight = IMSoftcrop.Ratio.height(newWidth, crops[n].ratio.f);
+                }
 
-                console.log(yDiff);
+                // Adjust width/height of crop if possible
+                if (newHeight != 0 && newWidth != 0) {
+                    if (newWidth <= this._w && newHeight <= this._h) {
+                        // Perfect, we can set both width and height
+                        console.log('Crop <' + n + '> fits completely');
+                        crops[n]._w = newWidth;
+                        crops[n]._h = newHeight;
+                    }
+                    else if (newWidth > this._w) {
+                        // Width is too big, set to image width and recalculate height
+                        console.log('Crop <' + n + '> is too wide');
+                        crops[n]._w = this._w;
+                        crops[n]._h = IMSoftcrop.Ratio.height(this._w, crops[n].ratio.f);
+                        // TODO: Should warn that crop might not be perfect
+                    }
+                    else if (newHeight > this._h) {
+                        // Height is too big, set to image height and recalculate width
+                        console.log('Crop <' + n + '> is too high, setting it to ' + this._h + ' instead of ' + newHeight);
+                        crops[n]._h = this._h;
+                        crops[n]._w = IMSoftcrop.Ratio.width(this._h,  crops[n].ratio.f);
+                        console.log('    <' + n + '> width calculated to ' + crops[n]._w + ' based on ' + crops[n].ratio.f);
+
+                        // TODO: Should warn that crop might not be perfect
+                    }
+                    else {
+                        // Unable to change size
+                        console.log('Crop <' + n + '> just does not fit?!?');
+                        // TODO: Should warn that crop might not be perfect
+                    }
+                }
+
+                // Adjust position
+                var cropCenter = {
+                        x: crops[n]._x + (crops[n]._w / 2),
+                        y: crops[n]._y + (crops[n]._h / 2)
+                    },
+                    xoffset = fpCenter.x - cropCenter.x,
+                    yoffset = fpCenter.y - cropCenter.y;
+
                 crops[n].move({
-                    x: 0,
-                    y: yDiff
+                    x: (xoffset > 0) ? xoffset : 0,
+                    y: (yoffset > 0) ? yoffset : 0
                 });
             }
 
