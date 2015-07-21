@@ -56,7 +56,7 @@
             this.ratio = {
                 w: hRatio,
                 h: vRatio,
-                f: hRatio / vRatio
+                f: IMSoftcrop.Ratio.decimal(hRatio, vRatio)
             };
 
             this.isReady(true);
@@ -86,53 +86,53 @@
                 case 'n':
                     y += point.y;
                     h -= point.y;
-                    w = h * this.ratio.f;
-                    x += (point.y / 2) * this.ratio.f;
+                    w = IMSoftcrop.Ratio.width(h, this.ratio.f);
+                    x += IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
                     break;
 
                 case 'e':
                     w += point.x;
-                    h = w / this.ratio.f;
-                    y -= (point.x / 2) / this.ratio.f;
+                    h = IMSoftcrop.Ratio.height(w, this.ratio.f);
+                    y -= IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
                     break;
 
                 case 's':
                     h += point.y;
-                    w = h * this.ratio.f;
-                    x -= (point.y / 2) * this.ratio.f;
+                    w = IMSoftcrop.Ratio.width(h, this.ratio.f);
+                    x -= IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
                     break;
 
                 case 'w':
                     w -= point.x;
                     x += point.x;
-                    h = w / this.ratio.f;
-                    y += (point.x / 2) / this.ratio.f;
+                    h = IMSoftcrop.Ratio.height(w, this.ratio.f);
+                    y += IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
                     break;
 
                 case 'nw':
                     if (Math.abs(point.x) > Math.abs(point.y)) {
                         w -= point.x;
                         x += point.x;
-                        h -= point.x / this.ratio.f;
-                        y += point.x / this.ratio.f;
+                        h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                        y += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
                     }
                     else {
                         h -= point.y;
                         y += point.y;
-                        w -= point.y * this.ratio.f;
-                        x += point.y * this.ratio.f;
+                        w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                        x += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
                     }
                     break;
 
                 case 'ne':
                     if (Math.abs(point.x) > Math.abs(point.y)) {
                         w += point.x;
-                        h += point.x / this.ratio.f;
-                        y -= point.x / this.ratio.f;
+                        h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                        y -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
 
                     }
                     else {
-                        w -= point.y * this.ratio.f;
+                        w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
                         h -= point.y;
                         y += point.y;
                     }
@@ -141,11 +141,11 @@
                 case 'se':
                     if (Math.abs(point.x) > Math.abs(point.y)) {
                         w += point.x;
-                        h += point.x / this.ratio.f;
+                        h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
                     }
                     else {
                         h += point.y;
-                        w += point.y * this.ratio.f;
+                        w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
                     }
                     break;
 
@@ -153,11 +153,11 @@
                     if (Math.abs(point.x) > Math.abs(point.y)) {
                         w -= point.x;
                         x += point.x;
-                        h -= point.x / this.ratio.f;
+                        h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
                     }
                     else {
-                        w += point.y * this.ratio.f;
-                        x -= point.y * this.ratio.f;
+                        w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                        x -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
                         h += point.y;
                     }
                     break;

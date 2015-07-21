@@ -208,7 +208,7 @@ var IMSoftcrop = (function() {
             var pvDiv = document.createElement('div');
             pvDiv.id = this._image.id + '_' + crop.id;
             pvDiv.classList.add('imc_preview_image');
-            pvDiv.style.width = previewHeight * crop.ratio.f + 'px';
+            pvDiv.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
             if (setAsCurrent) {
                 pvDiv.classList.add('active');
@@ -249,7 +249,7 @@ var IMSoftcrop = (function() {
 
             var imgDim = this._image.getDimensions();
             var previewHeight = 80;
-            var previewWidth = previewHeight * crop.ratio.f;
+            var previewWidth = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f);
             var cropDim = crop.getDimensions();
             var cropRatio = previewWidth / cropDim.w;
             var pvImg = pvDiv.getElementsByTagName('IMG');
