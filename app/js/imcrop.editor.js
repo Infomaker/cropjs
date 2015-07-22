@@ -357,11 +357,18 @@ var IMSoftcrop = (function() {
                 url,
                 function () {
                     _this.setZoomToImage(false);
+
+                    // Need to redraw before detecting
                     _this.redraw();
+
+                    _this.detectFeatures();
 
                     if (_this.autodetect) {
                         _this.detectFaces();
                     }
+
+                    // Redraw again so that we can print detection data if applicable
+                    _this.redraw();
 
                     if (typeof cbFunc === 'function') {
                         cbFunc.call(_this, _this._image);
@@ -369,6 +376,67 @@ var IMSoftcrop = (function() {
                 }
             );
         },
+
+        /**
+         * Detect features in image
+         */
+        detectFeatures: function() {
+            if (!this._image instanceof IMSoftcrop.Image || !this._image.isReady()) {
+                return;
+            }
+
+            var body = document.getElementsByTagName('body');
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            this.adjustForPixelRatio(canvas);
+            //FIXME: canvas.style.display = 'none';
+            canvas.style.border = '1px solid pink';
+            body[0].appendChild(canvas);
+
+            ctx.drawImage(
+                this._image._image,
+                this._image._drawX,
+                this._image._drawY,
+                this._image._drawW,
+                this._image._drawH
+            );
+
+            var imageData = ctx.getImageData(0, 0, this._image._w, this._image._h);
+            var data = tracking.Fast.findCorners(
+                tracking.Image.grayscale(
+                    imageData.data,
+                    this._image._w,
+                    this._image._h
+                ),
+                this._image._w,
+                this._image._h,
+                35
+            );
+
+
+            // FIXME: Paranoid cleanup instead of drawing
+            // FIXME: There is something wrong with x/y values
+            for (var i = 0; i < data.length; i += 2) {
+                data[i] = data[i] / this._scale;
+                data[i + 1] = data[i + 1] / this._scale;
+
+                ctx.fillRect(data[i] - 2, data[i + 1] - 2, 4, 4);
+            }
+
+            this._image.addDetailData(data);
+
+            /*
+            FIXME: Add this instead of drawing above
+            imageData = null;
+            ctx = null;
+            body[0].removeChild(canvas);
+            canvas = null;
+            body[0] = null;
+            body = null;
+            */
+        },
+
 
         /**
          * Detect faces in image
@@ -410,6 +478,13 @@ var IMSoftcrop = (function() {
 
                     _this._image.addFocusPoint(x, y, (w > h ? w : h));
                 });
+
+                // Paranoid cleanup
+                ctx = null;
+                body[0].removeChild(canvas);
+                canvas = null;
+                body[0] = null;
+                body = null;
             });
 
             tracking.track(canvas, tracker);

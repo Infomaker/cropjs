@@ -1,11 +1,33 @@
 (function() {
     IMSoftcrop.Image = IMSoftcrop.Base.extend({
+        // Image id
         id: undefined,
+
+        // Image src
         _src: undefined,
+
+        // Image element
         _image: undefined,
+
+        // List of crops for this image
         _crops: [],
+
+        // Focus points, for example faces
         _focusPoints: [],
+
+        // Total area needed to include focus points
         _focusArea: {
+            x1: undefined,
+            y1: undefined,
+            x2: undefined,
+            y2: undefined
+        },
+
+        // Image detail data
+        _detailData: undefined,
+
+        // Total area needed to include all image details
+        _detailArea: {
             x1: undefined,
             y1: undefined,
             x2: undefined,
@@ -90,6 +112,59 @@
 
         getSrc: function () {
             return this._src;
+        },
+
+        /**
+         * Add detail/corner data based on image drawing dimensions
+         * @param data Pixel data
+         * @param scale Scale used in source
+         */
+        addDetailData: function(data) {
+            this._detailData = data;
+
+            // Init structure with first x,y values
+            var detailArea = {
+                x1: data[0],
+                y1: data[1],
+                x2: data[0],
+                y2: data[1]
+            };
+
+            // Then go through the rest
+            for(var n = 2; n < data.length; n += 2) {
+                var m = n + 1;
+
+                if (data[n] < detailArea.x1) {
+                    detailArea.x1 = data[n];
+                }
+                else if (data[n] > detailArea.x2) {
+                    detailArea.x2 = data[n];
+                }
+
+                if (data[m] < detailArea.y1) {
+                    detailArea.y1 = data[m];
+                }
+                else if (data[m] > detailArea.y2) {
+                    detailArea.y2 = data[m];
+                }
+            }
+
+            // Translate drawing x,y values to image x,y values
+            var pt1 = this.getPointInImage(
+                detailArea.x1,
+                detailArea.y1
+            );
+            var pt2 = this.getPointInImage(
+                detailArea.x2,
+                detailArea.y2
+            );
+
+            this._detailArea = {
+                x1: pt1.x < 0 ? 0 : pt1.x,
+                y1: pt1.y < 0 ? 0 : pt1.y,
+                x2: pt2.x > this._w ? this._w : pt2.x,
+                y2: pt2.y > this._h ? this._h : pt2.y
+            };
         },
 
         /**
@@ -193,6 +268,25 @@
          */
         drawFocusPoints: function () {
             var zoomLevel = this._editor.getZoom(true);
+
+            if (typeof this._detailData != 'undefined') {
+                // FIXME: Not correct!!!
+                console.log(this._detailArea);
+                var pt1 = this.getPointInCanvas(this._detailArea.x1, this._detailArea.y1);
+                var pt2 = this.getPointInCanvas(this._detailArea.x2, this._detailArea.y2);
+                this._ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+                this._ctx.strokeRect(
+                    pt1.x, pt1.y,
+                    pt2.x - pt1.x, pt2.y - pt1.y
+                );
+/*
+                for (var i = 0; i < this._detailData.length; i += 2) {
+                    var x = this._detailData[i];
+                    var y = this._detailData[i + 1];
+                    this._ctx.fillRect(x - 2, y - 2, 4, 4);
+                }
+                */
+            }
 
             for (var n in this._focusPoints) {
                 var point = this.getPointInCanvas(
