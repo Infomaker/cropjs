@@ -155,7 +155,6 @@
                 offset = {x: 0, y: 0};
             }
 
-            var dim = this._editor.getDimensions();
             var zoomLevel = this._editor.getZoom(true);
 
             return {
