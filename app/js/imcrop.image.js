@@ -16,12 +16,7 @@
         _focusPoints: [],
 
         // Total area needed to include focus points
-        _focusArea: {
-            x1: undefined,
-            y1: undefined,
-            x2: undefined,
-            y2: undefined
-        },
+        _focusArea: undefined,
 
         // Image detail data
         _detailData: undefined,
@@ -146,6 +141,7 @@
             }
 
             this._detailArea = detailArea;
+            this.constrainArea(this._detailArea);
         },
 
         /**
@@ -154,55 +150,66 @@
          * @param radius
          */
         addFocusPoint: function (point, radius) {
-            if (typeof this._focusArea.x1 == 'undefined') {
-                // Init focus area
-                this._focusArea = {
-                    x1: point.x - radius,
-                    y1: point.y - radius,
-                    x2: point.x + radius,
-                    y2: point.y + radius
-                }
-            }
-            else {
-                // Recalculate focus area
-                if (point.x - point.r < this._focusArea.x1) {
-                    this._focusArea.x1 = point.x - point.r;
-                }
-
-                if (point.x + point.r > this._focusArea.x2) {
-                    this._focusArea.x2 = point.x + point.r;
-                }
-
-                if (point.y - point.r < this._focusArea.y1) {
-                    this._focusArea.y1 = point.y - point.r;
-                }
-
-                if (point.y + point.r > this._focusArea.y2) {
-                    this._focusArea.y2 = point.y + point.r;
-                }
-
-                // Keep within image dimensions
-                if (this._focusArea.x1 < 0) {
-                    this._focusArea.x1 = 0;
-                }
-
-                if (this._focusArea.x2 > this._w) {
-                    this._focusArea.x1 = this._w;
-                }
-
-                if (this._focusArea.y1 < 0) {
-                    this._focusArea.y1 = 0;
-                }
-
-                if (this._focusArea.y2 > this._h) {
-                    this._focusArea.y1 = this._h;
-                }
-            }
-
             point.r = radius; // Add radius to point
             this._focusPoints.push(point);
+
+            if (typeof this._focusArea == 'undefined') {
+                // Init focus area
+                this._focusArea = {
+                    point1: {
+                        x: point.x - radius,
+                        y: point.y - radius
+                    },
+                    point2: {
+                        x: point.x + radius,
+                        y: point.y + radius
+                    }
+                };
+
+                return;
+            }
+
+            // Recalculate focus area
+            if (point.x - point.r < this._focusArea.point1.x) {
+                this._focusArea.point1.x = point.x - point.r;
+            }
+
+            if (point.x + point.r > this._focusArea.point2.x) {
+                this._focusArea.point2.x = point.x + point.r;
+            }
+
+            if (point.y - point.r < this._focusArea.point1.y) {
+                this._focusArea.point1.y = point.y - point.r;
+            }
+
+            if (point.y + point.r > this._focusArea.point2.y) {
+                this._focusArea.point2.y = point.y + point.r;
+            }
+
+            this.constrainArea(this._focusArea);
         },
 
+        /**
+         * Consrain an area within image boundaries
+         * @param area
+         */
+        constrainArea: function(area) {
+            if (area.x1 < 0) {
+                area.x1 = 0;
+            }
+
+            if (area.x2 > this._w) {
+                area.x1 = this._w;
+            }
+
+            if (area.y1 < 0) {
+                area.y1 = 0;
+            }
+
+            if (area.y2 > this._h) {
+                area.y1 = this._h;
+            }
+        },
 
         /**
          * Redraw image
@@ -238,21 +245,7 @@
         drawFocusPoints: function () {
             // Draw area with detected details/corners
             if (typeof this._detailArea != 'undefined') {
-                var point1 = this._editor.imagePointInCanvas(
-                        this._detailArea.point1.x, this._detailArea.point1.y
-                    ),
-                    point2 = this._editor.imagePointInCanvas(
-                        this._detailArea.point2.x, this._detailArea.point2.y
-                    );
-
-                this._ctx.strokeStyle = 'rgba(255, 121, 255, 0.4)';
-                this._ctx.lineWidth = 4;
-                this._ctx.strokeRect(
-                    point1.x + 2,
-                    point1.y + 2,
-                    point2.x - point1.x - 4,
-                    point2.y - point1.y - 4
-                );
+                this.drawArea(this._detailArea, 'rgba(255, 121, 255, 0.4)');
 
                 this._ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
                 for (var i = 0; i < this._detailData.length; i++) {
@@ -264,24 +257,46 @@
             }
 
             // Draw focus points
-            for (var n in this._focusPoints) {
-                var drawPoint = this._editor.imagePointInCanvas(
-                    this._focusPoints[n].x,
-                    this._focusPoints[n].y
-                );
+            if (typeof this._focusArea != 'undefined') {
+                this.drawArea(this._focusArea, 'rgba(121, 121, 255, 0.4)');
 
-                var drawRadius = this._editor.imageLineInCanvas(this._focusPoints[n].r);
+                for (var n in this._focusPoints) {
+                    var drawPoint = this._editor.imagePointInCanvas(
+                        this._focusPoints[n].x,
+                        this._focusPoints[n].y
+                    );
 
-                this._ctx.beginPath();
-                this._ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
-                this._ctx.lineWidth = 1;
+                    var drawRadius = this._editor.imageLineInCanvas(this._focusPoints[n].r);
 
-                this._ctx.arc(drawPoint.x + 1, drawPoint.y + 1, drawRadius, 0, 2 * Math.PI, false);
-                this._ctx.fill();
-                this._ctx.closePath();
+                    this._ctx.beginPath();
+                    this._ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    this._ctx.lineWidth = 1;
+
+                    this._ctx.arc(drawPoint.x, drawPoint.y, drawRadius, 0, 2 * Math.PI, true);
+                    this._ctx.fill();
+                    this._ctx.closePath();
+                }
             }
         },
 
+        /**
+         * Draw area with specified color
+         * @param area
+         * @param color
+         */
+        drawArea: function(area, color) {
+            var point1 = this._editor.imagePointInCanvas(area.point1.x, area.point1.y),
+                point2 = this._editor.imagePointInCanvas(area.point2.x, area.point2.y);
+
+            this._ctx.strokeStyle = color;
+            this._ctx.lineWidth = 4;
+            this._ctx.strokeRect(
+                point1.x + 2,
+                point1.y + 2,
+                point2.x - point1.x - 4,
+                point2.y - point1.y - 4
+            );
+        },
 
         /**
          * Automatically alter crop(s) by focus points total focus area

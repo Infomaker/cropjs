@@ -462,7 +462,7 @@ var IMSoftcrop = (function() {
 
             var _this = this;
             var tracker = new tracking.ObjectTracker(['face', 'eye']);
-            tracker.setStepSize(1.3);
+            tracker.setStepSize(1.6);
 
             tracker.on('track', function (event) {
                 event.data.forEach(function (rect) {
@@ -470,10 +470,10 @@ var IMSoftcrop = (function() {
                         (rect.x / _this._scale),
                         (rect.y / _this._scale)
                     );
-                    var imageRadius = _this.canvasLineInImage(rect.width > rect.height ? (rect.width / 1.5) / _this._scale : (rect.height / 1.5) / _this._scale);
+                    var imageRadius = _this.canvasLineInImage(rect.width > rect.height ? (rect.width / 2) / _this._scale : (rect.height / 2) / _this._scale);
 
-                    imagePoint.x += imageRadius / 1.2;
-                    imagePoint.y += imageRadius / 1.3;
+                    imagePoint.x += imageRadius;
+                    imagePoint.y += imageRadius;
                     _this._image.addFocusPoint(imagePoint, imageRadius);
 
                 });
