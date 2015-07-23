@@ -474,7 +474,9 @@ var IMSoftcrop = (function() {
 
                     imagePoint.x += imageRadius;
                     imagePoint.y += imageRadius;
-                    _this._image.addFocusPoint(imagePoint, imageRadius);
+
+                    // Increase radius so foreheads are covered as well
+                    _this._image.addFocusPoint(imagePoint, imageRadius * 1.5);
 
                 });
 
