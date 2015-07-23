@@ -194,20 +194,20 @@
          * @param area
          */
         constrainArea: function(area) {
-            if (area.x1 < 0) {
-                area.x1 = 0;
+            if (area.point1.x < 0) {
+                area.point1.x = 0;
             }
 
-            if (area.x2 > this._w) {
-                area.x1 = this._w;
+            if (area.point2.x > this._w) {
+                area.point2.x = this._w;
             }
 
-            if (area.y1 < 0) {
-                area.y1 = 0;
+            if (area.point1.y < 0) {
+                area.point1.y = 0;
             }
 
-            if (area.y2 > this._h) {
-                area.y1 = this._h;
+            if (area.point2.y > this._h) {
+                area.point2.y = this._h;
             }
         },
 
