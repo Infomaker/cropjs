@@ -134,33 +134,6 @@
             this._drawY = Math.round((this._y + offset.y) * zoomLevel) + dim.margin;
             this._drawXW = this._drawX + this._drawW;
             this._drawYH = this._drawY + this._drawH;
-        },
-
-        getPointInCanvas: function (x, y, offset) {
-            if (typeof offset == 'undefined') {
-                offset = {x: 0, y: 0};
-            }
-
-            var dim = this._editor.getDimensions();
-            var zoomLevel = this._editor.getZoom(true);
-
-            return {
-                x: Math.round((x + offset.x) * zoomLevel) + dim.margin,
-                y: Math.round((y + offset.y) * zoomLevel) + dim.margin
-            };
-        },
-
-        getPointInImage: function (x, y, offset) {
-            if (typeof offset == 'undefined') {
-                offset = {x: 0, y: 0};
-            }
-
-            var zoomLevel = this._editor.getZoom(true);
-
-            return {
-                x: Math.round((x - offset.x) / zoomLevel),
-                y: Math.round((y - offset.y) / zoomLevel)
-            };
         }
     });
 })();

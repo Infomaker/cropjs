@@ -353,7 +353,7 @@ var IMSoftcrop = (function() {
 
             this._image = new IMSoftcrop.Image(this);
             this._image.load(
-                this.hashFnv32a(url),
+                IMSoftcrop.Ratio.hashFnv32a(url),
                 url,
                 function () {
                     _this.setZoomToImage(false);
@@ -368,6 +368,7 @@ var IMSoftcrop = (function() {
                     }
 
                     // Redraw again so that we can print detection data if applicable
+                    _this._image.autoCropFocusPoints();
                     _this.redraw();
 
                     if (typeof cbFunc === 'function') {
@@ -390,19 +391,18 @@ var IMSoftcrop = (function() {
             var ctx = canvas.getContext('2d');
 
             this.adjustForPixelRatio(canvas);
-            //FIXME: canvas.style.display = 'none';
+            canvas.style.display = 'none';
             canvas.style.border = '1px solid pink';
             body[0].appendChild(canvas);
 
             ctx.drawImage(
                 this._image._image,
-                this._image._drawX,
-                this._image._drawY,
-                this._image._drawW,
-                this._image._drawH
+                this._image._drawX, this._image._drawY,
+                this._image._drawW, this._image._drawH
             );
 
             var imageData = ctx.getImageData(0, 0, this._image._w, this._image._h);
+
             var data = tracking.Fast.findCorners(
                 tracking.Image.grayscale(
                     imageData.data,
@@ -411,30 +411,29 @@ var IMSoftcrop = (function() {
                 ),
                 this._image._w,
                 this._image._h,
-                35
+                40 // Threshold
             );
 
 
-            // FIXME: Paranoid cleanup instead of drawing
-            // FIXME: There is something wrong with x/y values
+            var corners = [];
             for (var i = 0; i < data.length; i += 2) {
-                data[i] = data[i] / this._scale;
-                data[i + 1] = data[i + 1] / this._scale;
-
-                ctx.fillRect(data[i] - 2, data[i + 1] - 2, 4, 4);
+                // Tracking does not understand scale, adjust for it
+                var imagePoint = this.canvasPointInImage(
+                    data[i] / this._scale,
+                    data[i + 1] / this._scale
+                );
+                corners.push(imagePoint);
             }
 
-            this._image.addDetailData(data);
+            this._image.addDetailData(corners);
 
-            /*
-            FIXME: Add this instead of drawing above
+            // Paranoid cleanup
             imageData = null;
             ctx = null;
             body[0].removeChild(canvas);
             canvas = null;
             body[0] = null;
             body = null;
-            */
         },
 
 
@@ -452,16 +451,14 @@ var IMSoftcrop = (function() {
 
             this.adjustForPixelRatio(canvas);
             canvas.style.display = 'none';
+
             body[0].appendChild(canvas);
 
             ctx.drawImage(
                 this._image._image,
-                this._image._drawX,
-                this._image._drawY,
-                this._image._drawW,
-                this._image._drawH
+                this._image._drawX, this._image._drawY,
+                this._image._drawW, this._image._drawH
             );
-
 
             var _this = this;
             var tracker = new tracking.ObjectTracker(['face', 'eye']);
@@ -469,14 +466,16 @@ var IMSoftcrop = (function() {
 
             tracker.on('track', function (event) {
                 event.data.forEach(function (rect) {
+                    var imagePoint = _this.canvasPointInImage(
+                        (rect.x / _this._scale),
+                        (rect.y / _this._scale)
+                    );
+                    var imageRadius = _this.canvasLineInImage(rect.width > rect.height ? (rect.width / 1.5) / _this._scale : (rect.height / 1.5) / _this._scale);
 
-                    // Tracking does not understand scale, so adjust for it
-                    var w = (rect.width / _this._scale) / 1.7;
-                    var h = (rect.height / _this._scale) / 1.7;
-                    var x = rect.x / _this._scale + w;
-                    var y = rect.y / _this._scale + h;
+                    imagePoint.x += imageRadius / 1.2;
+                    imagePoint.y += imageRadius / 1.3;
+                    _this._image.addFocusPoint(imagePoint, imageRadius);
 
-                    _this._image.addFocusPoint(x, y, (w > h ? w : h));
                 });
 
                 // Paranoid cleanup
@@ -488,6 +487,28 @@ var IMSoftcrop = (function() {
             });
 
             tracking.track(canvas, tracker);
+        },
+
+        canvasLineInImage: function(v) {
+            return v / this._zoomLevel;
+        },
+
+        imageLineInCanvas: function(v) {
+            return v * this._zoomLevel;
+        },
+
+        imagePointInCanvas: function(x, y) {
+            return {
+                x: Math.round((x + this._image._x) * this._zoomLevel) + this._margin,
+                y: Math.round((y + this._image._y) * this._zoomLevel) + this._margin
+            }
+        },
+
+        canvasPointInImage: function(x, y) {
+            return {
+                x: Math.round((x - this._margin) / this._zoomLevel) - this._image._x,
+                y: Math.round((y- this._margin) / this._zoomLevel) - this._image._y
+            };
         },
 
         /**
@@ -924,40 +945,11 @@ var IMSoftcrop = (function() {
          *
          * @returns {{x: number, y: number}}
          */
-        calculateViewport: function () {
-            var e = this._canvas;
-            var offsetX = 0;
-            var offsetY = 0;
+        calculateViewport: function() {
+            var offset = IMSoftcrop.Ratio.getElementPosition(this._canvas);
 
-            while (e) {
-                offsetX += (e.offsetLeft - e.scrollLeft + e.clientLeft);
-                offsetY += (e.offsetTop - e.scrollTop + e.clientTop);
-                e = e.offsetParent;
-            }
-
-            this._position.x = offsetX;
-            this._position.y = offsetY;
-        },
-
-        /**
-         * Calculate a 32 bit FNV-1a hash
-         * Found here: https://gist.github.com/vaiorabbit/5657561
-         * Ref.: http://isthe.com/chongo/tech/comp/fnv/
-         *
-         * @param {string} str the input value
-         * @param {integer} [seed] optionally pass the hash of the previous chunk
-         * @returns {string}
-         */
-        hashFnv32a: function (str, seed) {
-            var i, l,
-                hval = (seed === undefined) ? 0x811c9dc5 : seed;
-
-            for (i = 0, l = str.length; i < l; i++) {
-                hval ^= str.charCodeAt(i);
-                hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-            }
-
-            return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+            this._position.x = offset.x;
+            this._position.y = offset.y;
         },
 
 

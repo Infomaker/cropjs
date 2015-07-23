@@ -27,12 +27,7 @@
         _detailData: undefined,
 
         // Total area needed to include all image details
-        _detailArea: {
-            x1: undefined,
-            y1: undefined,
-            x2: undefined,
-            y2: undefined
-        },
+        _detailArea: undefined,
 
         /**
          * Load image from url and draw
@@ -117,81 +112,55 @@
         /**
          * Add detail/corner data based on image drawing dimensions
          * @param data Pixel data
-         * @param scale Scale used in source
          */
         addDetailData: function(data) {
             this._detailData = data;
 
             // Init structure with first x,y values
             var detailArea = {
-                x1: data[0],
-                y1: data[1],
-                x2: data[0],
-                y2: data[1]
+                point1: {
+                    x: data[0].x,
+                    y: data[0].y
+                },
+                point2: {
+                    x: data[0].x,
+                    y: data[0].y
+                }
             };
 
             // Then go through the rest
-            for(var n = 2; n < data.length; n += 2) {
-                var m = n + 1;
-
-                if (data[n] < detailArea.x1) {
-                    detailArea.x1 = data[n];
+            for(var n = 1; n < data.length; n++) {
+                if (data[n].x < detailArea.point1.x) {
+                    detailArea.point1.x = data[n].x;
                 }
-                else if (data[n] > detailArea.x2) {
-                    detailArea.x2 = data[n];
+                else if (data[n].x > detailArea.point2.x) {
+                    detailArea.point2.x = data[n].x;
                 }
 
-                if (data[m] < detailArea.y1) {
-                    detailArea.y1 = data[m];
+                if (data[n].y < detailArea.point1.y) {
+                    detailArea.point1.y = data[n].y;
                 }
-                else if (data[m] > detailArea.y2) {
-                    detailArea.y2 = data[m];
+                else if (data[n].y > detailArea.point2.y) {
+                    detailArea.point2.y = data[n].y;
                 }
             }
 
-            // Translate drawing x,y values to image x,y values
-            var pt1 = this.getPointInImage(
-                detailArea.x1,
-                detailArea.y1
-            );
-            var pt2 = this.getPointInImage(
-                detailArea.x2,
-                detailArea.y2
-            );
-
-            this._detailArea = {
-                x1: pt1.x < 0 ? 0 : pt1.x,
-                y1: pt1.y < 0 ? 0 : pt1.y,
-                x2: pt2.x > this._w ? this._w : pt2.x,
-                y2: pt2.y > this._h ? this._h : pt2.y
-            };
+            this._detailArea = detailArea;
         },
 
         /**
          * Add focus point to guide automatic cropping areas
-         * @param x
-         * @param y
+         * @param point
          * @param radius
          */
-        addFocusPoint: function (x, y, radius) {
-            var zoomLevel = this._editor.getZoom(true);
-            var point = this.getPointInImage(
-                x,
-                y,
-                {
-                    x: this._drawX,
-                    y: this._drawY
-                }
-            );
-            point.r = Math.round(radius / zoomLevel);
-
+        addFocusPoint: function (point, radius) {
             if (typeof this._focusArea.x1 == 'undefined') {
                 // Init focus area
                 this._focusArea = {
-                    x1: point.x - point.r,
-                    y1: point.y - point.r,
-                    x2: point.x + point.r,
-                    y2: point.y + point.r
+                    x1: point.x - radius,
+                    y1: point.y - radius,
+                    x2: point.x + radius,
+                    y2: point.y + radius
                 }
             }
             else {
@@ -230,7 +199,7 @@
                 }
             }
 
-
+            point.r = radius; // Add radius to point
             this._focusPoints.push(point);
         },
 
@@ -267,60 +236,49 @@
          * Draw focus points
          */
         drawFocusPoints: function () {
-            var zoomLevel = this._editor.getZoom(true);
+            // Draw area with detected details/corners
+            if (typeof this._detailArea != 'undefined') {
+                var point1 = this._editor.imagePointInCanvas(
+                        this._detailArea.point1.x, this._detailArea.point1.y
+                    ),
+                    point2 = this._editor.imagePointInCanvas(
+                        this._detailArea.point2.x, this._detailArea.point2.y
+                    );
 
-            if (typeof this._detailData != 'undefined') {
-                // FIXME: Not correct!!!
-                console.log(this._detailArea);
-                var pt1 = this.getPointInCanvas(this._detailArea.x1, this._detailArea.y1);
-                var pt2 = this.getPointInCanvas(this._detailArea.x2, this._detailArea.y2);
-                this._ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+                this._ctx.strokeStyle = 'rgba(255, 121, 255, 0.4)';
+                this._ctx.lineWidth = 4;
                 this._ctx.strokeRect(
-                    pt1.x, pt1.y,
-                    pt2.x - pt1.x, pt2.y - pt1.y
+                    point1.x + 2,
+                    point1.y + 2,
+                    point2.x - point1.x - 4,
+                    point2.y - point1.y - 4
                 );
-/*
-                for (var i = 0; i < this._detailData.length; i += 2) {
-                    var x = this._detailData[i];
-                    var y = this._detailData[i + 1];
-                    this._ctx.fillRect(x - 2, y - 2, 4, 4);
+
+                this._ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
+                for (var i = 0; i < this._detailData.length; i++) {
+                    var pt = this._editor.imagePointInCanvas(
+                            this._detailData[i].x, this._detailData[i].y
+                        );
+                    this._ctx.fillRect(pt.x, pt.y - 3, 6, 6);
                 }
-                */
             }
 
+            // Draw focus points
             for (var n in this._focusPoints) {
-                var point = this.getPointInCanvas(
+                var drawPoint = this._editor.imagePointInCanvas(
                     this._focusPoints[n].x,
-                    this._focusPoints[n].y,
-                    {
-                        x: this._x,
-                        y: this._y
-                    }
+                    this._focusPoints[n].y
                 );
-                var radius = this._focusPoints[n].r * zoomLevel;
+
+                var drawRadius = this._editor.imageLineInCanvas(this._focusPoints[n].r);
 
                 this._ctx.beginPath();
-                this._ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                this._ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
                 this._ctx.lineWidth = 1;
 
-                if (this._ctx.setLineDash) {
-                    this._ctx.setLineDash([5, 5]);
-                }
-
-                this._ctx.arc(point.x + 1, point.y + 1, radius, 0, 2 * Math.PI, false);
-                this._ctx.stroke();
+                this._ctx.arc(drawPoint.x + 1, drawPoint.y + 1, drawRadius, 0, 2 * Math.PI, false);
+                this._ctx.fill();
                 this._ctx.closePath();
-
-
-                this._ctx.beginPath();
-                this._ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
-                this._ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI, false);
-                this._ctx.stroke();
-                this._ctx.closePath();
-
-                if (this._ctx.setLineDash) {
-                    this._ctx.setLineDash([]);
-                }
             }
         },
 

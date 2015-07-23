@@ -46,7 +46,7 @@
             </a>
 
             <a href="#" id="imc_focuspoints" class="toggle on">
-                <em>Visa fokusområden</em>
+                <em>Debug fokusområden</em>
                 <span>
                     <span class="on">On</span>
                     <span class="off">Off</span>
@@ -78,14 +78,14 @@
             var editor = new IMSoftcrop.Editor(
                     'imc_container',
                     {
-                        autodetect: false,
+                        autodetect: true,
                         debug: false,
                         debugElement: document.getElementById('imc_debug')
                     }
             );
 
             editor.loadImage(
-                    'examples/picture4.jpg',
+                    'examples/picture.jpg',
                     function(image) {
                         this.addSoftcrop(16, 9, true);
                         this.addSoftcrop(9, 16, false);
