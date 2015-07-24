@@ -361,7 +361,7 @@ var IMSoftcrop = (function() {
                     // Need to redraw before detecting
                     _this.redraw();
 
-                    _this.detectFeatures();
+                    _this.detectDetails();
 
                     if (_this.autodetect) {
                         _this.detectFaces();
@@ -378,10 +378,7 @@ var IMSoftcrop = (function() {
             );
         },
 
-        /**
-         * Detect features in image
-         */
-        detectFeatures: function() {
+        getImageData: function() {
             if (!this._image instanceof IMSoftcrop.Image || !this._image.isReady()) {
                 return;
             }
@@ -392,7 +389,6 @@ var IMSoftcrop = (function() {
 
             this.adjustForPixelRatio(canvas);
             canvas.style.display = 'none';
-            canvas.style.border = '1px solid pink';
             body[0].appendChild(canvas);
 
             ctx.drawImage(
@@ -403,18 +399,65 @@ var IMSoftcrop = (function() {
 
             var imageData = ctx.getImageData(0, 0, this._image._w, this._image._h);
 
-            var data = tracking.Fast.findCorners(
-                tracking.Image.grayscale(
-                    imageData.data,
+            // Paranoid cleanup
+            ctx = null;
+            body[0].removeChild(canvas);
+            canvas = null;
+            body[0] = null;
+            body = null;
+
+            return imageData;
+        },
+
+
+        /**
+         * Detect features in image
+         */
+        detectDetails: function() {
+            if (!this._image instanceof IMSoftcrop.Image || !this._image.isReady()) {
+                return;
+            }
+
+            var _this = this,
+                imageData = this.getImageData();
+
+            if (window.Worker) {
+                // If workers are available, thread it
+                var detectWorker = new Worker('js/imcrop.worker.detect.js');
+                detectWorker.postMessage([
+                    'details',
+                    imageData,
                     this._image._w,
-                    this._image._h
-                ),
-                this._image._w,
-                this._image._h,
-                40 // Threshold
-            );
+                    this._image._h,
+                    40
+                ]);
 
+                detectWorker.onmessage = function(e) {
+                    _this.addDetectedDetails(e.data);
+                };
+            }
+            else {
+                // Fallback to non threaded
+                var data = tracking.Fast.findCorners(
+                    tracking.Image.grayscale(
+                        imageData.data,
+                        this._image._w,
+                        this._image._h
+                    ),
+                    this._image._w,
+                    this._image._h,
+                    40 // Threshold
+                );
 
+                this.addDetectedDetails(data);
+            }
+        },
+
+        /**
+         * Add detected details to current image
+         * @param data
+         */
+        addDetectedDetails: function(data) {
             var corners = [];
             for (var i = 0; i < data.length; i += 2) {
                 // Tracking does not understand scale, adjust for it
@@ -422,18 +465,11 @@ var IMSoftcrop = (function() {
                     data[i] / this._scale,
                     data[i + 1] / this._scale
                 );
+
                 corners.push(imagePoint);
             }
 
             this._image.addDetailData(corners);
-
-            // Paranoid cleanup
-            imageData = null;
-            ctx = null;
-            body[0].removeChild(canvas);
-            canvas = null;
-            body[0] = null;
-            body = null;
         },
 
 
@@ -445,50 +481,56 @@ var IMSoftcrop = (function() {
                 return;
             }
 
-            var body = document.getElementsByTagName('body');
-            var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
-
-            this.adjustForPixelRatio(canvas);
-            canvas.style.display = 'none';
-
-            body[0].appendChild(canvas);
-
-            ctx.drawImage(
-                this._image._image,
-                this._image._drawX, this._image._drawY,
-                this._image._drawW, this._image._drawH
-            );
-
             var _this = this;
-            var tracker = new tracking.ObjectTracker(['face', 'eye']);
-            tracker.setStepSize(1.6);
 
-            tracker.on('track', function (event) {
-                event.data.forEach(function (rect) {
-                    var imagePoint = _this.canvasPointInImage(
-                        (rect.x / _this._scale),
-                        (rect.y / _this._scale)
-                    );
-                    var imageRadius = _this.canvasLineInImage(rect.width > rect.height ? (rect.width / 2) / _this._scale : (rect.height / 2) / _this._scale);
+            if (window.Worker) {
+                // If workers are available, thread it
+                var featureWorker = new Worker('js/imcrop.worker.detect.js');
+                featureWorker.postMessage([
+                    'features',
+                    this.getImageData(),
+                    this._image._w,
+                    this._image._h,
+                    1.6
+                ]);
 
-                    imagePoint.x += imageRadius;
-                    imagePoint.y += imageRadius;
+                featureWorker.onmessage = function(e) {
+                    _this.addDetectedFeature(e.data);
+                };
+            }
+            else {
+                tracking.trackData = function(tracker, imageData, width, height) {
+                    var task = new tracking.TrackerTask(tracker);
+                    task.on('run', function() {
+                        tracker.track(imageData.data, width, height);
+                    });
+                    return task.run();
+                };
 
-                    // Increase radius so foreheads are covered as well
-                    _this._image.addFocusPoint(imagePoint, imageRadius * 1.5);
-
+                var tracker = new tracking.ObjectTracker(['face', 'eye']);
+                tracker.setStepSize(1.6);
+                tracker.on('track', function (event) {
+                    event.data.forEach(function (rect) {
+                        _this.addDetectedFeature(rect);
+                    });
                 });
 
-                // Paranoid cleanup
-                ctx = null;
-                body[0].removeChild(canvas);
-                canvas = null;
-                body[0] = null;
-                body = null;
-            });
+                tracking.trackData(tracker, this.getImageData(), this._image._w, this._image._h);
+            }
+        },
 
-            tracking.track(canvas, tracker);
+        addDetectedFeature: function(rect) {
+            var imagePoint = this.canvasPointInImage(
+                (rect.x / this._scale),
+                (rect.y / this._scale)
+            );
+            var imageRadius = this.canvasLineInImage(rect.width > rect.height ? (rect.width / 2) / this._scale : (rect.height / 2) / this._scale);
+
+            imagePoint.x += imageRadius;
+            imagePoint.y += imageRadius;
+
+            // Increase radius so foreheads are covered as well
+            this._image.addFocusPoint(imagePoint, imageRadius * 1.5);
         },
 
         canvasLineInImage: function(v) {

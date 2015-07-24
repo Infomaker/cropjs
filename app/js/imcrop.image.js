@@ -308,6 +308,20 @@
         autoCropFocusPoints: function(crop) {
             var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
 
+
+            // 1. Fit and center crop as best as possible around detail area
+
+            // 2. Make sure it's not outside image boundaries, keep centered
+
+            // 3a. Check to see if there are focus areas outside crop
+
+            // 3b. If so, can crop be moved so that it covers focus area better
+
+            // 3c. If not, can it be centered better over the largest focus point
+
+
+return;
+
             var fpCenter = {
                 x: this._focusArea.x1 + ((this._focusArea.x2 - this._focusArea.x1) / 2),
                 y: this._focusArea.y1 + ((this._focusArea.y2 - this._focusArea.y1) / 2)
