@@ -39,21 +39,18 @@
          * @param parent
          * @param hRatio
          * @param vRatio
-         * @param x
-         * @param y
-         * @param w
-         * @param h
+         * @param area {x, y, w, h}
          * @param respectRatio
          * @private
          */
-        _construct: function (parent, hRatio, vRatio, x, y, w, h, respectRatio) {
+        _construct: function (parent, hRatio, vRatio, area, respectRatio) {
             this.id = hRatio + ':' + vRatio;
             this._super(parent);
 
-            this._x = x;
-            this._y = y;
-            this._w = w;
-            this._h = h;
+            this._x = area.x;
+            this._y = area.y;
+            this._w = area.w;
+            this._h = area.h;
 
             this.respectRatio = respectRatio;
             this.ratio = {

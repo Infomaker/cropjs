@@ -59,29 +59,23 @@
         /**
          * Add soft crop to this image
          *
-         * @param width
-         * @param height
+         * @param hRatio
+         * @param vRatio
          * @param setAsCurrent
          */
-        addSoftcrop: function (width, height, setAsCurrent) {
-            var cropRatio = IMSoftcrop.Ratio.decimal(width, height);
-            var x = 0;
-            var y = 0;
-            var w = this._w;
-            var h = this._h;
+        addSoftcrop: function (hRatio, vRatio, setAsCurrent) {
+            var area = IMSoftcrop.Ratio.fitInto(
+                {
+                    w: this._w,
+                    h: this._h
+                },
+                {
+                    w: hRatio,
+                    h: vRatio
+                }
+            );
 
-            if (cropRatio < IMSoftcrop.Ratio.decimal(this._w, this._h)) {
-                // Crop fills horizontal but not vertical
-                h = IMSoftcrop.Ratio.height(w, cropRatio);
-                y = (this._h - h) / 2;
-            }
-            else {
-                // Crop will fill vertical but not horizontal
-                w = IMSoftcrop.Ratio.width(h, cropRatio);
-                x = (this._w - w) / 2;
-            }
-
-            var crop = new IMSoftcrop.Softcrop(this, width, height, x, y, w, h, true);
+            var crop = new IMSoftcrop.Softcrop(this, hRatio, vRatio, area, true);
             this._crops.push(crop);
 
             if (setAsCurrent) {
@@ -90,6 +84,7 @@
 
             return crop;
         },
+
 
         getCrops: function () {
             return this._crops;
@@ -299,17 +294,77 @@
         },
 
         /**
-         * Automatically alter crop(s) by focus points total focus area
-         *
-         * @todo Implement algorithm as this is work in progress!
-         *
+         * Automatically alter crop(s) to fit around interesting areas
          * @param crop
          */
         autoCropFocusPoints: function(crop) {
             var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
 
+            for (var n = 0; n < crops.length; n++) {
+                this.autoCropCrop(crops[n]);
+            }
+        },
+
+        /**
+         * Resize crop to best fit around interesting areas
+         * @param crop
+         */
+        autoCropCrop: function(crop) {
+            var x1 = (this._focusArea.point2.x < this._focusArea.point1.x)
+                ? this._focusArea.point2.x
+                : this._focusArea.point1.x;
+            var x2 = (this._focusArea.point2.x > this._focusArea.point1.x)
+                ? this._focusArea.point2.x
+                : this._focusArea.point1.x;
+            var y1 = (this._focusArea.point2.y < this._focusArea.point1.x)
+                ? this._focusArea.point2.y
+                : this._focusArea.point1.y;
+            var y2 = (this._focusArea.point2.y > this._focusArea.point1.y)
+                ? this._focusArea.point2.y
+                : this._focusArea.point1.y;
+
+            // 1. Calculate full x,y to x,y area coordinates,
+            //    making sure it does not bleed outside image.
+            var area = {
+                point1: {
+                    x: (x1 > 0) ? x1 : 0,
+                    y: (y1 > 0) ? y1 : 0
+                },
+                point2: {
+                    x: (x2 < this._w) ? x2 : this._w,
+                    y: (y2 < this._y) ? y2 : this._y
+                }
+            };
+
 
             // 1. Fit and center crop as best as possible around detail area
+            var newDim = IMSoftcrop.Ratio.fitAround(
+                { w: this._w, h: this._h },
+                { w: area.point2.x - area.point1.x, h: area.point2.y - area.point1.y }
+            );
+
+            if (newDim.w <= this._w && newDim.h <= this._h) {
+                // Perfect, we can set both width and height
+                crop._w = newDim.w;
+                crop._h = newDim.h;
+            }
+            else if (newDim.w > this._w) {
+                // Width is too big, set to image width and recalculate height of crop
+                crop._w = this._w;
+                crop._h = IMSoftcrop.Ratio.height(this._w, crop.ratio.f);
+                crop.autoCropWarning = true;
+            }
+            else if (newDim.h > this._h) {
+                // Height is too big, set to image height and recalculate width of crop
+                crop._h = this._h;
+                crop._w = IMSoftcrop.Ratio.width(this._h,  crop.ratio.f);
+                crop.autoCropWarning = true;
+            }
+            else {
+                // Unable to change size, should not happen!
+                console.log('Crop <' + n + '> just does not fit?!?');
+                crop.autoCropWarning = true;
+            }
 
             // 2. Make sure it's not outside image boundaries, keep centered
 
@@ -318,7 +373,10 @@
             // 3b. If so, can crop be moved so that it covers focus area better
 
             // 3c. If not, can it be centered better over the largest focus point
+        },
 
+        autocrop_old: function(crop) {
+            var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
 
 return;
 

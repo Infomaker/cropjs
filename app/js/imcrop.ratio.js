@@ -33,6 +33,103 @@
 
 
     /**
+     * Fit area into an image area
+     * @param imageArea
+     * @param area
+     * @returns {{x: number, y: number, w: number, h: number}}
+     */
+    IMSoftcrop.Ratio.fitInto = function(imageArea, area) {
+        var cropRatio = IMSoftcrop.Ratio.decimal(area.w, area.h);
+        var imageRatio = IMSoftcrop.Ratio.decimal(imageArea.w, imageArea.h);
+        var x = 0;
+        var y = 0;
+        var w = imageArea.w;
+        var h = imageArea.h;
+
+        if (cropRatio < imageRatio) {
+            // Area fills horizontal but not vertical
+            // +-------------+
+            // |             |
+            // ++-----------++
+            // ||   area    ||
+            // ++-----------++
+            // |             |
+            // +-------------+
+            h = IMSoftcrop.Ratio.height(w, cropRatio);
+            y = (imageArea.h - h) / 2;
+        }
+        else {
+            // Area will fill vertical but not horizontal
+            // +---+=====+---+
+            // |   |  a  |   |
+            // |   |  r  |   |
+            // |   |  e  |   |
+            // |   |  a  |   |
+            // +---+=====+---+
+
+            w = IMSoftcrop.Ratio.width(h, cropRatio);
+            x = (imageArea.w - w) / 2;
+        }
+
+        return {
+            x: x,
+            y: y,
+            w: w,
+            h: h
+        };
+    };
+
+
+    /**
+     * Fit area around an image area
+     * @param imageArea
+     * @param area
+     * @returns {{x: number, y: number, w: number, h: number}}
+     */
+    IMSoftcrop.Ratio.fitAround = function(imageArea, area) {
+        var cropRatio = IMSoftcrop.Ratio.decimal(area.w, area.h);
+        var imageRatio = IMSoftcrop.Ratio.decimal(imageArea.w, imageArea.h);
+        var x = 0;
+        var y = 0;
+        var w = imageArea.w;
+        var h = imageArea.h;
+
+        if (cropRatio > imageRatio) {
+            // Set area to height and expand horizontally based on ratio
+            // +---+=====+---+
+            // |   |  a  |   |
+            // |   |  r  |   |
+            // |   |  e  |   |
+            // |   |  a  |   |
+            // +---+=====+---+
+            //   <-------->
+
+            h = IMSoftcrop.Ratio.height(w, cropRatio);
+            y = (imageArea.h - h) / 2;
+        }
+        else {
+            // Set area to width and expand vertically based on ratio
+            // +------------+
+            // |            |  ^
+            // ++----------++  |
+            // ||   area   ||  |
+            // ++----------++  |
+            // |            |  v
+            // +------------+
+
+            w = IMSoftcrop.Ratio.width(h, cropRatio);
+            x = (imageArea.w - w) / 2;
+        }
+
+        return {
+            x: x,
+            y: y,
+            w: w,
+            h: h
+        };
+    };
+
+    /**
      * Return true x,y offset of dom element
      * @param e
      * @returns {{x: number, y: number}}

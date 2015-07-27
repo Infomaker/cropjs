@@ -53,11 +53,16 @@ var IMSoftcrop = (function() {
         // IMCropUI.Toggle for drawing focus points
         _focusPointsToggle: undefined,
 
-        // IMCropUI.Toggle for drawing focus points
+        // IMCropUI.Toggle for auto cropping
         _autoCropToggle: undefined,
+
+        // IMCropUI.Toggle for locking crops
+        _cropLockedToggle: undefined,
 
         // IMCropUI.Button for auto crop
         _detectAndCropButton: undefined,
+
+
 
 
         /**
@@ -94,7 +99,14 @@ var IMSoftcrop = (function() {
             // Auto crop
             this._autoCropToggle = new IMCropUI.Toggle(
                 'imc_autocrop',
+                function() {}
+            );
+
+            // Lock crop
+            this._cropLockedToggle = new IMCropUI.Toggle(
+                'imc_croplocked',
                 function () {
+                    // TODO: Propagare to current crop
                     //_this.redraw();
                 }
             );
@@ -120,6 +132,7 @@ var IMSoftcrop = (function() {
                 'imc_detectandcrop',
                 function () {
                     _this.toggleWait();
+
                     setTimeout(
                         function() {
                             _this.detectFaces();
@@ -190,11 +203,6 @@ var IMSoftcrop = (function() {
             for(var n = 0; n < crops.length; n++) {
                 this._renderUpdatedPreview(crops[n]);
             }
-
-            /* if (typeof this._crop != 'undefined') {
-                this._renderUpdatedPreview(this._crop);
-            }*/
-
         },
 
         /**
@@ -499,6 +507,10 @@ var IMSoftcrop = (function() {
                 };
             }
             else {
+                //
+                // Add function to tracking.js in order to track corners directly
+                // on image data so that we do not need to access ui.
+                //
                 tracking.trackData = function(tracker, imageData, width, height) {
                     var task = new tracking.TrackerTask(tracker);
                     task.on('run', function() {
@@ -684,6 +696,9 @@ var IMSoftcrop = (function() {
                     this._crop = crop;
                 }
 
+                // FIXME: If autocrop, crop is not locked (should not be at this point)
+                // FIXME: and image is ready then autocrop it
+                
                 this._renderNewPreview(crop, setAsCurrent);
                 this.redraw();
             }

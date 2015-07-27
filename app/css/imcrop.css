@@ -16,7 +16,7 @@ body {
     margin-bottom: 100px;
 }
 
-#imc_container #imc_autocrop {
+#imc_container #imc_croplocked {
     position: absolute;
     bottom: 10px;
     right: 10px;

@@ -24,7 +24,7 @@
 
             <div id="imc_wait"></div>
 
-            <a href="#" id="imc_autocrop" class="toggle on">
+            <a href="#" id="imc_croplocked" class="toggle" title="Låst till användare">
                 <span>
                     <span class="on"><img src="img/icon_lock-512px.svg"></span>
                     <span class="off"><img src="img/icon_lock-open-512px.svg"></span>
@@ -35,7 +35,17 @@
 
 
         <div class="toolbar">
+            <!--
             <a href="#" id="imc_detectandcrop" class="button">Detect &amp; crop</a>
+            -->
+
+            <a href="#" id="imc_autocrop" class="toggle on">
+                <em>Automatisk crop</em>
+                <span>
+                    <span class="on">On</span>
+                    <span class="off">Off</span>
+                </span>
+            </a>
 
             <a href="#" id="imc_guides" class="toggle on">
                 <em>Guide lines</em>
@@ -46,7 +56,7 @@
             </a>
 
             <a href="#" id="imc_focuspoints" class="toggle on">
-                <em>Debug fokusområden</em>
+                <em>Detaljer</em>
                 <span>
                     <span class="on">On</span>
                     <span class="off">Off</span>
@@ -76,6 +86,7 @@
                     'imc_container',
                     {
                         autodetect: true,
+                        autocrop: true,
                         debug: false,
                         debugElement: document.getElementById('imc_debug')
                     }

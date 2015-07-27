@@ -1,4 +1,6 @@
-
+//
+// Add dummy window object so tracking.js works outside ui context
+//
 tracking = {};
 Win = function () {};
 
@@ -12,6 +14,11 @@ importScripts(
     "tracking.js-master/build/data/eye-min.js"
 );
 
+
+//
+// Add function to tracking.js in order to track corners directly
+// on image data so that we do not need to access ui.
+//
 tracking.trackData = function(tracker, imageData, width, height) {
     var task = new tracking.TrackerTask(tracker);
 
@@ -22,6 +29,10 @@ tracking.trackData = function(tracker, imageData, width, height) {
     return task.run();
 };
 
+
+//
+// On message event handler
+//
 onmessage = function(e) {
     var operation = e.data[0],
         imageData = e.data[1],
@@ -50,7 +61,7 @@ onmessage = function(e) {
         var tracker = new tracking.ObjectTracker(['face', 'eye']);
         var _this = this;
 
-        tracker.setStepSize(1.6);
+        tracker.setStepSize(1.7);
         tracker.on('track', function (event) {
             event.data.forEach(function (rect) {
                 _this.postMessage(rect);
