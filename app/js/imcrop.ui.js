@@ -27,6 +27,12 @@
                 },
                 set: function(value) {
                     _on = value;
+                    if (value && !_element.classList.contains('on')) {
+                        _element.classList.add('on');
+                    }
+                    else if (!value && _element.classList.contains('on')) {
+                        _element.classList.remove('on');
+                    }
 
                 }
             }

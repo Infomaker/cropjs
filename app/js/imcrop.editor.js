@@ -794,6 +794,13 @@ var IMSoftcrop = (function() {
             );
 
             this._canvas.addEventListener(
+                'dblclick',
+                function(event) {
+                    return _this.onDoubleClick(event);
+                }
+            );
+
+            this._canvas.addEventListener(
                 'mousedown',
                 function (event) {
                     _this.onMouseDown(event);
@@ -813,6 +820,7 @@ var IMSoftcrop = (function() {
                     _this.onMouseUp(event);
                 }
             );
+
             this._canvas.addEventListener(
                 'mousemove',
                 function (event) {
@@ -880,6 +888,39 @@ var IMSoftcrop = (function() {
 
             this.redraw();
             this.calculateViewport();
+        },
+
+
+        /**
+         * Add focus point
+         * @param event
+         */
+        onDoubleClick: function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (typeof this._image == 'undefined') {
+                return false;
+            }
+
+            this.toggleLoadingImage(true);
+
+            if(!this._focusPointsToggle.on) {
+                this._focusPointsToggle.on = true;
+            }
+
+            var point = this.getMousePoint(event);
+            this._image.addFocusPoint(
+                this.canvasPointInImage(point.x, point.y),
+                40
+            );
+
+            if (this._image.autocrop()) {
+                this.redraw();
+                this.toggleLoadingImage(false);
+            }
+
+            return false;
         },
 
 
