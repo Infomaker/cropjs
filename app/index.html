@@ -15,6 +15,7 @@
             };
         </script>
 
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="css/imcrop.css">
     </head>
 
@@ -22,12 +23,14 @@
     <body>
         <div id="imc_container">
 
-            <div id="imc_wait"></div>
+            <div id="imc_loading">
+                <i class="fa fa-cog fa-spin"></i>
+            </div>
 
             <a href="#" id="imc_croplocked" class="toggle" title="Låst till användare">
                 <span>
-                    <span class="on"><img src="img/icon_lock-512px.svg"></span>
-                    <span class="off"><img src="img/icon_lock-open-512px.svg"></span>
+                    <span class="on"><i class="fa fa-lock"></i></span>
+                    <span class="off"><i class="fa fa-unlock"></i></span>
                 </span>
             </a>
 
@@ -86,19 +89,20 @@
                     'imc_container',
                     {
                         autodetect: true,
-                        autocrop: true,
                         debug: false,
                         debugElement: document.getElementById('imc_debug')
                     }
             );
 
-            editor.loadImage(
+
+            editor.addImage(
                     'examples/picture.jpg',
                     function(image) {
                         this.addSoftcrop(16, 9, true);
                         this.addSoftcrop(9, 16, false);
                         this.addSoftcrop(4, 3, false);
                         this.addSoftcrop(1, 1, false);
+                        //this.addSoftcrop(2, 1, false);
                     }
             );
 

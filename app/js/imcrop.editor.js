@@ -20,6 +20,9 @@ var IMSoftcrop = (function() {
         // Current selected image object
         _image: undefined,
 
+        // All crops
+        _crops: [],
+
         // Current selected crop object
         _crop: undefined,
 
@@ -60,7 +63,7 @@ var IMSoftcrop = (function() {
         _cropLockedToggle: undefined,
 
         // IMCropUI.Button for auto crop
-        _detectAndCropButton: undefined,
+        // _detectAndCropButton: undefined,
 
 
 
@@ -128,15 +131,16 @@ var IMSoftcrop = (function() {
             );
 
             // Draw button
+            /*
             this._detectAndCropButton = new IMCropUI.Button(
                 'imc_detectandcrop',
                 function () {
-                    _this.toggleWait();
+                    //_this.toggleWait();
 
                     setTimeout(
                         function() {
                             _this.detectFaces();
-                            _this._image.autoCropFocusPoints();
+                            _this._image.autocrop();
                             _this.redraw();
                             _this.toggleWait();
                         },
@@ -144,8 +148,28 @@ var IMSoftcrop = (function() {
                     );
                 }
             );
+            */
         },
 
+        /**
+         * Toggle loading spinning indicator
+         */
+        toggleLoadingImage: function(visible) {
+            var e = document.getElementById('imc_loading');
+
+            if (typeof visible == 'undefined') {
+                return e.classList.contains('loading');
+            }
+
+            if (visible) {
+                e.classList.add('loading');
+            }
+            else {
+                e.classList.remove('loading');
+            }
+
+            return visible;
+        },
 
         /**
          * Render main gui elements
@@ -167,20 +191,6 @@ var IMSoftcrop = (function() {
             this._canvas = document.createElement('canvas');
             this._container.appendChild(this._canvas);
             this._container.appendChild(workContainer);
-        },
-
-        /**
-         * Display please wait animation
-         */
-        toggleWait: function() {
-            var img = document.getElementById('imc_wait');
-
-            if (img.classList.contains('visible')) {
-                img.classList.remove('visible');
-            }
-            else {
-                img.classList.add('visible');
-            }
         },
 
         /**
@@ -356,10 +366,12 @@ var IMSoftcrop = (function() {
          * @param url
          * @param cbFunc
          */
-        loadImage: function (url, cbFunc) {
+        addImage: function (url, cbFunc) {
             var _this = this;
 
+            this.toggleLoadingImage(true);
             this._image = new IMSoftcrop.Image(this);
+
             this._image.load(
                 IMSoftcrop.Ratio.hashFnv32a(url),
                 url,
@@ -369,21 +381,36 @@ var IMSoftcrop = (function() {
                     // Need to redraw before detecting
                     _this.redraw();
 
-                    _this.detectDetails();
-
                     if (_this.autodetect) {
+                        _this.detectDetails();
                         _this.detectFaces();
                     }
-
-                    // Redraw again so that we can print detection data if applicable
-                    _this._image.autoCropFocusPoints();
-                    _this.redraw();
+                    else {
+                        _this.toggleLoadingImage(false);
+                    }
 
                     if (typeof cbFunc === 'function') {
                         cbFunc.call(_this, _this._image);
                     }
                 }
             );
+        },
+
+
+        /**
+         * Auto crop images
+         */
+        autocropImages: function() {
+            if (this._autoCropToggle.on) {
+                if (!this.toggleLoadingImage()) {
+                    this.toggleLoadingImage(true)
+                }
+
+                if (this._image.autocrop()) {
+                    this.redraw();
+                    this.toggleLoadingImage(false);
+                }
+            }
         },
 
         getImageData: function() {
@@ -442,6 +469,7 @@ var IMSoftcrop = (function() {
 
                 detectWorker.onmessage = function(e) {
                     _this.addDetectedDetails(e.data);
+                    _this.autocropImages();
                 };
             }
             else {
@@ -458,6 +486,7 @@ var IMSoftcrop = (function() {
                 );
 
                 this.addDetectedDetails(data);
+                this.autocropImages();
             }
         },
 
@@ -504,6 +533,7 @@ var IMSoftcrop = (function() {
 
                 featureWorker.onmessage = function(e) {
                     _this.addDetectedFeature(e.data);
+                    _this.autocropImages();
                 };
             }
             else {
@@ -525,6 +555,7 @@ var IMSoftcrop = (function() {
                     event.data.forEach(function (rect) {
                         _this.addDetectedFeature(rect);
                     });
+                    _this.autocropImages();
                 });
 
                 tracking.trackData(tracker, this.getImageData(), this._image._w, this._image._h);
@@ -689,17 +720,38 @@ var IMSoftcrop = (function() {
          * @param setAsCurrent
          */
         addSoftcrop: function (hRatio, vRatio, setAsCurrent) {
-            if (this._image instanceof IMSoftcrop.Image) {
-                var crop = this._image.addSoftcrop(hRatio, vRatio, setAsCurrent);
 
-                if (setAsCurrent) {
-                    this._crop = crop;
+            // Add uninitialized crop to list of available crops
+            this._crops.push({
+                hRatio: hRatio,
+                vRatio: vRatio,
+                setAsCurrent: setAsCurrent
+            });
+
+            if (this._image instanceof IMSoftcrop.Image && this._image.isReady()) {
+                // Always make sure all crops are added
+                for(var n = 0; n < this._crops.length; n++) {
+                    var crop = this._image.addSoftcrop(
+                        this._crops[n].hRatio,
+                        this._crops[n].vRatio,
+                        this._crops[n].setAsCurrent
+                    );
+
+                    if (crop === null) {
+                        continue;
+                    }
+
+                    if (this._crops[n].setAsCurrent) {
+                        this._crop = crop;
+                    }
+
+                    if (this._autoCropToggle.on) {
+                        this._image.autocrop();
+                    }
+
+                    this._renderNewPreview(crop, this._crops[n].setAsCurrent);
                 }
 
-                // FIXME: If autocrop, crop is not locked (should not be at this point)
-                // FIXME: and image is ready then autocrop it
-                
-                this._renderNewPreview(crop, setAsCurrent);
                 this.redraw();
             }
         },

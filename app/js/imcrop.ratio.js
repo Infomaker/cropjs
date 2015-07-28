@@ -33,13 +33,13 @@
 
 
     /**
-     * Fit area into an image area
+     * Fit crop area into an image area
      * @param imageArea
-     * @param area
+     * @param cropArea
      * @returns {{x: number, y: number, w: number, h: number}}
      */
-    IMSoftcrop.Ratio.fitInto = function(imageArea, area) {
-        var cropRatio = IMSoftcrop.Ratio.decimal(area.w, area.h);
+    IMSoftcrop.Ratio.fitInto = function(imageArea, cropArea) {
+        var cropRatio = IMSoftcrop.Ratio.decimal(cropArea.w, cropArea.h);
         var imageRatio = IMSoftcrop.Ratio.decimal(imageArea.w, imageArea.h);
         var x = 0;
         var y = 0;
@@ -81,21 +81,22 @@
 
 
     /**
-     * Fit area around an image area
+     * Fit crop area around an image area
+     * @param cropArea
      * @param imageArea
-     * @param area
-     * @returns {{x: number, y: number, w: number, h: number}}
+     * @returns {{w: number, h: number}}
      */
-    IMSoftcrop.Ratio.fitAround = function(imageArea, area) {
-        var cropRatio = IMSoftcrop.Ratio.decimal(area.w, area.h);
+    IMSoftcrop.Ratio.fitAround = function(cropArea, imageArea) {
+        var cropRatio = IMSoftcrop.Ratio.decimal(cropArea.w, cropArea.h);
         var imageRatio = IMSoftcrop.Ratio.decimal(imageArea.w, imageArea.h);
-        var x = 0;
-        var y = 0;
-        var w = imageArea.w;
-        var h = imageArea.h;
+        var w = 0;
+        var h = 0;
 
-        if (cropRatio > imageRatio) {
-            // Set area to height and expand horizontally based on ratio
+        if (cropRatio == 1) {
+            h = w = (imageArea.w > imageArea.h) ? imageArea.w : imageArea.h;
+        }
+        else if (cropArea.w / imageArea.w > cropArea.h / imageArea.h) {
+            // Set crop to area height and expand horizontally based on ratio
             // +---+=====+---+
             // |   |  a  |   |
             // |   |  r  |   |
@@ -104,8 +105,8 @@
             // +---+=====+---+
             //   <-------->
 
-            h = IMSoftcrop.Ratio.height(w, cropRatio);
-            y = (imageArea.h - h) / 2;
+            h = imageArea.h;
+            w = imageArea.h * (cropArea.w / cropArea.h);
         }
         else {
             // Set area to width and expand vertically based on ratio
@@ -117,13 +118,11 @@
             // |            |  v
             // +------------+
 
-            w = IMSoftcrop.Ratio.width(h, cropRatio);
-            x = (imageArea.w - w) / 2;
+            w = imageArea.w;
+            h = imageArea.w * (cropArea.h / cropArea.w);
         }
 
         return {
-            x: x,
-            y: y,
             w: w,
             h: h
         };

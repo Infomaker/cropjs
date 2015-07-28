@@ -64,6 +64,16 @@
          * @param setAsCurrent
          */
         addSoftcrop: function (hRatio, vRatio, setAsCurrent) {
+
+            // Make sure there are no duplicates
+            for (var n = 0; n < this._crops.length; n++) {
+                if (this._crops[n].ratio.w == hRatio
+                    && this._crops[n].ratio.h == vRatio
+                ) {
+                    return null;
+                }
+            }
+
             var area = IMSoftcrop.Ratio.fitInto(
                 {
                     w: this._w,
@@ -85,6 +95,9 @@
             return crop;
         },
 
+        detectionReady: function() {
+            return (typeof this._detailArea != 'undefined' && typeof this._focusArea != 'undefined');
+        },
 
         getCrops: function () {
             return this._crops;
@@ -296,13 +309,20 @@
         /**
          * Automatically alter crop(s) to fit around interesting areas
          * @param crop
+         * @returns boolean
          */
-        autoCropFocusPoints: function(crop) {
+        autocrop: function(crop) {
+            if (!this.detectionReady()) {
+                return false;
+            }
+
             var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
 
             for (var n = 0; n < crops.length; n++) {
                 this.autoCropCrop(crops[n]);
             }
+
+            return true;
         },
 
         /**
@@ -310,21 +330,23 @@
          * @param crop
          */
         autoCropCrop: function(crop) {
-            var x1 = (this._focusArea.point2.x < this._focusArea.point1.x)
-                ? this._focusArea.point2.x
+            // Calculate full detail + focus area
+            var x1 = (this._detailArea.point1.x < this._focusArea.point1.x)
+                ? this._detailArea.point1.x
                 : this._focusArea.point1.x;
-            var x2 = (this._focusArea.point2.x > this._focusArea.point1.x)
-                ? this._focusArea.point2.x
-                : this._focusArea.point1.x;
-            var y1 = (this._focusArea.point2.y < this._focusArea.point1.x)
-                ? this._focusArea.point2.y
-                : this._focusArea.point1.y;
-            var y2 = (this._focusArea.point2.y > this._focusArea.point1.y)
-                ? this._focusArea.point2.y
+
+            var x2 = (this._detailArea.point2.x > this._focusArea.point2.x)
+                ? this._detailArea.point2.x
+                : this._focusArea.point2.x;
+
+            var y1 = (this._detailArea.point1.y < this._focusArea.point1.x)
+                ? this._detailArea.point1.y
                 : this._focusArea.point1.y;
 
-            // 1. Calculate full x,y to x,y area coordinates,
-            //    making sure it does not bleed outside image.
+            var y2 = (this._detailArea.point2.y > this._focusArea.point2.y)
+                ? this._detailArea.point2.y
+                : this._focusArea.point2.y;
+
             var area = {
                 point1: {
                     x: (x1 > 0) ? x1 : 0,
@@ -332,14 +354,15 @@
                 },
                 point2: {
                     x: (x2 < this._w) ? x2 : this._w,
-                    y: (y2 < this._y) ? y2 : this._y
+                    y: (y2 < this._h) ? y2 : this._h
                 }
             };
 
 
-            // 1. Fit and center crop as best as possible around detail area
+            // Fit crop around full detail area as best as possible while
+            // making sure not to go outside image area.
             var newDim = IMSoftcrop.Ratio.fitAround(
-                { w: this._w, h: this._h },
+                { w: crop.ratio.w, h: crop.ratio.h },
                 { w: area.point2.x - area.point1.x, h: area.point2.y - area.point1.y }
             );
 
@@ -361,106 +384,54 @@
                 crop.autoCropWarning = true;
             }
             else {
-                // Unable to change size, should not happen!
-                console.log('Crop <' + n + '> just does not fit?!?');
+                // Too wide and too high
+                console.log('Too wide and too high, how?!? Ignoring!');
                 crop.autoCropWarning = true;
             }
 
-            // 2. Make sure it's not outside image boundaries, keep centered
 
-            // 3a. Check to see if there are focus areas outside crop
+            // Center crop over area while making sure it's not outside image boundaries.
+            // If full detail area cannot be covered, lean towards face features (focus area).
+            var areaCenter = {
+                    x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
+                    y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
+                },
+                focusCenter = {
+                    x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
+                    y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
+                },
+                cropCenter = {
+                    x: crop._x + (crop._w / 2),
+                    y: crop._y + (crop._h / 2)
+                },
+                xoffset = areaCenter.x - cropCenter.x,
+                yoffset = areaCenter.y - cropCenter.y;
 
-            // 3b. If so, can crop be moved so that it covers focus area better
+            //if (crop.autoCropWarning) {
+                // Full detail area not covered, adjust focus
+            //}
 
-            // 3c. If not, can it be centered better over the largest focus point
-        },
-
-        autocrop_old: function(crop) {
-            var crops = (typeof crop != 'undefined') ? new Array(crop) : this._crops;
-
-return;
-
-            var fpCenter = {
-                x: this._focusArea.x1 + ((this._focusArea.x2 - this._focusArea.x1) / 2),
-                y: this._focusArea.y1 + ((this._focusArea.y2 - this._focusArea.y1) / 2)
-            };
-
-            var imgMiddle = {
-                x: this._w / 2,
-                y: this._h / 2
-            };
-
-            // Resize and move all crops based on focus points
-            for(var n = 0; n < crops.length; n++) {
-                var cropDim = crops[n].getDimensions(),
-                    xRatio = (this._focusArea.x2 - this._focusArea.x1) / cropDim.w,
-                    yRatio = (this._focusArea.y2 - this._focusArea.y1)  / cropDim.h,
-                    newWidth = 0,
-                    newHeight = 0;
-
-                // Calculate optimal (tight fit) around focus area
-                if (xRatio < yRatio) {
-                    // Increase height and then calculate new width based on ratio
-                    console.log('Increasing height...');
-                    newHeight = this._focusArea.y2 - this._focusArea.y1 < this._w;
-                    newWidth = IMSoftcrop.Ratio.width(newHeight, crops[n].ratio.f);
-                }
-                else {
-                    // Increase width and then calculate new height based on ratio
-                    newWidth = this._focusArea.x2 - this._focusArea.x1;
-                    newHeight = IMSoftcrop.Ratio.height(newWidth, crops[n].ratio.f);
-                }
-
-                // Adjust width/height of crop if possible
-                if (newHeight != 0 && newWidth != 0) {
-                    if (newWidth <= this._w && newHeight <= this._h) {
-                        // Perfect, we can set both width and height
-                        crops[n]._w = newWidth;
-                        crops[n]._h = newHeight;
-                    }
-                    else if (newWidth > this._w) {
-                        // Width is too big, set to image width and recalculate height
-                        crops[n]._w = this._w;
-                        crops[n]._h = IMSoftcrop.Ratio.height(this._w, crops[n].ratio.f);
-                        crops[n].autoCropWarning = true;
-                    }
-                    else if (newHeight > this._h) {
-                        // Height is too big, set to image height and recalculate width
-                        crops[n]._h = this._h;
-                        crops[n]._w = IMSoftcrop.Ratio.width(this._h,  crops[n].ratio.f);
-                        crops[n].autoCropWarning = true;
-                    }
-                    else {
-                        // Unable to change size, should not happen!
-                        console.log('Crop <' + n + '> just does not fit?!?');
-                        crops[n].autoCropWarning = true;
-                    }
-                }
-
-                // Adjust position
-                var cropCenter = {
-                        x: crops[n]._x + (crops[n]._w / 2),
-                        y: crops[n]._y + (crops[n]._h / 2)
-                    },
-                    xoffset = fpCenter.x - cropCenter.x,
-                    yoffset = fpCenter.y - cropCenter.y;
-
-                crops[n].move({
-                    x: (xoffset > 0) ? xoffset : 0,
-                    y: (yoffset > 0) ? yoffset : 0
-                });
+            if (crop._x + xoffset < 0) {
+                crop._x = 0;
+            }
+            else if (crop._x + xoffset + crop._w > this._w) {
+                crop._x = this._w - crop._w;
+            }
+            else {
+                crop._x += xoffset;
             }
 
-            /*
-            this._ctx.rect(
-                pt1.x,
-                pt1.y,
-                pt2.x - pt1.x,
-                pt2.y - pt1.y
-            );
-            this._ctx.stroke();
-            this._ctx.closePath();
-            */
+            if (crop._y + yoffset < 0) {
+                crop._y = 0;
+            }
+            else if (crop._y + yoffset + crop._h > this._h) {
+                crop._y = this._h - crop._h;
+            }
+            else {
+                crop._y += yoffset;
+            }
+
+
         }
     });
     return this;

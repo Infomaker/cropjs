@@ -16,14 +16,6 @@ body {
     margin-bottom: 100px;
 }
 
-#imc_container #imc_croplocked {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.5);
-}
-
-
 #imc_container canvas {
     background: rgba(0, 0, 0, 1);
 }
@@ -39,20 +31,28 @@ body {
     background: #EFF3F2;
 }
 
-#imc_wait {
+#imc_container #imc_loading {
     position: absolute;
-    background: rgba(255, 255, 255, 0.5) url('../img/pleasewait.gif') 50% 50% no-repeat;
-    background-size: 33px 33px;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    bottom: 8px;
+    right: 66px;
+    font-size: 20px;
+    color: #fff;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
     display: none;
 }
 
-#imc_wait.visible {
-    display: block;
+#imc_container #imc_loading.loading {
+    display: inline-block;
 }
+
+#imc_container #imc_croplocked {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.5);
+}
+
+
 
 /**
  * Preview area and preview images
@@ -189,6 +189,10 @@ a.toggle > span span {
 
 }
 
+a.toggle > span span i {
+    text-indent: 3px;
+}
+
 a.toggle > span span img {
     height: 12px;
     margin-left: 3px;
@@ -215,6 +219,10 @@ a.toggle.on > span span.on {
     left: auto;
     right: 3px;
     text-indent: -23px;
+}
+
+a.toggle > span span.on i {
+    text-indent: 5px;
 }
 
 a.toggle.on > span span.off {
