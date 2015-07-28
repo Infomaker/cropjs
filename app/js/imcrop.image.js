@@ -391,14 +391,13 @@
 
 
             // Center crop over area while making sure it's not outside image boundaries.
-            // If full detail area cannot be covered, lean towards face features (focus area).
             var areaCenter = {
                     x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
                     y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
                 },
                 focusCenter = {
-                    x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
-                    y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
+                    x: this._focusArea.point1.x + ((this._focusArea.point2.x - this._focusArea.point1.x) / 2),
+                    y: this._focusArea.point1.y + ((this._focusArea.point2.y - this._focusArea.point1.y) / 2)
                 },
                 cropCenter = {
                     x: crop._x + (crop._w / 2),
@@ -407,9 +406,31 @@
                 xoffset = areaCenter.x - cropCenter.x,
                 yoffset = areaCenter.y - cropCenter.y;
 
-            //if (crop.autoCropWarning) {
-                // Full detail area not covered, adjust focus
-            //}
+            // Full detail area not covered, adjust focus leaning toward focus center.
+            // Make sure we don't move outside full detail area.
+            if (crop.autoCropWarning) {
+
+                console.log('changing from ' + yoffset);
+
+                var yoffset2 = focusCenter.y - cropCenter.y;
+                if (crop._y + yoffset2 < area.point1.y) {
+                    yoffset = area.point1.y - crop._y;
+                }
+                else {
+                    yoffset = yoffset2;
+                }
+
+                var xoffset2 = focusCenter.x - cropCenter.x;
+                if (crop._x + xoffset2 < area.point1.x) {
+                    xoffset = area.point1.x - crop._x;
+                }
+                else {
+                    xoffset = xoffset2;
+                }
+
+                console.log('to ' + yoffset);
+
+            }
 
             if (crop._x + xoffset < 0) {
                 crop._x = 0;
