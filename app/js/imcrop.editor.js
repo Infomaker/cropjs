@@ -464,7 +464,7 @@ var IMSoftcrop = (function() {
                     imageData,
                     this._image._w,
                     this._image._h,
-                    40
+                    60
                 ]);
 
                 detectWorker.onmessage = function(e) {
@@ -482,7 +482,7 @@ var IMSoftcrop = (function() {
                     ),
                     this._image._w,
                     this._image._h,
-                    40 // Threshold
+                    60 // Threshold
                 );
 
                 this.addDetectedDetails(data);

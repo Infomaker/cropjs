@@ -406,15 +406,17 @@
                 xoffset = areaCenter.x - cropCenter.x,
                 yoffset = areaCenter.y - cropCenter.y;
 
+
             // Full detail area not covered, adjust focus leaning toward focus center.
             // Make sure we don't move outside full detail area.
             if (crop.autoCropWarning) {
-
-                console.log('changing from ' + yoffset);
-
                 var yoffset2 = focusCenter.y - cropCenter.y;
                 if (crop._y + yoffset2 < area.point1.y) {
                     yoffset = area.point1.y - crop._y;
+                }
+                else if (crop._y + crop._h + yoffset2 > area.point2.y) {
+                    // Move crop upwards
+                    yoffset = area.point2.y - crop._h - crop._y;
                 }
                 else {
                     yoffset = yoffset2;
@@ -424,14 +426,26 @@
                 if (crop._x + xoffset2 < area.point1.x) {
                     xoffset = area.point1.x - crop._x;
                 }
+                else if (crop._x + crop._w + xoffset2 > area.point2.x) {
+                    // Move crop to the left
+                    xoffset = area.point2.x - crop._w - crop._x;
+                }
                 else {
                     xoffset = xoffset2;
                 }
 
-                console.log('to ' + yoffset);
+                // If we completely cover focus area and at least 80%
+                // of the detail area is covered, be bold and remove warning.
+                if (crop._w >= this._focusArea.point2.x - this._focusArea.point1.x &&
+                    crop._h >= this._focusArea.point2.y - this._focusArea.point1.y &&
+                    0.8 <= crop._w / (area.point2.x - area.point1.x) &&
+                    0.8 <= crop._h / (area.point2.y - area.point1.y)) {
+                    crop.autoCropWarning = false;
+                }
 
             }
 
+            // Actually move the crop
             if (crop._x + xoffset < 0) {
                 crop._x = 0;
             }
@@ -451,8 +465,6 @@
             else {
                 crop._y += yoffset;
             }
-
-
         }
     });
     return this;
