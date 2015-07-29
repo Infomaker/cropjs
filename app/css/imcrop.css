@@ -100,26 +100,26 @@ body {
     box-shadow: 1px 1px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
-.imc_preview_image_container
-.imc_preview_image.warning {
+.imc_preview_image_container.warning
+.imc_preview_image {
     position: relative;
 }
 
-.imc_preview_image_container
-.imc_preview_image.warning:after {
+.imc_preview_image_container.warning
+.imc_preview_image:after {
     content: '!';
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background: #B02521;
     bottom: 2px;
     right: 2px;
-    font-size: 12px;
+    font-size: 9px;
     text-align: center;
-    line-height: 18px;
+    line-height: 16px;
     color: #fff;
     border-radius: 10px;
-    font-weight: 400;
+    font-weight: 100;
 }
 
 
