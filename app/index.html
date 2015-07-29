@@ -27,45 +27,50 @@
                 <i class="fa fa-cog fa-spin"></i>
             </div>
 
-            <a href="#" id="imc_croplocked" class="toggle" title="Låst till användare">
+            <a href="#" id="imc_croplocked" class="toggle">
+                <em class="hint">Låst till användare</em>
                 <span>
                     <span class="on"><i class="fa fa-lock"></i></span>
                     <span class="off"><i class="fa fa-unlock"></i></span>
                 </span>
             </a>
 
+            <div class="toolbar">
+                <div class="group">
+                    <a href="#" id="imc_focuspoints" class="toggle">
+                        <em class="hint">Detaljer</em>
+                        <span>
+                            <span class="on"><i class="fa fa-cogs"></i></span>
+                            <span class="off"><i class="fa fa-cogs"></i></span>
+                        </span>
+                    </a>
+
+                    <a href="#" id="imc_autocrop" class="toggle on">
+                        <em class="hint">Automatisk crop</em>
+                        <span>
+                            <span class="on"><i class="fa fa-crop"></i></span>
+                            <span class="off"><i class="fa fa-crop"></i></span>
+                        </span>
+                    </a>
+
+                    <a href="#" id="imc_guides" class="toggle on">
+                        <em class="hint">Guide lines</em>
+                        <span>
+                            <span class="on"><i class="fa fa-th"></i></span>
+                            <span class="off"><i class="fa fa-th"></i></span>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="group right">
+                    <a href="#" id="imc_cancel" class="button left secondary">Avbryt</a>
+                    <a href="#" id="imc_save" class="button right">Spara</a>
+                </div>
+            </div>
         </div>
 
 
-        <div class="toolbar">
-            <!--
-            <a href="#" id="imc_detectandcrop" class="button">Detect &amp; crop</a>
-            -->
 
-            <a href="#" id="imc_autocrop" class="toggle on">
-                <em>Automatisk crop</em>
-                <span>
-                    <span class="on">On</span>
-                    <span class="off">Off</span>
-                </span>
-            </a>
-
-            <a href="#" id="imc_guides" class="toggle on">
-                <em>Guide lines</em>
-                <span>
-                    <span class="on">On</span>
-                    <span class="off">Off</span>
-                </span>
-            </a>
-
-            <a href="#" id="imc_focuspoints" class="toggle">
-                <em>Detaljer</em>
-                <span>
-                    <span class="on">On</span>
-                    <span class="off">Off</span>
-                </span>
-            </a>
-        </div>
 
         <div id="imc_debug"></div>
 
@@ -96,7 +101,7 @@
 
 
             editor.addImage(
-                    'examples/picture2.jpg',
+                    'examples/picture4.jpg',
                     function(image) {
                         this.addSoftcrop(1, 1, true);
                         this.addSoftcrop(16, 9, false);

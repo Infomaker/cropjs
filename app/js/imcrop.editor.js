@@ -62,8 +62,11 @@ var IMSoftcrop = (function() {
         // IMCropUI.Toggle for locking crops
         _cropLockedToggle: undefined,
 
-        // IMCropUI.Button for auto crop
-        // _detectAndCropButton: undefined,
+        // IMCropUI.Button for saving
+        _saveButton: undefined,
+
+        // IMCropUI.Button for cancelling
+        _cancelButton: undefined,
 
 
 
@@ -130,25 +133,21 @@ var IMSoftcrop = (function() {
                 }
             );
 
-            // Draw button
-            /*
-            this._detectAndCropButton = new IMCropUI.Button(
-                'imc_detectandcrop',
+            // Save button
+            this._saveButton = new IMCropUI.Button(
+                'imc_save',
                 function () {
-                    //_this.toggleWait();
-
-                    setTimeout(
-                        function() {
-                            _this.detectFaces();
-                            _this._image.autocrop();
-                            _this.redraw();
-                            _this.toggleWait();
-                        },
-                        100
-                    );
+                    alert('save?');
                 }
             );
-            */
+
+            // Save button
+            this._cancelButton = new IMCropUI.Button(
+                'imc_cancel',
+                function () {
+                    alert('cancel?');
+                }
+            );
         },
 
         /**

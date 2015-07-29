@@ -18,6 +18,11 @@
             _on = true;
         }
 
+        var em = _element.getElementsByTagName('em');
+        if (em.length == 1 && em[0].classList.contains('hint')) {
+            _element.title = em[0].innerHTML;
+        }
+
         Object.defineProperty(
             this,
             'on',
