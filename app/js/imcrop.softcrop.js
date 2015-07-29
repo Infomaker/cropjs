@@ -387,7 +387,7 @@
             if (this._ctx.setLineDash) {
                 this._ctx.setLineDash([3, 3]);
             }
-            this._ctx.strokeStyle = 'rgba(55, 55, 55, 0.7)';
+            this._ctx.strokeStyle = 'rgba(55, 55, 55, 0.5)';
             this._ctx.lineWidth = 1;
 
             var stepY = this._drawH / 3,

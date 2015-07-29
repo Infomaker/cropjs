@@ -226,21 +226,25 @@ var IMSoftcrop = (function() {
             var _this = this;
 
             // Create image container element
-            var pvDiv = document.createElement('div');
-            pvDiv.id = this._image.id + '_' + crop.id;
-            pvDiv.classList.add('imc_preview_image');
-            pvDiv.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
+            var pvDivOuter = document.createElement('div');
+            pvDivOuter.id = this._image.id + '_' + crop.id;
+            pvDivOuter.classList.add('imc_preview_image_container');
 
             if (setAsCurrent) {
-                pvDiv.classList.add('active');
+                pvDivOuter.classList.add('active');
             }
 
-            pvDiv.addEventListener(
+            pvDivOuter.addEventListener(
                 'click',
                 function () {
                     _this.setActiveCrop(crop);
                 }
             );
+
+            // Create inner container element
+            var pvDivInner = document.createElement('div');
+            pvDivInner.classList.add('imc_preview_image');
+            pvDivInner.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
             // Create image element
             var pvImg = document.createElement('img');
@@ -248,8 +252,9 @@ var IMSoftcrop = (function() {
 
 
             // Put it together
-            pvDiv.appendChild(pvImg);
-            this._previewContainer.appendChild(pvDiv);
+            pvDivInner.appendChild(pvImg);
+            pvDivOuter.appendChild(pvDivInner);
+            this._previewContainer.appendChild(pvDivOuter);
 
 
             // Render update
@@ -765,7 +770,7 @@ var IMSoftcrop = (function() {
             }
 
             var div = document.getElementById(this._image.id + '_' + crop.id);
-            var divs = this._previewContainer.getElementsByClassName('imc_preview_image');
+            var divs = this._previewContainer.getElementsByClassName('imc_preview_image_container');
             for (var n = 0; n < divs.length; n++) {
                 divs[n].classList.remove('active');
             }
