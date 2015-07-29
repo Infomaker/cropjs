@@ -181,7 +181,7 @@ var IMSoftcrop = (function() {
             }
 
             this._previewContainer = document.createElement('div');
-            this._previewContainer.id = 'imc_preview_container';
+            this._previewContainer.className = 'imc_preview_container';
 
             var workContainer = document.createElement('div');
             workContainer.id = 'imc_work_container';
@@ -246,13 +246,23 @@ var IMSoftcrop = (function() {
             pvDivInner.classList.add('imc_preview_image');
             pvDivInner.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
+            // Create span (title) element, including warning element
+            var pvSpan = document.createElement('span');
+            var pvSpanTxt = document.createTextNode(crop.id);
+            var pvWarning = document.createElement('i');
+            pvWarning.className = 'fa fa-warning';
+
+            pvSpan.appendChild(pvSpanTxt);
+            pvSpan.appendChild(pvWarning);
+
+
             // Create image element
             var pvImg = document.createElement('img');
             pvImg.src = this._image._src;
 
-
             // Put it together
             pvDivInner.appendChild(pvImg);
+            pvDivInner.appendChild(pvSpan);
             pvDivOuter.appendChild(pvDivInner);
             this._previewContainer.appendChild(pvDivOuter);
 
