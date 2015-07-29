@@ -96,10 +96,16 @@
                     {
                         autodetect: true,
                         debug: false,
-                        debugElement: document.getElementById('imc_debug')
+                        debugElement: document.getElementById('imc_debug'),
+                        onSave: function(cropdata) {
+                            console.log('Saving...');
+                            console.log(cropdata);
+                        },
+                        onCancel: function(cropdata) {
+                            console.log('cancelling');
+                        }
                     }
             );
-
 
             editor.addImage(
                     'examples/picture.jpg',
@@ -107,8 +113,6 @@
                         this.addSoftcrop(1, 1, true);
                         this.addSoftcrop(16, 9, false);
                         this.addSoftcrop(3, 2, false);
-                        this.addSoftcrop(9, 16, false);
-                        //this.addSoftcrop(5, 1, false);
                     }
             );
 

@@ -50,6 +50,10 @@ var IMSoftcrop = (function() {
         autodetect: false,
         _debug: false,
 
+        // Option callbacks
+        _onSave: undefined,
+        _onCancel: undefined,
+
         // IMCropUI.Toggle for drawing guides
         _guidesToggle: undefined,
 
@@ -89,6 +93,8 @@ var IMSoftcrop = (function() {
             if (typeof options == 'object') {
                 var _this = this;
 
+                // Options.debug
+                // Options.debugElement
                 if (options.debug === true) {
                     if (typeof options.debug != 'undefined') {
                         this._debugContainer = options.debugElement;
@@ -97,8 +103,19 @@ var IMSoftcrop = (function() {
                     this._debug = true;
                 }
 
+                // Options.autodectec
                 if (options.autodetect === true) {
                     this.autodetect = true;
+                }
+
+                // Options.onSave
+                if(typeof options.onSave == 'function') {
+                    this._onSave = options.onSave;
+                }
+
+                // Options.onCancel
+                if(typeof options.onCancel == 'function') {
+                    this._onCancel = options.onCancel;
                 }
             }
 
@@ -137,7 +154,7 @@ var IMSoftcrop = (function() {
             this._saveButton = new IMCropUI.Button(
                 'imc_save',
                 function () {
-                    alert('save?');
+                    _this.onSave();
                 }
             );
 
@@ -145,9 +162,50 @@ var IMSoftcrop = (function() {
             this._cancelButton = new IMCropUI.Button(
                 'imc_cancel',
                 function () {
-                    alert('cancel?');
+                    _this.onCancel();
                 }
             );
+        },
+
+        /**
+         * Save image crops
+         */
+        onSave: function() {
+            if (typeof this._onSave != 'function') {
+                console.log('User save function not defined');
+                return;
+            }
+
+            var data = {
+                src: this._image._src,
+                width: this._image._w,
+                height: this._image._h,
+                crops: []
+            };
+
+            for(var n = 0; n < this._image._crops.length; n++) {
+                data.crops.push({
+                    name: this._image._crops[n].id,
+                    x: Math.round(this._image._crops[n]._x),
+                    y: Math.round(this._image._crops[n]._y),
+                    width: Math.round(this._image._crops[n]._w),
+                    height: Math.round(this._image._crops[n]._h)
+                });
+            }
+
+            this._onSave(data);
+        },
+
+        /**
+         * Cancel function
+         */
+        onCancel: function() {
+            if (typeof this._onSave != 'function') {
+                console.log('User cancel function not defined');
+                return;
+            }
+
+            this._onCancel();
         },
 
         /**
@@ -378,9 +436,9 @@ var IMSoftcrop = (function() {
         /**
          * Load image from url
          * @param url
-         * @param cbFunc
+         * @param onImageReady Callback after image has been loaded
          */
-        addImage: function (url, cbFunc) {
+        addImage: function (url, onImageReady) {
             var _this = this;
 
             this.toggleLoadingImage(true);
@@ -403,8 +461,8 @@ var IMSoftcrop = (function() {
                         _this.toggleLoadingImage(false);
                     }
 
-                    if (typeof cbFunc === 'function') {
-                        cbFunc.call(_this, _this._image);
+                    if (typeof onImageReady === 'function') {
+                        onImageReady.call(_this, _this._image);
                     }
                 }
             );

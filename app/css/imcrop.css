@@ -7,8 +7,8 @@ body {
 }
 
 #imc {
-    width: 80%;
-    height: 350px;
+    width: 100%;
+    height: 400px;
     overflow: hidden;
 
     /* Adjust for work container and toolbar below img container */
