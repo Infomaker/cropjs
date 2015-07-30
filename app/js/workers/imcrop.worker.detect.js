@@ -9,9 +9,7 @@ window.tracking = tracking;
 
 
 importScripts(
-    "tracking.js-master/build/tracking-min.js",
-    "tracking.js-master/build/data/face-min.js",
-    "tracking.js-master/build/data/eye-min.js"
+    "tracking.js"
 );
 
 

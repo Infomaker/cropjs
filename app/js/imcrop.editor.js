@@ -529,7 +529,8 @@ var IMSoftcrop = (function() {
                 imageData = this.getImageData();
 
             if (window.Worker) {
-                // If workers are available, thread it
+                // If workers are available, thread detection of faces
+                var boo = null;
                 var detectWorker = new Worker('js/imcrop.worker.detect.js');
                 detectWorker.postMessage([
                     'details',

@@ -7,21 +7,20 @@ body {
 }
 
 #imc {
-    width: 100%;
-    height: 400px;
-    overflow: hidden;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
 
-    /* Adjust for work container and toolbar below img container */
-    padding-bottom: 130px;
-}
+  /* Adjust for work container and toolbar below img container */
+  padding-bottom: 130px;
 
-#imc_container {
+  #imc_container {
     position: relative;
     background: #EFF3F2;
     height: 100%;
-}
+  }
 
-#imc_work_container {
+  #imc_work_container {
     position: absolute;
 
     left: 0;
@@ -30,9 +29,9 @@ body {
     height: 95px;
 
     background: #EFF3F2;
-}
+  }
 
-#imc_container #imc_loading {
+  #imc_container #imc_loading {
     position: absolute;
     bottom: 8px;
     right: 66px;
@@ -40,30 +39,29 @@ body {
     color: #fff;
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
     display: none;
-}
+  }
 
-#imc_container #imc_loading.loading {
+  #imc_container #imc_loading.loading {
     display: inline-block;
-}
+  }
 
-#imc_container #imc_croplocked {
+  #imc_container #imc_croplocked {
     position: absolute;
     bottom: 10px;
     right: 10px;
     box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.5);
+  }
 }
-
 
 
 /**
  * Preview area and preview images
  */
 .imc_preview_container {
-    white-space: nowrap;
-    position: relative;
-}
+  white-space: nowrap;
+  position: relative;
 
-.imc_preview_container:after {
+  &:after {
     display: block;
     position: absolute;
     content: "";
@@ -73,15 +71,15 @@ body {
     bottom: 0;
     background: #EFF3F2;
     box-shadow: 0px 0 8px 6px #EFF3F2;
+  }
 }
 
 .imc_preview_image_container {
-    position: relative;
-    display: inline-block;
-}
+  position: relative;
+  display: inline-block;
 
-.imc_preview_image_container.active:after,
-.imc_preview_image_container.active:before {
+  &:after,
+  &:before {
     bottom: 100%;
     left: 50%;
     border: solid transparent;
@@ -90,92 +88,88 @@ body {
     width: 0;
     position: absolute;
     pointer-events: none;
-}
+  }
 
-.imc_preview_image_container.active:after {
+  &.active:after {
     border-color: rgba(239, 243, 242, 0);
     border-bottom-color: #EFF3F2;
     border-width: 8px;
     margin-left: -8px;
-}
-.imc_preview_image_container.active:before {
+  }
+
+  &.active:before {
     border-color: rgba(214, 219, 220, 0);
     border-bottom-color: #D6DBDC;
     border-width: 10px;
     margin-left: -10px;
-}
+  }
 
-.imc_preview_image_container
-.imc_preview_image {
+  .imc_preview_image {
     position: relative;
     margin: 7px 0 0 7px;
     height: 80px;
     width: 80px;
     overflow: hidden;
     box-shadow: 1px 1px 4px -1px rgba(0, 0, 0, 0.2);
-}
 
-.imc_preview_image_container
-.imc_preview_image:hover {
-    box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.5);
-}
+    &:hover {
+      box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.5);
+    }
 
-.imc_preview_image_container
-.imc_preview_image span {
-    position: absolute;
-    bottom: 2px;
-    left: 3px;
-    font-size: 9px;
-    line-height: 16px;
-    color: #fff;
-    font-weight: 300;
-    background: rgba(0,0,0,0.4);
-    border-radius: 3px;
-    padding: 0 2px;
-}
+    span {
+      position: absolute;
+      bottom: 2px;
+      left: 3px;
+      font-size: 9px;
+      line-height: 16px;
+      color: #fff;
+      font-weight: 300;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 3px;
+      padding: 0 2px;
 
-.imc_preview_image_container
-.imc_preview_image span i {
-    display: none;
-}
+      i {
+        display: none;
+      }
+    }
+  }
 
-.imc_preview_image_container.warning
-.imc_preview_image span i {
+  &.warning .imc_preview_image span i {
     display: inline-block;
     padding-left: 4px;
     color: #FF4E66;
+    background: inherit;
+  }
 }
-
-
 
 /**
- * Defualt toolbar
+ * Default toolbar
  */
 div.toolbar {
-    position: absolute;
-    bottom: -132px;
-    border-top: 1px solid #D6DBDC;
-    left: 0;
-    right: 0;
-    padding: 6px 0;
-    width: 100%;
-    height: 24px;
-    overflow: hidden;
-    background: #EFF3F2;
-}
+  position: absolute;
+  bottom: -132px;
+  border-top: 1px solid #D6DBDC;
+  left: 0;
+  right: 0;
+  padding: 6px 0;
+  width: 100%;
+  height: 24px;
+  overflow: hidden;
+  background: #EFF3F2;
 
-div.toolbar a {
-    margin-right: 0px;
-}
+  a {
+    margin-right: 0;
+  }
 
-div.toolbar div.group {
+  div.group {
     float: left;
     margin-left: 6px;
-}
 
-div.toolbar div.group.right {
-    float: right;
-    margin-right: 6px;
+    &.right {
+      float: right;
+      margin-right: 6px;
+    }
+  }
 }
 
 /**
@@ -183,47 +177,50 @@ div.toolbar div.group.right {
  */
 a.button,
 a.toggle {
-    display: inline-block;
-    text-decoration: none;
-    font-size: 12px;
-    vertical-align: middle;
+  display: inline-block;
+  text-decoration: none;
+  font-size: 12px;
+  vertical-align: middle;
 }
 
 a.button {
-    background: #6C797A;
-    color: #fff;
-    line-height: 22px;
-    padding: 0 8px;
-    border-radius: 8px;
-    font-weight: 100;
-    display: block;
-    float: left;
-}
+  background: #6C797A;
+  color: #fff;
+  line-height: 22px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-weight: 100;
+  display: block;
+  float: left;
 
-a.secondary {
+  &.secondary {
     background-color: #839595;
-}
+  }
 
-a.button.left,
-a.button.right {
+  &.left,
+  &.right {
     padding: 0 16px;
     text-align: center;
-}
+  }
 
-a.button.left {
+  &.left {
     border-radius: 8px 0 0 8px;
     margin-right: 0;
     border-right: 1px solid #CDD5D6;
-}
+  }
 
-a.button.right {
+  &.right {
     border-radius: 0 8px 8px 0;
     margin-right: 0;
+  }
+
+  &:hover {
+    background-color: #586566;
+  }
 }
 
-a.button:hover {
-    background-color: #586566;
-}
+
+
 
 
 /**
@@ -232,28 +229,28 @@ a.button:hover {
  *
  */
 a.toggle {
-    height: 20px;
-    color: #6C797A;
-    border-radius: 12px;
-    padding: 0;
-}
+  height: 20px;
+  color: #6C797A;
+  border-radius: 12px;
+  padding: 0;
 
-/* Toggle label */
-a.toggle em {
+  /* Toggle label */
+  em {
     display: inline-block;
     line-height: 20px;
     font-style: normal;
     vertical-align: middle;
-}
 
-/* Use label as title instead */
-a.toggle em.hint {
-    display: none;
-}
+    /* Use label as title instead */
+    &.hint {
+      display: none;
+    }
+  }
 
-/* Toggle options */
-a.toggle > span {
+  /* Toggle options */
+  & > span {
     display: inline-block;
+    position: relative;
     vertical-align: middle;
     margin: 0;
     padding: 0;
@@ -264,57 +261,54 @@ a.toggle > span {
 
     line-height: 14px;
 
-
-    position: relative;
-
     background: #839595;
-}
 
-/* Toggle option, default off */
-a.toggle > span span {
-    display: block;
-    position: absolute;
-    overflow: visible;
+    /* Toggle option, default off */
+    span {
+      display: block;
+      position: absolute;
+      overflow: visible;
 
-    width: 14px;
-    height: 14px;
-    top: 3px;
-    left: 3px;
-    border-radius: 7px;
-    text-indent: 20px;
+      width: 14px;
+      height: 14px;
+      top: 3px;
+      left: 3px;
+      border-radius: 7px;
+      text-indent: 20px;
 
+      background: #6C797A;
+      color: #cfddde;
+
+      /* Font awesome vector icon handling */
+      i {
+        text-indent: 3px;
+      }
+
+      /* On defaults to hidden */
+      &.on {
+        display: none;
+      }
+    }
+  }
+
+  /* Option on state */
+  &.toggle.on > span {
     background: #6C797A;
-    color: #cfddde;
-}
 
-/* Font awesome vector icon handling */
-a.toggle > span span i {
-    text-indent: 3px;
-}
+    span.on {
+      display: block;
+      background: #839595;
+      color: #ffffff;
+      left: auto;
+      right: 3px;
+      text-indent: -23px;
 
-/* On defaults to hidden */
-a.toggle > span span.on {
-    display: none;
-}
-
-/* Option on state */
-a.toggle.on > span {
-    background: #6C797A;
-}
-
-a.toggle.on > span span.on {
-    display: block;
-    background: #839595;
-    color: #ffffff;
-    left: auto;
-    right: 3px;
-    text-indent: -23px;
-}
-
-a.toggle > span span.on i {
-    text-indent: 4px;
-}
-
-a.toggle.on > span span.off {
-    display: none;
+      i {
+        text-indent: 4px;
+      }
+    }
+    span.off {
+      display: none;
+    }
+  }
 }

@@ -7,7 +7,9 @@
     "type": "git",
     "url": "http://git.infomaker.se/scm/npjs/cropjs.git"
   },
-  "author": "Danne Lundqvist",
+  "author": {
+    "name": "Danne Lundqvist"
+  },
   "license": "Unlicense",
   "private": true,
   "devDependencies": {

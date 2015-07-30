@@ -28,7 +28,7 @@ function banner() {
 
 // Lint task
 gulp.task('lint', function() {
-    return gulp.src('app/js/*.js')
+    return gulp.src('app/js/**/*.js')
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });
@@ -44,6 +44,61 @@ gulp.task('docs', function() {
 
 
 
+// Concatenate detect workers
+gulp.task('scripts-trackingjs', function() {
+    var files = [
+        'app/bower_components/tracking.js/build/tracking-min.js',
+        'app/bower_components/tracking.js/build/data/face-min.js',
+        'app/bower_components/tracking.js/build/data/eye-min.js'
+    ];
+
+    return gulp.src(files)
+        .pipe(concat('tracking.js'))
+        .pipe(gulp.dest('build/js'));
+});
+
+
+// Uglify detect worker
+gulp.task('scripts-worker-detect', function() {
+    return gulp.src('app/js/workers/imcrop.worker.detect.js')
+        .pipe(uglify())
+        .pipe(banner())
+        .pipe(gulp.dest('build/js'));
+});
+
+
+// Concatenate and uglify cropjs core files
+gulp.task('scripts-cropjs', function() {
+    var files = [
+        'app/js/class/class.js',
+        'app/js/imcrop.ui.js',
+        'app/js/imcrop.editor.js',
+        'app/js/imcrop.ratio.js',
+        'app/js/imcrop.base.js',
+        'app/js/imcrop.image.js',
+        'app/js/imcrop.softcrop.js'
+    ];
+
+    return gulp.src(files)
+        .pipe(concat('cropjs.js'))
+        .pipe(gulp.dest('build/js'))
+        .pipe(uglify())
+        .pipe(banner())
+        .pipe(gulp.dest('build/js'));
+});
+
+
+// Handle all javascript files
+gulp.task('scripts', ['scripts-cropjs', 'scripts-worker-detect', 'scripts-trackingjs']);
+
+
+// Copy necessary files
+gulp.task('copy', function() {
+    gulp.src('app/index.html')
+        .pipe(gulp.dest('build/'));
+});
+
+
 // Compile our sass
 gulp.task('sass', function() {
     return gulp.src('app/scss/*.scss')
@@ -52,46 +107,13 @@ gulp.task('sass', function() {
 });
 
 
-// Concatenate detect workers
-gulp.task('scripts-workers', function() {
-    gulp.src('app/js/worker/imcrop.worker.detect.js')
-        .pipe(uglify())
-        .pipe(rename('cropjs.detect.min.js'))
-        .pipe(gulp.dest('build/js'));
-});
-
-
-// Concatenate and minify base javascript
-gulp.task('scripts', function() {
-    var files = [
-        'app/bower_components/tracking.js/build/tracking-min.js',
-        'app/bower_components/tracking.js/build/face-min.js',
-        'app/bower_components/tracking.js/build/eye-min.js',
-        'app/js/*.js'
-    ];
-
-    return gulp.src(files)
-        .pipe(concat('cropjs.js'))
-        .pipe(banner())
-        .pipe(gulp.dest('build/js'))
-        .pipe(uglify())
-        .pipe(banner())
-        .pipe(rename('cropjs.min.js'))
-        .pipe(gulp.dest('build/js'));
-});
-
-
-// Copy necessary files
-gulp.task('copy', function() {
-    return gulp.src('app/index.html')
-        .pipe(gulp.dest('build/'));
-});
 
 // Watch files for changes
 gulp.task('watch', function() {
-    gulp.watch('app/js/*.js', ['lint', 'scripts']);
     gulp.watch('app/scss/*.scss', ['sass']);
+    gulp.watch('app/js/**/*.js', ['scripts', 'scripts-workers']);
+    gulp.watch('app/*.html', ['copy']);
 });
 
 // Default Task
-gulp.task('default', ['lint', 'sass', 'scripts', 'copy', 'watch']);
+gulp.task('default', ['sass', 'scripts', 'copy', 'watch']);
