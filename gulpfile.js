@@ -9,7 +9,9 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var header = require('gulp-header');
 var jsdoc = require('gulp-jsdoc');
+var bower = require('gulp-bower');
 var pkg = require('./package.json');
+
 
 function banner() {
     var stamp = [
@@ -41,15 +43,18 @@ gulp.task('docs', function() {
 
 
 
-
+// Get bower dependencies
+gulp.task('bower', function() {
+    return bower();
+});
 
 
 // Concatenate detect workers
 gulp.task('scripts-trackingjs', function() {
     var files = [
-        'app/bower_components/tracking.js/build/tracking-min.js',
-        'app/bower_components/tracking.js/build/data/face-min.js',
-        'app/bower_components/tracking.js/build/data/eye-min.js'
+        'bower_components/tracking.js/build/tracking-min.js',
+        'bower_components/tracking.js/build/data/face-min.js',
+        'bower_components/tracking.js/build/data/eye-min.js'
     ];
 
     return gulp.src(files)
@@ -116,4 +121,4 @@ gulp.task('watch', function() {
 });
 
 // Default Task
-gulp.task('default', ['sass', 'scripts', 'copy', 'watch']);
+gulp.task('default', ['bower', 'sass', 'scripts', 'copy', 'watch']);
