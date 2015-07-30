@@ -24,7 +24,7 @@ function banner() {
     ].join('\n');
 
     return header(stamp, { pkg: pkg });
-};
+}
 
 // Lint task
 gulp.task('lint', function() {
@@ -111,7 +111,7 @@ gulp.task('sass', function() {
 // Watch files for changes
 gulp.task('watch', function() {
     gulp.watch('app/scss/*.scss', ['sass']);
-    gulp.watch('app/js/**/*.js', ['scripts', 'scripts-workers']);
+    gulp.watch('**/*.js', ['scripts-cropjs', 'scripts-worker-detect']);
     gulp.watch('app/*.html', ['copy']);
 });
 
