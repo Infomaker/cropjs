@@ -39,7 +39,7 @@
          * @param parent
          * @param hRatio
          * @param vRatio
-         * @param area {x, y, w, h}
+         * @param area
          * @param respectRatio
          * @private
          */
@@ -335,7 +335,7 @@
 
         /**
          * Redraw image
-         * @param {object} offset
+         * @param options
          */
         redraw: function (options) {
             if (!this.isReady()) {
@@ -481,7 +481,7 @@
             );
 
             this._ctx.fill();
-            this._ctx.closePath;
+            this._ctx.closePath();
         },
 
 
@@ -504,6 +504,7 @@
             this._ctx.strokeStyle = !active ? this._lineColor : this._lineColorActive;
 
 
+            //noinspection FallThroughInSwitchStatementJS
             switch (name) {
                 case 'se':
                     // Just mirror values and fall through to nw

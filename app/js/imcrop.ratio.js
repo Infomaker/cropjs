@@ -88,7 +88,6 @@
      */
     IMSoftcrop.Ratio.fitAround = function(cropArea, imageArea) {
         var cropRatio = IMSoftcrop.Ratio.decimal(cropArea.w, cropArea.h);
-        var imageRatio = IMSoftcrop.Ratio.decimal(imageArea.w, imageArea.h);
         var w = 0;
         var h = 0;
 

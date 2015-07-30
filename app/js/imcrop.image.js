@@ -268,7 +268,7 @@
             if (typeof this._focusArea != 'undefined') {
                 this.drawArea(this._focusArea, 'rgba(121, 121, 255, 0.4)');
 
-                for (var n in this._focusPoints) {
+                for (var n = 0; n < this._focusPoints.length; n++) {
                     var drawPoint = this._editor.imagePointInCanvas(
                         this._focusPoints[n].x,
                         this._focusPoints[n].y
@@ -308,7 +308,7 @@
 
         /**
          * Automatically alter crop(s) to fit around interesting areas
-         * @param crop
+         * @param [crop]
          * @returns boolean
          */
         autocrop: function(crop) {

@@ -78,7 +78,8 @@ var IMSoftcrop = (function() {
         /**
          * Constructor
          *
-         * @param container
+         * @param id
+         * @param [options]
          * @private
          */
         _construct: function (id, options) {
@@ -530,7 +531,6 @@ var IMSoftcrop = (function() {
 
             if (window.Worker) {
                 // If workers are available, thread detection of faces
-                var boo = null;
                 var detectWorker = new Worker('js/imcrop.worker.detect.js');
                 detectWorker.postMessage([
                     'details',
@@ -1223,7 +1223,7 @@ var IMSoftcrop = (function() {
 
         /**
          * Helper function for drawing a cross mark
-         * @param string
+         * @param color
          * @param point
          */
         _drawCross: function (color, point) {
