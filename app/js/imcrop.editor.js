@@ -108,16 +108,6 @@ var IMSoftcrop = (function() {
                 if (options.autodetect === true) {
                     this.autodetect = true;
                 }
-
-                // Options.onSave
-                if(typeof options.onSave == 'function') {
-                    this._onSave = options.onSave;
-                }
-
-                // Options.onCancel
-                if(typeof options.onCancel == 'function') {
-                    this._onCancel = options.onCancel;
-                }
             }
 
             // Auto crop
@@ -155,7 +145,7 @@ var IMSoftcrop = (function() {
             this._saveButton = new IMCropUI.Button(
                 'imc_save',
                 function () {
-                    _this.onSave();
+                    _this.onButtonSave();
                 }
             );
 
@@ -163,15 +153,38 @@ var IMSoftcrop = (function() {
             this._cancelButton = new IMCropUI.Button(
                 'imc_cancel',
                 function () {
-                    _this.onCancel();
+                    _this.onButtonCancel();
                 }
             );
         },
 
+
+        /**
+         * Add onSave callback function
+         * @param {function} func
+         */
+        onSave: function(func) {
+            if(typeof func == 'function') {
+                this._onSave = func;
+            }
+        },
+
+
+        /**
+         * Add onSave callback function
+         * @param {function} func
+         */
+        onCancel: function(func) {
+            if(typeof func == 'function') {
+                this._onCancel = func;
+            }
+        },
+
+
         /**
          * Save image crops
          */
-        onSave: function() {
+        onButtonSave: function() {
             if (typeof this._onSave != 'function') {
                 console.log('User save function not defined');
                 return;
@@ -200,7 +213,7 @@ var IMSoftcrop = (function() {
         /**
          * Cancel function
          */
-        onCancel: function() {
+        onButtonCancel: function() {
             if (typeof this._onSave != 'function') {
                 console.log('User cancel function not defined');
                 return;

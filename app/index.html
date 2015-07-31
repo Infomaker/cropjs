@@ -79,30 +79,17 @@
         <script src="js/cropjs.js"></script>
         <script>
 
-            var editor = new IMSoftcrop.Editor(
-                    'imc_container',
-                    {
-                        autodetect: true,
-                        debug: false,
-                        debugElement: document.getElementById('imc_debug'),
-                        onSave: function(cropdata) {
-                            console.log('Saving...');
-                            console.log(cropdata);
-                        },
-                        onCancel: function(cropdata) {
-                            console.log('cancelling');
+            function getEditor() {
+                var editor = new IMSoftcrop.Editor(
+                        'imc_container',
+                        {
+                            autodetect: true,
+                            debug: false,
+                            debugElement: document.getElementById('imc_debug')
                         }
-                    }
-            );
-
-            editor.addImage(
-                    'examples/picture.jpg',
-                    function(image) {
-                        this.addSoftcrop(1, 1, true);
-                        this.addSoftcrop(16, 9, false);
-                        this.addSoftcrop(3, 2, false);
-                    }
-            );
+                );
+                return editor;
+            }
 
         </script>
     </body>

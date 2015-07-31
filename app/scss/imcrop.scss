@@ -1,9 +1,10 @@
 body {
-    margin: 10px;
-    padding: 10px;
+    margin: 0;
+    padding: 10px 10px 0 10px;
     font-family: 'Helvetica Neue', 'Arial', sans-serif;
     font-weight: 200;
     letter-spacing: 1px;
+  background: #EFF3F2;
 }
 
 #imc {
@@ -105,7 +106,7 @@ body {
 
     .imc_preview_image {
       position: relative;
-      margin: 7px 0 0 7px;
+      margin: 7px 7px 0 0;
       height: 80px;
       width: 80px;
       overflow: hidden;

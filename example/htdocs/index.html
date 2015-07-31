@@ -3,13 +3,78 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>IM Crop</title>
-
-    <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CropJS Example</title>
+
+    <link rel="stylesheet" href="index.css">
+
+    <script>
+        function openCropJS(image) {
+            var dlg = document.getElementById('dialog');
+            var editor = dlg.contentWindow.getEditor();
+
+            editor.onSave(function(cropdata) {
+                alert('boom');
+            });
+
+            editor.onCancel(function(cropdata) {
+                alert('cancel');
+            });
+
+            editor.addImage(
+                    image.url,
+                    function (image) {
+                        this.addSoftcrop(1, 1, true);
+                        this.addSoftcrop(16, 9, false);
+                        this.addSoftcrop(3, 2, false);
+                    }
+            );
+
+            dlg.classList.add('open');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var imageInput = document.getElementById('imageinput');
+            var progressBar = document.querySelector('progress');
+
+            imageInput.addEventListener('change', function(event) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
+
+                xhr.onload = function(event) {
+                    if (xhr.status == 200) {
+                        openCropJS(JSON.parse(xhr.responseText));
+                    }
+                };
+
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        progressBar.value = (e.loaded / e.total) * 100;
+                        progressBar.textContent = progressBar.value;
+                    }
+                };
+
+                var formData = new FormData(
+                    document.getElementById('imageform')
+                );
+                xhr.send(formData);
+            });
+        });
+    </script>
 </head>
 
+
+
 <body>
-    hello html
+    <form enctype="multipart/form-data" method="post" action="/upload" id="imageform">
+        <label for="imageinput">Add image</label>
+        <input type="file" id="imageinput" name="imageinput">
+        <progress min="0" max="100" value="0">0% complete</progress>
+    </form>
+
+    <iframe src="cropjs/" id="dialog" seamless="seamless"></iframe>
+
+    <ol id="imagelist"></ol>
 </body>
 </html>
