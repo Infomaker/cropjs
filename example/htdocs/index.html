@@ -10,18 +10,28 @@
     <link rel="stylesheet" href="index.css">
 
     <script>
+        /**
+         * Open CropJS dialog
+         */
         function openCropJS(image) {
+            // Get iframe where cropjs is loaded
             var dlg = document.getElementById('dialog');
+
+            // Get access to the editor object
             var editor = dlg.contentWindow.getEditor();
 
+            // Add save handler
             editor.onSave(function(cropdata) {
-                alert('boom');
+                dlg.classList.remove('open');
+                addImageToDocument(cropdata);
             });
 
+            // Add cancel handelr
             editor.onCancel(function(cropdata) {
-                alert('cancel');
+                dlg.classList.remove('open');
             });
 
+            // Load image with crops
             editor.addImage(
                     image.url,
                     function (image) {
@@ -31,9 +41,48 @@
                     }
             );
 
+            // Show the dialog
             dlg.classList.add('open');
         }
 
+
+        /**
+         * Add image to document and display all crops
+         */
+        function addImageToDocument(image) {
+
+            var li = document.createElement('li');
+
+            for (var n = 0; n < image.crops.length; n++) {
+                var crop = image.crops[n];
+
+                var previewHeight = 80;
+                var previewWidth = 80 * (crop.width / crop.height);
+                var cropRatio = previewWidth / crop.width;
+
+
+                var div = document.createElement('div');
+                div.style.height = previewHeight + 'px';
+                div.style.width = previewWidth + 'px';
+
+                var img = document.createElement('img');
+                img.src = image.src;
+                img.style.height = image.height * cropRatio + 'px';
+                img.style.marginTop = '-' + crop.y * cropRatio + 'px';
+                img.style.marginLeft = '-' + crop.x * cropRatio + 'px';
+
+
+                div.appendChild(img);
+                li.appendChild(div);
+            }
+
+            var list = document.getElementById('imagelist');
+            list.appendChild(li);
+        }
+
+        /**
+         * Upload image locally
+         */
         document.addEventListener('DOMContentLoaded', function() {
             var imageInput = document.getElementById('imageinput');
             var progressBar = document.querySelector('progress');
@@ -44,6 +93,7 @@
 
                 xhr.onload = function(event) {
                     if (xhr.status == 200) {
+                        // Open crop dialog
                         openCropJS(JSON.parse(xhr.responseText));
                     }
                 };
