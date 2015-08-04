@@ -17,6 +17,12 @@
         <div id="imc">
             <div id="imc_container">
 
+                <canvas id="imc_canvas"></canvas>
+
+                <div id="imc_work_container">
+                    <div id="imc_preview_container" class="imc_preview_container"></div>
+                </div>
+
                 <div id="imc_loading">
                     <i class="fa fa-cog fa-spin"></i>
                 </div>
@@ -71,9 +77,13 @@
         <script src="js/tracking.js"></script>
         <script src="js/cropjs.js"></script>
         <script>
-
+            var editor;
             function getEditor() {
-                var editor = new IMSoftcrop.Editor(
+                if (typeof editor != 'undefined') {
+                    return editor;
+                }
+
+                editor = new IMSoftcrop.Editor(
                         'imc_container',
                         {
                             autodetect: true,
@@ -81,6 +91,7 @@
                             debugElement: document.getElementById('imc_debug')
                         }
                 );
+
                 return editor;
             }
 

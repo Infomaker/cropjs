@@ -11,6 +11,9 @@ var IMSoftcrop = (function() {
         // Editor canvas
         _canvas: undefined,
 
+        // True if redraw canvas is necessary
+        _redrawCanvas: false,
+
         // Preview container element
         _previewContainer: undefined,
 
@@ -74,7 +77,6 @@ var IMSoftcrop = (function() {
 
 
 
-
         /**
          * Constructor
          *
@@ -84,11 +86,14 @@ var IMSoftcrop = (function() {
          */
         _construct: function (id, options) {
             this._id = id;
-            this.renderGui();
+            this.setupUI();
             this.adjustForPixelRatio();
 
             this.calculateViewport();
             this.addCanvasEventListeners();
+
+            this.setupAnimation();
+            this.runAnimation();
 
             // Options
             if (typeof options == 'object') {
@@ -160,67 +165,106 @@ var IMSoftcrop = (function() {
 
 
         /**
-         * Add onSave callback function
-         * @param {function} func
+         * Get hold of references to the main gui elements
+         *
+         * div#imc_container
+         *     canvas#imc_canvas
+         *     div#imc_work_container
+         *         div#imc_preview_container.imc_preview_container
+         *
+         * @private
          */
-        onSave: function(func) {
-            if(typeof func == 'function') {
-                this._onSave = func;
+        setupUI: function () {
+            this._container = document.getElementById(this._id);
+            if (!this._container) {
+                throw new Error('Container element with id <' + this._id + '> not found');
+            }
+
+            this._previewContainer = document.getElementById('imc_preview_container');
+            if (!this._previewContainer) {
+                throw new Error('Preview element with id <imc_preview_container> not found');
+            }
+
+            this._canvas = document.getElementById('imc_canvas');
+            if (!this._canvas) {
+                throw new Error('Canvas element with id <imc_canvas_initial> not found');
             }
         },
 
 
         /**
-         * Add onSave callback function
-         * @param {function} func
+         * Setup animation through either native requestAnimationFrame or fallback
          */
-        onCancel: function(func) {
-            if(typeof func == 'function') {
-                this._onCancel = func;
+        setupAnimation: function() {
+            var lastTime = 0;
+            var vendors = ['webkit', 'moz'];
+
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelAnimationFrame =
+                    window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+            }
+
+            if (!window.requestAnimationFrame) {
+                window.requestAnimationFrame = function (callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function () {
+                            callback(currTime + timeToCall);
+                        },
+                        timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+            }
+
+            if (!window.cancelAnimationFrame) {
+                window.cancelAnimationFrame = function (id) {
+                    clearTimeout(id);
+                };
             }
         },
 
 
         /**
-         * Save image crops
+         * Run animation
          */
-        onButtonSave: function() {
-            if (typeof this._onSave != 'function') {
-                console.log('User save function not defined');
+        runAnimation: function() {
+            var _this = this;
+            requestAnimationFrame(function() {
+                _this.runAnimation();
+            });
+
+            if (!this._redrawCanvas) {
                 return;
             }
 
-            var data = {
-                src: this._image._src,
-                width: this._image._w,
-                height: this._image._h,
-                crops: []
-            };
+            this._redrawCanvas = false;
+            //this.adjustForPixelRatio();
 
-            for(var n = 0; n < this._image._crops.length; n++) {
-                data.crops.push({
-                    name: this._image._crops[n].id,
-                    x: Math.round(this._image._crops[n]._x),
-                    y: Math.round(this._image._crops[n]._y),
-                    width: Math.round(this._image._crops[n]._w),
-                    height: Math.round(this._image._crops[n]._h)
+            if (this._image instanceof IMSoftcrop.Image) {
+                this._image.redraw({
+                    guides: this._guidesToggle.on,
+                    focuspoints: this._focusPointsToggle.on
                 });
+
+                this._renderPreviews();
             }
 
-            this._onSave(data);
+            if (this._debug) {
+                this._renderDebug();
+            }
         },
+
+
 
         /**
-         * Cancel function
+         * Tell editor a redraw is necessary
          */
-        onButtonCancel: function() {
-            if (typeof this._onSave != 'function') {
-                console.log('User cancel function not defined');
-                return;
-            }
-
-            this._onCancel();
+        redraw: function () {
+            this._redrawCanvas = true;
         },
+
 
         /**
          * Toggle loading spinning indicator
@@ -243,25 +287,17 @@ var IMSoftcrop = (function() {
         },
 
         /**
-         * Render main gui elements
-         * @private
+         * Clear GUI when adding/switching image
          */
-        renderGui: function () {
-            this._container = document.getElementById(this._id);
-            if (!this._container) {
-                throw new Error('Container element with id <' + this._id + '> not found');
+        cleanGui: function() {
+            this._crop = null;
+            for(var n = 0; n < this._crops.length; n++) {
+                this._crops[n] = null;
             }
+            this._crops = [];
 
-            this._previewContainer = document.createElement('div');
-            this._previewContainer.className = 'imc_preview_container';
-
-            var workContainer = document.createElement('div');
-            workContainer.id = 'imc_work_container';
-            workContainer.appendChild(this._previewContainer);
-
-            this._canvas = document.createElement('canvas');
-            this._container.appendChild(this._canvas);
-            this._container.appendChild(workContainer);
+            this._image = undefined;
+            this._crop = undefined;
         },
 
         /**
@@ -270,6 +306,10 @@ var IMSoftcrop = (function() {
          */
         _renderPreviews: function () {
             if (!this._image.isReady()) {
+                return;
+            }
+
+            if (this._crops.length > 0) {
                 return;
             }
 
@@ -351,7 +391,7 @@ var IMSoftcrop = (function() {
          */
         _renderUpdatedPreview: function (crop) {
             var pvDiv = document.getElementById(this._image.id + '_' + crop.id);
-            if (typeof pvDiv != 'object') {
+            if (pvDiv == null || typeof pvDiv != 'object') {
                 return;
             }
 
@@ -386,28 +426,6 @@ var IMSoftcrop = (function() {
             };
         },
 
-
-        /**
-         * Redraw canvas
-         */
-        redraw: function () {
-            this.adjustForPixelRatio();
-
-            if (this._image instanceof IMSoftcrop.Image) {
-
-                this._image.redraw({
-                    guides: this._guidesToggle.on,
-                    focuspoints: this._focusPointsToggle.on
-                });
-
-                this._renderPreviews();
-            }
-
-            if (this._debug) {
-                this._renderDebug();
-            }
-        },
-
         /**
          * Adjust canvas for pixel ratio
          * @param canvas
@@ -434,9 +452,8 @@ var IMSoftcrop = (function() {
                 c.style.width = oldWidth + 'px';
                 c.style.height = oldHeight + 'px';
 
-                // now scale the context to counter
-                // the fact that we've manually scaled
-                // our canvas element
+                // now scale the context to counter the fact that we've
+                // manually scaled our canvas element
                 ctx.scale(ratio, ratio);
                 this._scale = ratio;
             }
@@ -929,8 +946,18 @@ var IMSoftcrop = (function() {
                 'keydown',
                 function (e) {
                     var keyCode = e.keyCode || e.which;
-                    if (keyCode == 9) {
 
+                    // Handle escape key
+                    if (keyCode == 27) {
+                        _this.onCancel();
+
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+
+                    // Handle tab key
+                    if (keyCode == 9) {
                         var crops = _this._image.getCrops();
                         var current;
                         for (var n = 0; n < crops.length; n++) {
@@ -959,6 +986,70 @@ var IMSoftcrop = (function() {
                 },
                 false
             );
+        },
+
+
+        /**
+         * Add onSave callback function
+         * @param {function} func
+         */
+        onSave: function(func) {
+            if(typeof func == 'function') {
+                this._onSave = func;
+            }
+        },
+
+
+        /**
+         * Add onSave callback function
+         * @param {function} func
+         */
+        onCancel: function(func) {
+            if(typeof func == 'function') {
+                this._onCancel = func;
+            }
+        },
+
+
+        /**
+         * Save image crops
+         */
+        onButtonSave: function() {
+            if (typeof this._onSave != 'function') {
+                console.log('User save function not defined');
+                return;
+            }
+
+            var data = {
+                src: this._image._src,
+                width: this._image._w,
+                height: this._image._h,
+                crops: []
+            };
+
+            for(var n = 0; n < this._image._crops.length; n++) {
+                data.crops.push({
+                    name: this._image._crops[n].id,
+                    x: Math.round(this._image._crops[n]._x),
+                    y: Math.round(this._image._crops[n]._y),
+                    width: Math.round(this._image._crops[n]._w),
+                    height: Math.round(this._image._crops[n]._h)
+                });
+            }
+
+            this._onSave(data);
+        },
+
+        /**
+         * Cancel function
+         */
+        onButtonCancel: function() {
+            if (typeof this._onSave != 'function') {
+                console.log('User cancel function not defined');
+                return;
+            }
+
+            this._onCancel();
         },
 
 
