@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="index.css">
 
     <script>
+        var editor;
+
         /**
          * Open CropJS dialog
          */
@@ -18,18 +20,21 @@
             var dlg = document.getElementById('dialog');
 
             // Get access to the editor object
-            var editor = dlg.contentWindow.getEditor();
+            if (typeof editor == 'undefined') {
+                editor = dlg.contentWindow.getEditor();
 
-            // Add save handler
-            editor.onSave(function(cropdata) {
-                dlg.classList.remove('open');
-                addImageToDocument(cropdata);
-            });
+                // Add save handler
+                editor.onSave(function (cropdata) {
+                    dlg.classList.remove('open');
+                    addImageToDocument(cropdata);
+                });
 
-            // Add cancel handelr
-            editor.onCancel(function(cropdata) {
-                dlg.classList.remove('open');
-            });
+                // Add cancel handelr
+                editor.onCancel(function (cropdata) {
+                    dlg.classList.remove('open');
+                });
+            }
+
 
             // Load image with crops
             editor.addImage(

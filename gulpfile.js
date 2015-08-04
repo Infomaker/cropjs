@@ -86,7 +86,9 @@ gulp.task('scripts-cropjs', function() {
 
     return gulp.src(files)
         .pipe(concat('cropjs.js'))
+        .pipe(banner())
         .pipe(gulp.dest('build/js'))
+        .pipe(rename('cropjs.min.js'))
         .pipe(uglify())
         .pipe(banner())
         .pipe(gulp.dest('build/js'));
