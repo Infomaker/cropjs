@@ -1,4 +1,4 @@
-(function() {
+(function(IMSoftcrop) {
     IMSoftcrop.Ratio = function(){};
 
     /**
@@ -185,4 +185,4 @@
         return Math.round(100 * (w1 * h1) / (w2 * h2));
     };
 
-})();
+})(IMSoftcrop);

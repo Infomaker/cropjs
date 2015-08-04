@@ -1,557 +1,619 @@
-(function() {
-    IMSoftcrop.Softcrop = IMSoftcrop.Base.extend({
-        id: undefined,
-        _lineWidth: 1,
-        _lineColor: 'rgba(255, 255, 255, 1)',
-        _lineColorActive: 'rgba(0, 255, 255, 1)',
+(function(IMSoftcrop) {
+    /**
+     * Soft crop constructor
+     *
+     * @constructor
+     *
+     * @param {object} parent
+     * @param {int} hRatio
+     * @param {int} vRatio
+     * @param {object} area
+     * @param {boolean} respectRatio
+     *
+     * @extends IMSoftcrop.Shape
+     */
+    IMSoftcrop.Softcrop = function (parent, hRatio, vRatio, area, respectRatio) {
+        // Call super constructor
+        IMSoftcrop.Shape.call(this, hRatio + ':' + vRatio, parent);
 
-        _handleThickness: 3,
-        _handleLength: 14,
+        this.x = area.x;
+        this.y = area.y;
+        this.w = area.w;
+        this.h = area.h;
 
-        // Drawing positions of handles
-        _handles: {
-            nw: [0, 0, 0],
-            n: [0, 0, 0],
-            ne: [0, 0, 0],
-            e: [0, 0, 0],
-            se: [0, 0, 0],
-            s: [0, 0, 0],
-            sw: [0, 0, 0],
-            w: [0, 0, 0]
-        },
+        this.respectRatio = respectRatio;
+        this.ratio = {
+            w: hRatio,
+            h: vRatio,
+            f: IMSoftcrop.Ratio.decimal(hRatio, vRatio)
+        };
 
-        // Focused handle
-        _handle: undefined,
+        this.ready = true;
+    };
 
-        // Ratio handling
-        ratio: {
-            w: 1,
-            h: 1,
-            f: 1
-        },
-        respectRatio: true,
+    /**
+     * IMSoftcrop.Softcrop prototype
+     */
+    IMSoftcrop.Softcrop.prototype = Object.create(
+        Shape.prototype,
+        {
+            lineWidth: {
+                value: 1
+            },
 
-        // Warning for possible bad cropping
-        autoCropWarning: false,
+            lineColor: {
+                value: 'rgba(255, 255, 255, 1)'
+            },
 
-        /**
-         * Soft crop constructor
-         * @param parent
-         * @param hRatio
-         * @param vRatio
-         * @param area
-         * @param respectRatio
-         * @private
-         */
-        _construct: function (parent, hRatio, vRatio, area, respectRatio) {
-            this.id = hRatio + ':' + vRatio;
-            this._super(parent);
+            lineColorActive: {
+                value: 'rgba(0, 255, 255, 1)'
+            },
 
-            this._x = area.x;
-            this._y = area.y;
-            this._w = area.w;
-            this._h = area.h;
+            handleThickness: {
+                value: 3
+            },
 
-            this.respectRatio = respectRatio;
-            this.ratio = {
-                w: hRatio,
-                h: vRatio,
-                f: IMSoftcrop.Ratio.decimal(hRatio, vRatio)
-            };
+            handleLength: {
+                value: 14
+            },
 
-            this.isReady(true);
-        },
+            // Drawing positions of handles
+            handles: {
+                value: {
+                    nw: [0, 0, 0],
+                    n: [0, 0, 0],
+                    ne: [0, 0, 0],
+                    e: [0, 0, 0],
+                    se: [0, 0, 0],
+                    s: [0, 0, 0],
+                    sw: [0, 0, 0],
+                    w: [0, 0, 0]
+                }
+            },
+
+            // Focused handle
+            handle: {
+                writable: true
+            },
+
+            // Ratio handling
+            ratio: {
+                value: {
+                    w: 1,
+                    h: 1,
+                    f: 1
+                },
+                writable: true
+            },
+
+            // Respect ratio or not
+            respectRatio: {
+                value: true,
+                writable: true
+            },
+
+            // Warning for possible bad cropping
+            autoCropWarning: {
+                value: false,
+                writable: true
+            },
 
 
-        /**
-         * Drag a handle
-         *
-         * @fixme Must enforce dimensions throught any drag events
-         *
-         * @param handle
-         * @param point
-         */
-        dragHandle: function (handle, point) {
-            if (typeof this._handle != 'string') {
-                return;
-            }
 
-            var i = this._parent.getDimensions();
-            var x = this._x;
-            var y = this._y;
-            var w = this._w;
-            var h = this._h;
 
-            switch (handle) {
-                case 'n':
-                    y += point.y;
-                    h -= point.y;
-                    w = IMSoftcrop.Ratio.width(h, this.ratio.f);
-                    x += IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
-                    break;
+            /**
+             * Drag a handle
+             *
+             * @fixme Must enforce dimensions throught any drag events
+             *
+             * @param handle
+             * @param point
+             */
+            dragHandle: {
+                value: function (handle, point) {
+                    if (typeof this.handle != 'string') {
+                        return;
+                    }
 
-                case 'e':
-                    w += point.x;
-                    h = IMSoftcrop.Ratio.height(w, this.ratio.f);
-                    y -= IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
-                    break;
+                    var i = this.parent.getDimensions();
+                    var x = this.x;
+                    var y = this.y;
+                    var w = this.w;
+                    var h = this.h;
 
-                case 's':
-                    h += point.y;
-                    w = IMSoftcrop.Ratio.width(h, this.ratio.f);
-                    x -= IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
-                    break;
+                    switch (handle) {
+                        case 'n':
+                            y += point.y;
+                            h -= point.y;
+                            w = IMSoftcrop.Ratio.width(h, this.ratio.f);
+                            x += IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
+                            break;
 
-                case 'w':
-                    w -= point.x;
-                    x += point.x;
-                    h = IMSoftcrop.Ratio.height(w, this.ratio.f);
-                    y += IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
-                    break;
+                        case 'e':
+                            w += point.x;
+                            h = IMSoftcrop.Ratio.height(w, this.ratio.f);
+                            y -= IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
+                            break;
 
-                case 'nw':
-                    if (Math.abs(point.x) > Math.abs(point.y)) {
-                        w -= point.x;
-                        x += point.x;
-                        h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
-                        y += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                        case 's':
+                            h += point.y;
+                            w = IMSoftcrop.Ratio.width(h, this.ratio.f);
+                            x -= IMSoftcrop.Ratio.width((point.y / 2), this.ratio.f);
+                            break;
+
+                        case 'w':
+                            w -= point.x;
+                            x += point.x;
+                            h = IMSoftcrop.Ratio.height(w, this.ratio.f);
+                            y += IMSoftcrop.Ratio.height((point.x / 2), this.ratio.f);
+                            break;
+
+                        case 'nw':
+                            if (Math.abs(point.x) > Math.abs(point.y)) {
+                                w -= point.x;
+                                x += point.x;
+                                h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                                y += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                            }
+                            else {
+                                h -= point.y;
+                                y += point.y;
+                                w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                                x += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                            }
+                            break;
+
+                        case 'ne':
+                            if (Math.abs(point.x) > Math.abs(point.y)) {
+                                w += point.x;
+                                h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                                y -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+
+                            }
+                            else {
+                                w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                                h -= point.y;
+                                y += point.y;
+                            }
+                            break;
+
+                        case 'se':
+                            if (Math.abs(point.x) > Math.abs(point.y)) {
+                                w += point.x;
+                                h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                            }
+                            else {
+                                h += point.y;
+                                w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                            }
+                            break;
+
+                        case 'sw':
+                            if (Math.abs(point.x) > Math.abs(point.y)) {
+                                w -= point.x;
+                                x += point.x;
+                                h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                            }
+                            else {
+                                w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                                x -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                                h += point.y;
+                            }
+                            break;
+
+                    }
+
+                    // Stop reversing of dimensions
+                    if (h < 40 || w < 40) {
+                        return;
+                    }
+
+                    // Enforce width/height and top/left boundaries
+                    if (w > i.w || h > i.h) {
+                        return;
+                    }
+
+                    // Enforce bottom/right boundaries
+                    if (x + w > i.w || y + h > i.h) {
+                        return;
+                    }
+
+                    if (x < 0) {
+                        x = 0;
+                    }
+
+                    if (y < 0) {
+                        y = 0;
+                    }
+
+
+                    this.x = Math.round(x);
+                    this.y = Math.round(y);
+                    this.w = Math.round(w);
+                    this.h = Math.round(h);
+                }
+            },
+
+
+            /**
+             * Move crop area
+             *
+             * @param point
+             */
+            move: {
+                value: function (point) {
+                    var i = this.parent.getDimensions();
+
+                    if (this.x + point.x < 0) {
+                        this.x = 0;
+                        point.x = 0;
+                    }
+
+                    if (this.y + point.y < 0) {
+                        point.y = 0;
+                        this.y = 0;
+                    }
+
+                    if (this.w + this.x + Math.round(point.x) > i.w) {
+                        point.x = i.w - this.w;
+                        return;
+                    }
+
+                    if (this.h + this.y + Math.round(point.y) > i.h) {
+                        point.y = i.h - this.h;
+                        return;
+                    }
+
+
+                    IMSoftcrop.Shape.prototype.move.call(this, point);
+                }
+            },
+
+
+            /**
+             * Return handle name if mouse hover over it
+             *
+             * @param point
+             * @returns {*}
+             */
+            overHandle: {
+                value: function (point) {
+                    var handle = '';
+                    var vDir = this.overVerticalArea(point);
+                    var hDir = this.overHorizontalArea(point);
+
+                    if ((hDir || vDir) && (!hDir || !vDir)) {
+                        handle = '';
+                    }
+                    else if (hDir == vDir) {
+                        handle = '';
                     }
                     else {
-                        h -= point.y;
-                        y += point.y;
-                        w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
-                        x += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                        handle = hDir + vDir;
+                        handle = handle.replace('m', '');
                     }
-                    break;
 
-                case 'ne':
-                    if (Math.abs(point.x) > Math.abs(point.y)) {
-                        w += point.x;
-                        h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
-                        y -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
 
+                    if (handle === '') {
+                        this.handle = false;
                     }
                     else {
-                        w -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
-                        h -= point.y;
-                        y += point.y;
+                        this.handle = handle;
                     }
-                    break;
 
-                case 'se':
-                    if (Math.abs(point.x) > Math.abs(point.y)) {
-                        w += point.x;
-                        h += IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                    return this.handle;
+                }
+            },
+
+
+            /**
+             * Find out if and if so which horizontal area mouse is over
+             * @param point
+             * @returns {string}
+             * @private
+             */
+            overHorizontalArea: {
+                value: function (point) {
+                    var left = this.drawX - this.handleThickness;
+                    var right = this.drawX + this.drawW + this.handleThickness;
+
+                    if (this.withinCoordinates(
+                            point,
+                            left, this.drawY + this.drawH - this.handleLength + this.handleThickness,
+                            right, this.drawY + this.drawH + this.handleThickness)) {
+                        // Is in southern area
+                        return 's';
                     }
-                    else {
-                        h += point.y;
-                        w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
+                    else if (this.withinCoordinates(
+                            point,
+                            left, this.drawY + (this.drawH / 2) - this.handleLength,
+                            right, this.drawY + (this.drawH / 2) + this.handleLength)) {
+                        // Is in middle area
+                        return 'm';
                     }
-                    break;
-
-                case 'sw':
-                    if (Math.abs(point.x) > Math.abs(point.y)) {
-                        w -= point.x;
-                        x += point.x;
-                        h -= IMSoftcrop.Ratio.height(point.x, this.ratio.f);
+                    else if (this.withinCoordinates(
+                            point,
+                            left, this.drawY - this.handleThickness,
+                            right, this.drawY + this.handleLength)) {
+                        // Is in northern area
+                        return 'n';
                     }
-                    else {
-                        w += IMSoftcrop.Ratio.width(point.y, this.ratio.f);
-                        x -= IMSoftcrop.Ratio.width(point.y, this.ratio.f);
-                        h += point.y;
+
+                    return '';
+                }
+            },
+
+            /**
+             * Find out if and if so which vertical area mouse is over
+             * @param point
+             * @returns {string}
+             * @private
+             */
+            overVerticalArea: {
+                value: function (point) {
+                    var top = this.drawY - this.handleThickness;
+                    var bottom = this.drawY + this.drawH + this.handleThickness;
+
+                    if (this.withinCoordinates(
+                            point,
+                            this.drawX + this.drawW - this.handleLength, top,
+                            this.drawX + this.drawW + this.handleThickness, bottom)) {
+                        // Is in western drag area
+                        return 'e';
                     }
-                    break;
-
-            }
-
-            // Stop reversing of dimensions
-            if (h < 40 || w < 40) {
-                return;
-            }
-
-            // Enforce width/height and top/left boundaries
-            if (w > i.w || h > i.h) {
-                return;
-            }
-
-            // Enforce bottom/right boundaries
-            if (x + w > i.w || y + h > i.h) {
-                return;
-            }
-
-            if (x < 0) {
-                x = 0;
-            }
-
-            if (y < 0) {
-                y = 0;
-            }
-
-
-            this._x = Math.round(x);
-            this._y = Math.round(y);
-            this._w = Math.round(w);
-            this._h = Math.round(h);
-        },
-
-
-        /**
-         * Move crop area
-         *
-         * @param point
-         */
-        move: function (point) {
-            var i = this._parent.getDimensions();
-
-            if (this._x + point.x < 0) {
-                this._x = 0;
-                point.x = 0;
-            }
-
-            if (this._y + point.y < 0) {
-                point.y = 0;
-                this.y = 0;
-            }
-
-            if (this._w + this._x + Math.round(point.x) > i.w) {
-                point.x = i.w - this._w;
-                return;
-            }
-
-            if (this._h + this._y + Math.round(point.y) > i.h) {
-                point.y = i.h - this._h;
-                return;
-            }
-
-
-            this._super(point);
-        },
-
-
-        /**
-         * Return handle name if mouse hover over it
-         *
-         * @param point
-         * @returns {*}
-         */
-        overHandle: function (point) {
-            var handle = '';
-            var vDir = this._overVerticalArea(point);
-            var hDir = this._overHorizontalArea(point);
-
-            if ((hDir || vDir) && (!hDir || !vDir)) {
-                handle = '';
-            }
-            else if (hDir == vDir) {
-                handle = '';
-            }
-            else {
-                handle = hDir + vDir;
-                handle = handle.replace('m', '');
-            }
-
-
-            if (handle === '') {
-                this._handle = false;
-            }
-            else {
-                this._handle = handle;
-            }
-
-            return this._handle;
-        },
-
-
-        /**
-         * Find out if and if so which horizontal area mouse is over
-         * @param point
-         * @returns {string}
-         * @private
-         */
-        _overHorizontalArea: function (point) {
-            var left = this._drawX - this._handleThickness;
-            var right = this._drawX + this._drawW + this._handleThickness;
-
-            if (this.withinCoordinates(
-                    point,
-                    left, this._drawY + this._drawH - this._handleLength + this._handleThickness,
-                    right, this._drawY + this._drawH + this._handleThickness)) {
-                // Is in southern area
-                return 's';
-            }
-            else if (this.withinCoordinates(
-                    point,
-                    left, this._drawY + (this._drawH / 2) - this._handleLength,
-                    right, this._drawY + (this._drawH / 2) + this._handleLength)) {
-                // Is in middle area
-                return 'm';
-            }
-            else if (this.withinCoordinates(
-                    point,
-                    left, this._drawY - this._handleThickness,
-                    right, this._drawY + this._handleLength)) {
-                // Is in northern area
-                return 'n';
-            }
-
-            return '';
-        },
-
-        /**
-         * Find out if and if so which vertical area mouse is over
-         * @param point
-         * @returns {string}
-         * @private
-         */
-        _overVerticalArea: function (point) {
-            var top = this._drawY - this._handleThickness;
-            var bottom = this._drawY + this._drawH + this._handleThickness;
-
-            if (this.withinCoordinates(
-                    point,
-                    this._drawX + this._drawW - this._handleLength, top,
-                    this._drawX + this._drawW + this._handleThickness, bottom)) {
-                // Is in western drag area
-                return 'e';
-            }
-            else if (this.withinCoordinates(
-                    point,
-                    this._drawX + (this._drawW / 2) - this._handleLength, top,
-                    this._drawX + (this._drawW / 2) + this._handleLength, bottom)) {
-                // Is in western drag area
-                return 'm';
-            }
-            else if (this.withinCoordinates(
-                    point,
-                    this._drawX - this._handleThickness, top,
-                    this._drawX + this._handleLength, bottom)) {
-                // Is in western drag area
-                return 'w';
-            }
-
-            return '';
-        },
-
-
-        /**
-         * Redraw image
-         * @param options
-         */
-        redraw: function (options) {
-            if (!this.isReady()) {
-                return;
-            }
-
-            this.getDimensionsInCanvas(this._parent.getCoordinates());
-
-            // Draw area outside crop
-            this._drawCropMargins();
-
-            // Draw crop handles
-            var doubleLength = this._handleLength * 2;
-
-            this._ctx.beginPath();
-            this._drawHandle('nw', false, this._drawX, this._drawY, this._handleLength, this._handleThickness);
-            this._drawHandle('se', false, this._drawXW, this._drawYH, this._handleLength, this._handleThickness);
-            this._drawHandle('ne', false, this._drawXW, this._drawY, this._handleLength, this._handleThickness);
-            this._drawHandle('sw', false, this._drawX, this._drawYH, this._handleLength, this._handleThickness);
-
-            var halfDrawWidth = this._drawW / 2;
-            var halfDrawHeight = this._drawH / 2;
-            this._drawHandle('n', false, this._drawX + halfDrawWidth, this._drawY, doubleLength, this._handleThickness);
-            this._drawHandle('e', false, this._drawXW, this._drawY + halfDrawHeight, doubleLength, this._handleThickness);
-            this._drawHandle('s', false, this._drawX + halfDrawWidth, this._drawYH, doubleLength, this._handleThickness);
-            this._drawHandle('w', false, this._drawX, this._drawY + halfDrawHeight, doubleLength, this._handleThickness);
-            this._ctx.stroke();
-            this._ctx.closePath();
-
-            // Draw border
-            this._drawCropBorder();
-
-            // Draw guidelines inside crop
-            if (typeof options == 'object' && options.guides === true) {
-                this._drawCropGuidelines();
-            }
-        },
-
-
-        /**
-         * Draw guide lines inside crop
-         *
-         * @private
-         */
-        _drawCropGuidelines: function () {
-            this._ctx.closePath();
-            this._ctx.beginPath();
-
-            if (this._ctx.setLineDash) {
-                this._ctx.setLineDash([3, 3]);
-            }
-            this._ctx.strokeStyle = 'rgba(55, 55, 55, 0.5)';
-            this._ctx.lineWidth = 1;
-
-            var stepY = this._drawH / 3,
-                stepX = this._drawW / 3;
-
-            // Horizontal line 1
-            this._ctx.moveTo(this._drawX, this._drawY + stepY);
-            this._ctx.lineTo(this._drawX + this._drawW, this._drawY + stepY);
-
-            // Horizontal line 2
-            this._ctx.moveTo(this._drawX, this._drawY + stepY + stepY);
-            this._ctx.lineTo(this._drawX + this._drawW, this._drawY + stepY + stepY);
-
-            // Vertical line 1
-            this._ctx.moveTo(this._drawX + stepX, this._drawY);
-            this._ctx.lineTo(this._drawX + stepX, this._drawY + this._drawH);
-
-            // Horizontal line 2
-            this._ctx.moveTo(this._drawX + stepX + stepX, this._drawY);
-            this._ctx.lineTo(this._drawX + stepX + stepX, this._drawY + this._drawH);
-
-            this._ctx.stroke();
-
-            if (this._ctx.setLineDash) {
-                this._ctx.setLineDash([]);
-            }
-
-            this._ctx.closePath();
-        },
-
-
-        /**
-         * Draw crop border
-         *
-         * @private
-         */
-        _drawCropBorder: function () {
-            this._ctx.beginPath();
-
-            this._ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            this._ctx.lineWidth = 1;
-            this._ctx.rect(
-                this._drawX - 0.5,
-                this._drawY - 0.5,
-                this._drawW + 1,
-                this._drawH + 1
-            );
-
-            this._ctx.stroke();
-            this._ctx.closePath();
-        },
-
-
-        /**
-         * Draw dark areas outside crop area
-         *
-         * @private
-         */
-        _drawCropMargins: function () {
-            var imgDim = this._parent.getDimensions();
-
-            this._ctx.beginPath();
-            this._ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-
-            this._ctx.rect(
-                0,
-                0,
-                imgDim.w,
-                this._drawY
-            );
-
-            this._ctx.rect(
-                0,
-                0,
-                this._drawX,
-                imgDim.h
-            );
-
-            this._ctx.rect(
-                this._drawX,
-                this._drawYH,
-                imgDim.w,
-                imgDim.h
-            );
-
-            this._ctx.rect(
-                this._drawXW,
-                this._drawY,
-                imgDim.w,
-                this._drawH
-            );
-
-            this._ctx.fill();
-            this._ctx.closePath();
-        },
-
-
-        /**
-         * Draw crop area handle
-         * @param name
-         * @param active
-         * @param x
-         * @param y
-         * @param length
-         * @param thickness
-         *
-         * @protected
-         */
-        _drawHandle: function (name, active, x, y, length, thickness) {
-            var wOffset = thickness / 2;
-            var lOffset = length / 2;
-
-            this._ctx.lineWidth = thickness;
-            this._ctx.strokeStyle = !active ? this._lineColor : this._lineColorActive;
-
-
-            //noinspection FallThroughInSwitchStatementJS
-            switch (name) {
-                case 'se':
-                    // Just mirror values and fall through to nw
-                    wOffset = wOffset * -1;
-                    length = length * -1;
-
-                case 'nw':
-                    this._ctx.moveTo(x - wOffset, y + length);
-                    this._ctx.lineTo(x - wOffset, y - wOffset);
-                    this._ctx.lineTo(x + length, y - wOffset);
-
-                    this._handles[name] = [x, y, thickness, length];
-                    break;
-
-                case 'sw':
-                    // Just mirror values and fall through to ne
-                    wOffset = wOffset * -1;
-                    length = length * -1;
-
-                case 'ne':
-                    this._ctx.moveTo(x - length, y - wOffset);
-                    this._ctx.lineTo(x + wOffset, y - wOffset);
-                    this._ctx.lineTo(x + wOffset, y + length);
-
-                    this._handles[name] = [x, y, thickness, length];
-                    break;
-
-                case 'n':
-                    this._ctx.moveTo(x - lOffset, y - wOffset);
-                    this._ctx.lineTo(x + lOffset, y - wOffset);
-                    break;
-
-                case 's':
-                    this._ctx.moveTo(x - lOffset, y + wOffset);
-                    this._ctx.lineTo(x + lOffset, y + wOffset);
-                    break;
-
-                case 'w':
-                    this._ctx.moveTo(x - wOffset, y + lOffset);
-                    this._ctx.lineTo(x - wOffset, y - lOffset);
-                    break;
-
-                case 'e':
-                    this._ctx.moveTo(x + wOffset, y + lOffset);
-                    this._ctx.lineTo(x + wOffset, y - lOffset);
-                    break;
+                    else if (this.withinCoordinates(
+                            point,
+                            this.drawX + (this.drawW / 2) - this.handleLength, top,
+                            this.drawX + (this.drawW / 2) + this.handleLength, bottom)) {
+                        // Is in western drag area
+                        return 'm';
+                    }
+                    else if (this.withinCoordinates(
+                            point,
+                            this.drawX - this.handleThickness, top,
+                            this.drawX + this.handleLength, bottom)) {
+                        // Is in western drag area
+                        return 'w';
+                    }
+
+                    return '';
+                }
+            },
+
+
+            /**
+             * Redraw image
+             * @param options
+             */
+            redraw: {
+                value: function (options) {
+                    if (!this.ready) {
+                        return;
+                    }
+
+                    this.getDimensionsInCanvas(this.parent.getCoordinates());
+
+                    // Draw area outside crop
+                    this.drawCropMargins();
+
+                    // Draw crop handles
+                    var doubleLength = this.handleLength * 2;
+
+                    this.ctx.beginPath();
+                    this.drawHandle('nw', false, this.drawX, this.drawY, this.handleLength, this.handleThickness);
+                    this.drawHandle('se', false, this.drawXW, this.drawYH, this.handleLength, this.handleThickness);
+                    this.drawHandle('ne', false, this.drawXW, this.drawY, this.handleLength, this.handleThickness);
+                    this.drawHandle('sw', false, this.drawX, this.drawYH, this.handleLength, this.handleThickness);
+
+                    var halfDrawWidth = this.drawW / 2;
+                    var halfDrawHeight = this.drawH / 2;
+                    this.drawHandle('n', false, this.drawX + halfDrawWidth, this.drawY, doubleLength, this.handleThickness);
+                    this.drawHandle('e', false, this.drawXW, this.drawY + halfDrawHeight, doubleLength, this.handleThickness);
+                    this.drawHandle('s', false, this.drawX + halfDrawWidth, this.drawYH, doubleLength, this.handleThickness);
+                    this.drawHandle('w', false, this.drawX, this.drawY + halfDrawHeight, doubleLength, this.handleThickness);
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+
+                    // Draw border
+                    this.drawCropBorder();
+
+                    // Draw guidelines inside crop
+                    if (typeof options == 'object' && options.guides === true) {
+                        this.drawCropGuidelines();
+                    }
+                }
+            },
+
+
+            /**
+             * Draw guide lines inside crop
+             *
+             * @private
+             */
+            drawCropGuidelines: {
+                value: function () {
+                    this.ctx.closePath();
+                    this.ctx.beginPath();
+
+                    if (this.ctx.setLineDash) {
+                        this.ctx.setLineDash([3, 3]);
+                    }
+                    this.ctx.strokeStyle = 'rgba(55, 55, 55, 0.5)';
+                    this.ctx.lineWidth = 1;
+
+                    var stepY = this.drawH / 3,
+                        stepX = this.drawW / 3;
+
+                    // Horizontal line 1
+                    this.ctx.moveTo(this.drawX, this.drawY + stepY);
+                    this.ctx.lineTo(this.drawX + this.drawW, this.drawY + stepY);
+
+                    // Horizontal line 2
+                    this.ctx.moveTo(this.drawX, this.drawY + stepY + stepY);
+                    this.ctx.lineTo(this.drawX + this.drawW, this.drawY + stepY + stepY);
+
+                    // Vertical line 1
+                    this.ctx.moveTo(this.drawX + stepX, this.drawY);
+                    this.ctx.lineTo(this.drawX + stepX, this.drawY + this.drawH);
+
+                    // Horizontal line 2
+                    this.ctx.moveTo(this.drawX + stepX + stepX, this.drawY);
+                    this.ctx.lineTo(this.drawX + stepX + stepX, this.drawY + this.drawH);
+
+                    this.ctx.stroke();
+
+                    if (this.ctx.setLineDash) {
+                        this.ctx.setLineDash([]);
+                    }
+
+                    this.ctx.closePath();
+                }
+            },
+
+
+            /**
+             * Draw crop border
+             *
+             * @private
+             */
+            drawCropBorder: {
+                value: function () {
+                    this.ctx.beginPath();
+
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.rect(
+                        this.drawX - 0.5,
+                        this.drawY - 0.5,
+                        this.drawW + 1,
+                        this.drawH + 1
+                    );
+
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+                }
+            },
+
+
+            /**
+             * Draw dark areas outside crop area
+             *
+             * @private
+             */
+            drawCropMargins: {
+                value: function () {
+                    var imgDim = this.parent.getDimensions();
+
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+
+                    this.ctx.rect(
+                        0,
+                        0,
+                        imgDim.w,
+                        this.drawY
+                    );
+
+                    this.ctx.rect(
+                        0,
+                        0,
+                        this.drawX,
+                        imgDim.h
+                    );
+
+                    this.ctx.rect(
+                        this.drawX,
+                        this.drawYH,
+                        imgDim.w,
+                        imgDim.h
+                    );
+
+                    this.ctx.rect(
+                        this.drawXW,
+                        this.drawY,
+                        imgDim.w,
+                        this.drawH
+                    );
+
+                    this.ctx.fill();
+                    this.ctx.closePath();
+                }
+            },
+
+
+            /**
+             * Draw crop area handle
+             * @param name
+             * @param active
+             * @param x
+             * @param y
+             * @param length
+             * @param thickness
+             *
+             * @protected
+             */
+            drawHandle: {
+                value: function (name, active, x, y, length, thickness) {
+                    var wOffset = thickness / 2;
+                    var lOffset = length / 2;
+
+                    this.ctx.lineWidth = thickness;
+                    this.ctx.strokeStyle = !active ? this.lineColor : this.lineColorActive;
+
+
+                    //noinspection FallThroughInSwitchStatementJS
+                    switch (name) {
+                        case 'se':
+                            // Just mirror values and fall through to nw
+                            wOffset = wOffset * -1;
+                            length = length * -1;
+
+                        case 'nw':
+                            this.ctx.moveTo(x - wOffset, y + length);
+                            this.ctx.lineTo(x - wOffset, y - wOffset);
+                            this.ctx.lineTo(x + length, y - wOffset);
+
+                            this.handles[name] = [x, y, thickness, length];
+                            break;
+
+                        case 'sw':
+                            // Just mirror values and fall through to ne
+                            wOffset = wOffset * -1;
+                            length = length * -1;
+
+                        case 'ne':
+                            this.ctx.moveTo(x - length, y - wOffset);
+                            this.ctx.lineTo(x + wOffset, y - wOffset);
+                            this.ctx.lineTo(x + wOffset, y + length);
+
+                            this.handles[name] = [x, y, thickness, length];
+                            break;
+
+                        case 'n':
+                            this.ctx.moveTo(x - lOffset, y - wOffset);
+                            this.ctx.lineTo(x + lOffset, y - wOffset);
+                            break;
+
+                        case 's':
+                            this.ctx.moveTo(x - lOffset, y + wOffset);
+                            this.ctx.lineTo(x + lOffset, y + wOffset);
+                            break;
+
+                        case 'w':
+                            this.ctx.moveTo(x - wOffset, y + lOffset);
+                            this.ctx.lineTo(x - wOffset, y - lOffset);
+                            break;
+
+                        case 'e':
+                            this.ctx.moveTo(x + wOffset, y + lOffset);
+                            this.ctx.lineTo(x + wOffset, y - lOffset);
+                            break;
+                    }
+                }
             }
         }
-    });
-})();
+    );
+
+    // Add constructor
+    IMSoftcrop.Softcrop.prototype.constructor = IMSoftcrop.Softcrop;
+})(IMSoftcrop);

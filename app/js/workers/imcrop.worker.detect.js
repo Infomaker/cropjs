@@ -67,7 +67,6 @@ onmessage = function(e) {
         });
 
         tracking.trackData(tracker, imageData, imageWidth, imageHeight);
-        return;
     }
 
 };

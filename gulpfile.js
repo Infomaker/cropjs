@@ -75,7 +75,6 @@ gulp.task('scripts-worker-detect', function() {
 // Concatenate and uglify cropjs core files
 gulp.task('scripts-cropjs', function() {
     var files = [
-        'app/js/class/class.js',
         'app/js/imcrop.ui.js',
         'app/js/imcrop.editor.js',
         'app/js/imcrop.ratio.js',

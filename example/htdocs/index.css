@@ -30,7 +30,8 @@ form progress {
  * Crop dialog
  */
 #dialog {
-    display: none;
+    /* TODO: Set display to visible after debugging */
+    display: block;
     position: absolute;
     top: 4%;
     left: 10%;
