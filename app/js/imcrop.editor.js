@@ -799,47 +799,24 @@ var IMSoftcrop = (function() {
         centerImage: function (redraw, point, factor) {
             var cx, cy;
 
-            // TODO: Should remove 1 when calculation below is fixed
-            if (1 || typeof point === 'undefined') {
+            // Normal zoom
+            //if (typeof point === 'undefined') {
                 this._keepCenter = true;
                 cx = this._container.clientWidth / 2;
                 cy = this._container.clientHeight / 2;
-            }
-            else {
-                cx = point.x;
-                cy = point.y;
-            }
+            //}
+            //else {
+            //    cx = point.x;
+            //    cy = point.y;
+            //}
 
             var ix = ((this._image.w * this._zoomLevel) / 2) + (this._image.x * this._zoomLevel) + this._margin;
             var iy = ((this._image.h * this._zoomLevel) / 2) + (this._image.y * this._zoomLevel) + this._margin;
 
-            var x = 0;
-            var y = 0;
+            var x = (cx == ix) ? 0 : (cx - ix) / this._zoomLevel;
+            var y = (cy == iy) ? 0 : (cy - iy) / this._zoomLevel;
 
-
-            // TODO: Should remove 0 and fix calculation
-            if (0 && typeof factor == 'number') {
-                if (cx != ix) {
-                    x = ((cx - ix) * factor) * this._zoomLevel;
-                }
-
-                if (cy != iy) {
-                    y = (cy - iy) / this._zoomLevel;
-                }
-
-                this._image.move({x: x, y: y});
-            }
-            else {
-                if (cx != ix) {
-                    x = (cx - ix) / this._zoomLevel;
-                }
-
-                if (cy != iy) {
-                    y = (cy - iy) / this._zoomLevel;
-                }
-
-                this._image.move({x: x, y: y});
-            }
+            this._image.move({x: x, y: y});
 
             if (redraw === true) {
                 this.redraw();
@@ -1245,6 +1222,7 @@ var IMSoftcrop = (function() {
             var point = this.getMousePoint(event);
             var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
             var zoom = 0;
+            var prevZoom = this._zoomLevel;
 
             if (delta < 0 && this._zoomLevel < this._zoomMax) {
                 // Zoom in
@@ -1264,7 +1242,13 @@ var IMSoftcrop = (function() {
                 this.centerImage(false);
             }
             else {
-                this.centerImage(false, point, zoom);
+                // FIXME: Calcuation is not correct
+                var wDiff = (this._image.w * prevZoom) - (this._image.w * this._zoomLevel);
+                var hDiff = (this._image.h * prevZoom) - (this._image.h * this._zoomLevel);
+                this._image.move({
+                    x: wDiff / 2,
+                    y: hDiff / 2
+                });
             }
 
             this.redraw();
