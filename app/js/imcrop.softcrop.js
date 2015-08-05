@@ -4,6 +4,7 @@
      *
      * @constructor
      *
+     * @param {string} id
      * @param {object} parent
      * @param {int} hRatio
      * @param {int} vRatio
@@ -12,9 +13,9 @@
      *
      * @extends IMSoftcrop.Shape
      */
-    IMSoftcrop.Softcrop = function (parent, hRatio, vRatio, area, respectRatio) {
+    IMSoftcrop.Softcrop = function (id, parent, hRatio, vRatio, area, respectRatio) {
         // Call super constructor
-        IMSoftcrop.Shape.call(this, hRatio + ':' + vRatio, parent);
+        IMSoftcrop.Shape.call(this, id, parent);
 
         this.x = area.x;
         this.y = area.y;
@@ -37,12 +38,6 @@
             s: [0, 0, 0],
             sw: [0, 0, 0],
             w: [0, 0, 0]
-        };
-
-        this.ratio = {
-            w: 1,
-            h: 1,
-            f: 1
         };
 
         this.ready = true;

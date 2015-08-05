@@ -508,6 +508,7 @@ var IMSoftcrop = (function() {
 
             // Add uninitialized crop to list of available crops
             this._crops.push({
+                id: hRatio + ':' + vRatio,
                 hRatio: hRatio,
                 vRatio: vRatio,
                 setAsCurrent: setAsCurrent
@@ -529,10 +530,11 @@ var IMSoftcrop = (function() {
 
             // Always make sure all crops are added
             for(var n = 0; n < this._crops.length; n++) {
-                var crop = this._image.getSoftcrop(this._crops[n].hRatio, this._crops[n].vRatio);
+                var crop = this._image.getSoftcrop(this._crops[n].id);
 
                 if (crop == null) {
                     var crop = this._image.addSoftcrop(
+                        this._crops[n].id,
                         this._crops[n].hRatio,
                         this._crops[n].vRatio,
                         this._crops[n].setAsCurrent

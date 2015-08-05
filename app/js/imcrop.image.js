@@ -110,15 +110,16 @@
             /**
              * Add soft crop to this image
              *
+             * @param id
              * @param hRatio
              * @param vRatio
              * @param setAsCurrent
              */
             addSoftcrop: {
-                value: function (hRatio, vRatio, setAsCurrent) {
+                value: function (id, hRatio, vRatio, setAsCurrent) {
                     // Make sure there are no duplicates
                     var crop;
-                    if (null != (crop = this.getSoftcrop(hRatio, vRatio))) {
+                    if (null != (crop = this.getSoftcrop(id))) {
                         return crop;
                     }
 
@@ -133,7 +134,7 @@
                         }
                     );
 
-                    crop = new IMSoftcrop.Softcrop(this, hRatio, vRatio, area, true);
+                    crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true);
                     this.crops.push(crop);
 
                     if (setAsCurrent) {
@@ -146,14 +147,13 @@
 
             /**
              * Return soft crop if it exists
-             * @param hRatio
-             * @param vRatio
-             * @returns {null}
+             * @param id
+             * @returns {object}
              */
             getSoftcrop: {
-                value: function (hRatio, vRatio) {
+                value: function (id) {
                     for (var n = 0; n < this.crops.length; n++) {
-                        if (this.crops[n].ratio.w == hRatio && this.crops[n].ratio.h == vRatio) {
+                        if (this.crops[n].id == id) {
                             return this.crops[n];
                         }
                     }
