@@ -28,6 +28,23 @@
             f: IMSoftcrop.Ratio.decimal(hRatio, vRatio)
         };
 
+        this.handles = {
+            nw: [0, 0, 0],
+            n: [0, 0, 0],
+            ne: [0, 0, 0],
+            e: [0, 0, 0],
+            se: [0, 0, 0],
+            s: [0, 0, 0],
+            sw: [0, 0, 0],
+            w: [0, 0, 0]
+        };
+
+        this.ratio = {
+            w: 1,
+            h: 1,
+            f: 1
+        };
+
         this.ready = true;
     };
 
@@ -59,16 +76,7 @@
 
             // Drawing positions of handles
             handles: {
-                value: {
-                    nw: [0, 0, 0],
-                    n: [0, 0, 0],
-                    ne: [0, 0, 0],
-                    e: [0, 0, 0],
-                    se: [0, 0, 0],
-                    s: [0, 0, 0],
-                    sw: [0, 0, 0],
-                    w: [0, 0, 0]
-                }
+                writable: true
             },
 
             // Focused handle
@@ -78,11 +86,6 @@
 
             // Ratio handling
             ratio: {
-                value: {
-                    w: 1,
-                    h: 1,
-                    f: 1
-                },
                 writable: true
             },
 

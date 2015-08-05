@@ -12,6 +12,10 @@
      */
     IMSoftcrop.Image = function(id, parent){
         IMSoftcrop.Shape.call(this, id, parent);
+
+        console.log(this.src);
+        this.crops = [];
+        this.focusPoints = [];
     };
 
 
@@ -23,6 +27,7 @@
         {
             // Image src
             src: {
+                value: 'string',
                 writable: true
             },
 
@@ -33,13 +38,11 @@
 
             // List of crops for this image
             crops: {
-                value: [],
                 writable: true
             },
 
             // Focus points, for example faces
             focusPoints: {
-                value: [],
                 writable: true
             },
 
@@ -94,9 +97,13 @@
              */
             clear: {
                 value: function () {
-                    for (var n = 0; n < this._crops.length; n++) {
-                        this.crops[n].clear();
+                    for (var n = 0; n < this.crops.length; n++) {
+                        this.crops[n] = null;
                     }
+
+                    this.crops = [];
+                    this.crop = null;
+                    this.image = null;
                 }
             },
 
