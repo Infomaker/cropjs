@@ -505,15 +505,13 @@
              */
             drawCropMargins: {
                 value: function () {
-                    var imgDim = this.parent.getDimensions();
-
                     this.ctx.beginPath();
                     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 
                     this.ctx.rect(
                         0,
                         0,
-                        imgDim.w,
+                        this.canvas.width,
                         this.drawY
                     );
 
@@ -521,20 +519,20 @@
                         0,
                         0,
                         this.drawX,
-                        imgDim.h
+                        this.canvas.height
                     );
 
                     this.ctx.rect(
                         this.drawX,
                         this.drawYH,
-                        imgDim.w,
-                        imgDim.h
+                        this.canvas.width,
+                        this.canvas.height
                     );
 
                     this.ctx.rect(
                         this.drawXW,
                         this.drawY,
-                        imgDim.w,
+                        this.canvas.width,
                         this.drawH
                     );
 
