@@ -468,14 +468,8 @@ var IMSoftcrop = (function() {
                     _this.setZoomToImage(false);
 
                     if (_this._autocrop) {
-                        // Wait for 10 ms to be sure canvas has been drawn?!
-                        setTimeout(
-                            function() {
-                                _this.detectDetails();
-                                _this.detectFaces();
-                            },
-                            500
-                        );
+                        _this.detectDetails();
+                        _this.detectFaces();
                     }
                     else {
                         _this.toggleLoadingImage(false);
