@@ -466,6 +466,7 @@ var IMSoftcrop = (function() {
                 url,
                 function () {
                     _this.setZoomToImage(false);
+                    _this.centerImage(false);
 
                     if (_this._autocrop) {
                         _this.detectDetails();
