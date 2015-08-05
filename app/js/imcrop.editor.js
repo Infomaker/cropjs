@@ -97,6 +97,9 @@ var IMSoftcrop = (function() {
         // Editor canvas
         _canvas: undefined,
 
+        // Editor canvas
+        _ctx: undefined,
+
         // True if redraw canvas is necessary
         _redrawCanvas: false,
 
@@ -187,6 +190,8 @@ var IMSoftcrop = (function() {
             if (!this._canvas) {
                 throw new Error('Canvas element with id <imc_canvas_initial> not found');
             }
+
+            this._ctx = this._canvas.getContext('2d');
         },
 
 
@@ -238,7 +243,11 @@ var IMSoftcrop = (function() {
             }
 
             this._redrawCanvas = false;
+
+
             //this.adjustForPixelRatio();
+
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
             if (this._image instanceof IMSoftcrop.Image) {
                 this._image.redraw({
@@ -577,6 +586,7 @@ var IMSoftcrop = (function() {
             this._image.clear();
             this._crop = undefined;
             this._image = undefined;
+            this._previewContainer.innerHTML = '';
             this.redraw();
         },
 
