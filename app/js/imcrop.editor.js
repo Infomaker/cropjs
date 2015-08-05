@@ -238,24 +238,29 @@ var IMSoftcrop = (function() {
                 _this.runAnimation();
             });
 
+            // Only redraw when necessary
             if (!this._redrawCanvas) {
                 return;
             }
-
             this._redrawCanvas = false;
-
 
             //this.adjustForPixelRatio();
 
+
+            // Clear drawing area so transparency works
             this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
+            // Redraw current image
             if (this._image instanceof IMSoftcrop.Image) {
                 this._image.redraw({
                     guides: this._guidesToggle.on,
                     focuspoints: this._focusPointsToggle.on
                 });
 
-                this._renderPreviews();
+                // Redraw current crop preview
+                if (this._crop instanceof IMSoftcrop.Softcrop) {
+                    this._renderUpdatedPreview(this._crop);
+                }
             }
 
             if (this._debug) {
@@ -291,32 +296,6 @@ var IMSoftcrop = (function() {
             }
 
             return visible;
-        },
-
-        /**
-         * Render preview area for all soft crops
-         * @private
-         */
-        _renderPreviews: function () {
-            if (!this._image.ready) {
-                return;
-            }
-
-            if (this._crops.length > 0) {
-                return;
-            }
-
-            // Render preview area
-            if (this._previewContainer.id != this._image.id) {
-                this._previewContainer.innerHTML = '';
-                this._previewContainer.id = this._image.id;
-            }
-
-            // Recalculate current preview
-            var crops = this._image.getCrops();
-            for(var n = 0; n < crops.length; n++) {
-                this._renderUpdatedPreview(crops[n]);
-            }
         },
 
         /**
