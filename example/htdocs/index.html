@@ -19,6 +19,9 @@
             // Get iframe where cropjs is loaded
             var dlg = document.getElementById('dialog');
 
+            // Show the dialog
+            dlg.classList.add('open');
+
             // Get access to the editor object
             if (typeof editor == 'undefined') {
                 editor = dlg.contentWindow.getEditor();
@@ -45,9 +48,6 @@
                         this.addSoftcrop(3, 2, false);
                     }
             );
-
-            // Show the dialog
-            dlg.classList.add('open');
         }
 
 
