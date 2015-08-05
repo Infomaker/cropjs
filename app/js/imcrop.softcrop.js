@@ -96,6 +96,11 @@
                 writable: true
             },
 
+            locked: {
+                value: false,
+                writable: true
+            },
+
 
 
 

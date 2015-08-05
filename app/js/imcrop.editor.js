@@ -48,8 +48,9 @@ var IMSoftcrop = (function() {
         this._cropLockedToggle = new IMCropUI.Toggle(
             'imc_croplocked',
             function () {
-                // TODO: Propagare to current crop
-                //_this.redraw();
+                if (_this._crop instanceof IMSoftcrop.Softcrop) {
+                    _this._crop.locked = this.on;
+                }
             }
         );
 
@@ -552,6 +553,7 @@ var IMSoftcrop = (function() {
 
             this._crop = crop;
             this._image.setActiveCrop(crop);
+            this._cropLockedToggle.on = crop.locked;
             this.redraw();
         },
 
