@@ -13,7 +13,6 @@
     IMSoftcrop.Image = function(id, parent){
         IMSoftcrop.Shape.call(this, id, parent);
 
-        console.log(this.src);
         this.crops = [];
         this.focusPoints = [];
     };
