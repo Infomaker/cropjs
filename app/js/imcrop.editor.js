@@ -32,17 +32,21 @@ var IMSoftcrop = (function() {
                 this._debug = true;
             }
 
-            // Options.autodectec
-            if (options.autodetect === true) {
-                this.autodetect = true;
+            // Options.autodectect
+            if (options.autocrop === true) {
+                this._autocrop = true;
+            }
+
+            // Options.detectThreshold for detect corners
+            if (typeof options.detectThreshold === 'number') {
+                this._detectThreshold = options.detectThreshold;
+            }
+
+            // Options.detectStepSize (for detecting faces/features)
+            if (typeof options.detectStepSize === 'number') {
+                this._detectStepSize = true;
             }
         }
-
-        // Auto crop
-        this._autoCropToggle = new IMCropUI.Toggle(
-            'imc_autocrop',
-            function() {}
-        );
 
         // Lock crop
         this._cropLockedToggle = new IMCropUI.Toggle(
@@ -139,8 +143,16 @@ var IMSoftcrop = (function() {
         _zoomMax: 5,
         _zoomMin: 0.1,
 
-        // Options
-        autodetect: false,
+        // Option, detect and autocrop images
+        _autocrop: false,
+
+        // Option, detect corners threshold for difference between colours
+        _detectThreshold: 60,
+
+        // Option, step size for finding features like faces and eyes
+        _detectStepSize: 1.6,
+
+        // Option, output debug info
         _debug: false,
 
         // Option callbacks
@@ -152,9 +164,6 @@ var IMSoftcrop = (function() {
 
         // IMCropUI.Toggle for drawing focus points
         _focusPointsToggle: undefined,
-
-        // IMCropUI.Toggle for auto cropping
-        _autoCropToggle: undefined,
 
         // IMCropUI.Toggle for locking crops
         _cropLockedToggle: undefined,
@@ -458,9 +467,15 @@ var IMSoftcrop = (function() {
                 function () {
                     _this.setZoomToImage(false);
 
-                    if (_this.autodetect) {
-                        _this.detectDetails();
-                        _this.detectFaces();
+                    if (_this._autocrop) {
+                        // Wait for 10 ms to be sure canvas has been drawn?!
+                        setTimeout(
+                            function() {
+                                _this.detectDetails();
+                                _this.detectFaces();
+                            },
+                            500
+                        );
                     }
                     else {
                         _this.toggleLoadingImage(false);
@@ -520,7 +535,7 @@ var IMSoftcrop = (function() {
                         this._crops[n].setAsCurrent
                     );
 
-                    if (this._autoCropToggle.on) {
+                    if (this._autocrop) {
                         this._image.autocrop();
                     }
 
@@ -578,7 +593,7 @@ var IMSoftcrop = (function() {
          * Auto crop images
          */
         autocropImages: function() {
-            if (this._autoCropToggle.on) {
+            if (this._autocrop) {
                 if (!this.toggleLoadingImage()) {
                     this.toggleLoadingImage(true)
                 }
@@ -590,6 +605,10 @@ var IMSoftcrop = (function() {
             }
         },
 
+        /**
+         * Create temporary canvas in image size and extract image data
+         * @returns {ImageData}
+         */
         getImageData: function() {
             if (!this._image instanceof IMSoftcrop.Image || !this._image.ready) {
                 return;
@@ -599,19 +618,23 @@ var IMSoftcrop = (function() {
             var canvas = document.createElement('canvas');
             var ctx = canvas.getContext('2d');
 
-            this.adjustForPixelRatio(canvas);
             canvas.style.display = 'none';
             body[0].appendChild(canvas);
 
+            canvas.width = this._image.w;
+            canvas.height = this._image.h;
+            canvas.style.width = this._image.w + 'px';
+            canvas.style.height = this._image.h + 'px';
+
             ctx.drawImage(
                 this._image.image,
-                this._image.drawX, this._image.drawY,
-                this._image.drawW, this._image.drawH
+                0, 0,
+                this._image.w, this._image.h
             );
 
             var imageData = ctx.getImageData(0, 0, this._image.w, this._image.h);
 
-            // Paranoid cleanup
+            // Cleanup references
             ctx = null;
             body[0].removeChild(canvas);
             canvas = null;
@@ -641,7 +664,7 @@ var IMSoftcrop = (function() {
                     imageData,
                     this._image.w,
                     this._image.h,
-                    60
+                    this._detectThreshold
                 ]);
 
                 detectWorker.onmessage = function(e) {
@@ -659,7 +682,7 @@ var IMSoftcrop = (function() {
                     ),
                     this._image.w,
                     this._image.h,
-                    60 // Threshold
+                    this._detectThreshold
                 );
 
                 this.addDetectedDetails(data);
@@ -674,13 +697,10 @@ var IMSoftcrop = (function() {
         addDetectedDetails: function(data) {
             var corners = [];
             for (var i = 0; i < data.length; i += 2) {
-                // Tracking does not understand scale, adjust for it
-                var imagePoint = this.canvasPointInImage(
-                    data[i] / this._scale,
-                    data[i + 1] / this._scale
-                );
-
-                corners.push(imagePoint);
+                corners.push({
+                    x: data[i],
+                    y: data[i + 1]
+                });
             }
 
             this._image.addDetailData(corners);
@@ -705,7 +725,7 @@ var IMSoftcrop = (function() {
                     this.getImageData(),
                     this._image.w,
                     this._image.h,
-                    1.6
+                    this._detectStepSize
                 ]);
 
                 featureWorker.onmessage = function(e) {
@@ -727,7 +747,7 @@ var IMSoftcrop = (function() {
                 };
 
                 var tracker = new tracking.ObjectTracker(['face', 'eye']);
-                tracker.setStepSize(1.6);
+                tracker.setStepSize(this._detectStepSize);
                 tracker.on('track', function (event) {
                     event.data.forEach(function (rect) {
                         _this.addDetectedFeature(rect);
@@ -740,10 +760,10 @@ var IMSoftcrop = (function() {
         },
 
         addDetectedFeature: function(rect) {
-            var imagePoint = this.canvasPointInImage(
-                (rect.x / this._scale),
-                (rect.y / this._scale)
-            );
+            var imagePoint = {
+                x: rect.x,
+                y: rect.y
+            };
             var imageRadius = this.canvasLineInImage(rect.width > rect.height ? (rect.width / 2) / this._scale : (rect.height / 2) / this._scale);
 
             imagePoint.x += imageRadius;

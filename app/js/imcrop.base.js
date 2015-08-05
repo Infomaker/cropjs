@@ -121,6 +121,11 @@
                 writable: true
             },
 
+            drawH: {
+                value: 0,
+                writable: true
+            },
+
             drawXW: {
                 value: 0,
                 writable: true

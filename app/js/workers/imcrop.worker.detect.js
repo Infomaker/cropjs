@@ -59,7 +59,7 @@ onmessage = function(e) {
         var tracker = new tracking.ObjectTracker(['face', 'eye']);
         var _this = this;
 
-        tracker.setStepSize(1.7);
+        tracker.setStepSize(byValue);
         tracker.on('track', function (event) {
             event.data.forEach(function (rect) {
                 _this.postMessage(rect);
