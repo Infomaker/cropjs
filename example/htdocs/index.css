@@ -38,8 +38,8 @@ form progress {
     height: 540px;
     padding: 0;
     margin: 0;
-    border: 4px solid #D6DBDC;
-    box-shadow: 1px 3px 8px 0px rgba(201, 201, 201, 0.4);
+    border: 1px solid #eee;
+    box-shadow: 1px 2px 8px 0px rgba(201, 201, 201, 0.4);
     border-radius: 2px;
     overflow: hidden;
 }
