@@ -1,10 +1,10 @@
 body {
-    margin: 0;
-    padding: 10px 10px 0 10px;
-    font-family: 'Helvetica Neue', 'Arial', sans-serif;
-    font-weight: 200;
-    letter-spacing: 1px;
-  background: #EFF3F2;
+  margin: 0;
+  padding: 10px 10px 0 10px;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: 200;
+  letter-spacing: 1px;
+  background: #fff;
 }
 
 #imc {
@@ -17,7 +17,6 @@ body {
 
   #imc_container {
     position: relative;
-    background: #EFF3F2;
     height: 100%;
     width: 100%;
   }
@@ -29,8 +28,6 @@ body {
     right: 0;
     bottom: -95px;
     height: 95px;
-
-    background: #EFF3F2;
   }
 
   #imc_container #imc_loading {
@@ -71,8 +68,8 @@ body {
     top: 6px;
     right: 0;
     bottom: 0;
-    background: #EFF3F2;
-    box-shadow: 0 0 8px 6px #EFF3F2;
+    background: #fff;
+    box-shadow: 0 0 8px 6px #fff;
   }
 
   .imc_preview_image_container {
@@ -91,16 +88,16 @@ body {
       pointer-events: none;
     }
 
-    &.active:after {
-      border-color: rgba(239, 243, 242, 0);
-      border-bottom-color: #EFF3F2;
-      border-width: 8px;
-      margin-left: -8px;
-    }
-
     &.active:before {
       border-color: rgba(214, 219, 220, 0);
-      border-bottom-color: #D6DBDC;
+      border-bottom-color: #aaa;
+      border-width: 11px;
+      margin-left: -11px;
+    }
+
+    &.active:after {
+      border-color: rgba(239, 243, 242, 0);
+      border-bottom-color: #fff;
       border-width: 10px;
       margin-left: -10px;
     }
@@ -157,7 +154,6 @@ div.toolbar {
   width: 100%;
   height: 24px;
   overflow: hidden;
-  background: #EFF3F2;
 
   a {
     margin-right: 0;
