@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>IM Crop</title>
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="css/imcrop.css">
+    </head>
+
+
+    <body>
+        <div id="imc">
+            <div id="imc_container">
+
+                <canvas id="imc_canvas"></canvas>
+
+                <div id="imc_work_container">
+                    <div id="imc_preview_container" class="imc_preview_container"></div>
+                </div>
+
+                <div id="imc_loading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </div>
+
+                <a href="#" id="imc_croplocked" class="toggle">
+                    <em class="hint">Låst till användare</em>
+                    <span>
+                        <span class="on"><i class="fa fa-lock"></i></span>
+                        <span class="off"><i class="fa fa-unlock"></i></span>
+                    </span>
+                </a>
+
+                <div class="toolbar">
+                    <div class="group">
+                        <a href="#" id="imc_focuspoints" class="toggle">
+                            <em class="hint">Detaljer</em>
+                            <span>
+                                <span class="on"><i class="fa fa-object-group"></i></span>
+                                <span class="off"><i class="fa fa-object-group"></i></span>
+                            </span>
+                        </a>
+
+                        <a href="#" id="imc_guides" class="toggle on">
+                            <em class="hint">Guide lines</em>
+                            <span>
+                                <span class="on"><i class="fa fa-th"></i></span>
+                                <span class="off"><i class="fa fa-th"></i></span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="group right">
+                        <a href="#" id="imc_cancel" class="button left secondary">Avbryt</a>
+                        <a href="#" id="imc_save" class="button right">Spara</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="imc_debug"></div>
+
+        <script src="js/tracking.js"></script>
+        <script src="js/cropjs.js"></script>
+        <script>
+            var editor;
+            function getEditor() {
+                if (typeof editor != 'undefined') {
+                    return editor;
+                }
+
+                editor = new IMSoftcrop.Editor(
+                        'imc_container',
+                        {
+                            autocrop: true,
+                            detectThreshold: 50,
+                            detectStepSize: 1.7,
+                            debug: false,
+                            debugElement: document.getElementById('imc_debug')
+                        }
+                );
+
+                return editor;
+            }
+
+        </script>
+    </body>
+</html>

@@ -36,7 +36,7 @@ server.route({
     path: '/cropjs/{param*}',
     handler: {
         directory: {
-            path: './../../build/',
+            path: './../../dist/',
             index: true
         }
     }

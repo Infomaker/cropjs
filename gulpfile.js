@@ -52,14 +52,14 @@ gulp.task('bower', function() {
 // Concatenate detect workers
 gulp.task('scripts-trackingjs', function() {
     var files = [
-        'bower_components/tracking.js/build/tracking-min.js',
-        'bower_components/tracking.js/build/data/face-min.js',
-        'bower_components/tracking.js/build/data/eye-min.js'
+        'bower_components/tracking.js/dist/tracking-min.js',
+        'bower_components/tracking.js/dist/data/face-min.js',
+        'bower_components/tracking.js/dist/data/eye-min.js'
     ];
 
     return gulp.src(files)
         .pipe(concat('tracking.js'))
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('dist/js'));
 });
 
 
@@ -68,7 +68,7 @@ gulp.task('scripts-worker-detect', function() {
     return gulp.src('app/js/workers/imcrop.worker.detect.js')
         .pipe(uglify())
         .pipe(banner())
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('dist/js'));
 });
 
 
@@ -86,11 +86,11 @@ gulp.task('scripts-cropjs', function() {
     return gulp.src(files)
         .pipe(concat('cropjs.js'))
         .pipe(banner())
-        .pipe(gulp.dest('build/js'))
+        .pipe(gulp.dest('dist/js'))
         .pipe(rename('cropjs.min.js'))
         .pipe(uglify())
         .pipe(banner())
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('dist/js'));
 });
 
 
@@ -101,7 +101,7 @@ gulp.task('scripts', ['scripts-cropjs', 'scripts-worker-detect', 'scripts-tracki
 // Copy necessary files
 gulp.task('copy', function() {
     gulp.src('app/index.html')
-        .pipe(gulp.dest('build/'));
+        .pipe(gulp.dest('dist/'));
 });
 
 
@@ -109,7 +109,7 @@ gulp.task('copy', function() {
 gulp.task('sass', function() {
     return gulp.src('app/scss/*.scss')
         .pipe(sass())
-        .pipe(gulp.dest('build/css'));
+        .pipe(gulp.dest('dist/css'));
 });
 
 
@@ -122,4 +122,4 @@ gulp.task('watch', function() {
 });
 
 // Default Task
-gulp.task('default', ['bower', 'sass', 'scripts', 'copy', 'watch']);
+gulp.task('default', ['bower', 'sass', 'scripts', 'copy']);

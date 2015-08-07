@@ -1,6 +1,6 @@
 {
   "name": "cropjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "authors": [
     "Danne Lundqvist <danne.lundqvist@infomaker.se>"
   ],
@@ -12,6 +12,7 @@
   "license": "Unlicense",
   "homepage": "http://www.infomaker.se",
   "ignore": [
+    "**/.*",
     "node_modules",
     "bower_components",
     "test",
