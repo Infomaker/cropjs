@@ -52,6 +52,20 @@ gulp.task('bower', function() {
 // Concatenate detect workers
 gulp.task('scripts-trackingjs', function() {
     var files = [
+        'bower_components/tracking.js/build/tracking.js',
+        'bower_components/tracking.js/build/data/face.js',
+        'bower_components/tracking.js/build/data/eye.js'
+    ];
+
+    return gulp.src(files)
+        .pipe(concat('tracking.js'))
+        .pipe(gulp.dest('dist/js'));
+});
+
+
+// Concatenate detect workers
+gulp.task('scripts-trackingjs-min', function() {
+    var files = [
         'bower_components/tracking.js/build/tracking-min.js',
         'bower_components/tracking.js/build/data/face-min.js',
         'bower_components/tracking.js/build/data/eye-min.js'
@@ -95,7 +109,7 @@ gulp.task('scripts-cropjs', function() {
 
 
 // Handle all javascript files
-gulp.task('scripts', ['scripts-cropjs', 'scripts-worker-detect', 'scripts-trackingjs']);
+gulp.task('scripts', ['scripts-cropjs', 'scripts-worker-detect', 'scripts-trackingjs', 'scripts-trackingjs-min']);
 
 
 // Copy necessary files

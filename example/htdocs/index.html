@@ -9,6 +9,14 @@
 
     <link rel="stylesheet" href="index.css">
 
+    <!-- Crop JS includes -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="cropjs/css/imcrop.css">
+    <script src="cropjs/js/tracking.js"></script>
+    <script src="cropjs/js/cropjs.js"></script>
+
+
+
     <script>
         var editor;
 
@@ -16,25 +24,35 @@
          * Open CropJS dialog
          */
         function openCropJS(image) {
-            // Get iframe where cropjs is loaded
-            var dlg = document.getElementById('dialog');
+            // Get div where cropjs is loaded
+            var div = document.getElementById('crop_impl');
 
-            // Show the dialog
-            dlg.classList.add('open');
+            // Show the div
+            div.classList.add('open');
 
             // Get access to the editor object
             if (typeof editor == 'undefined') {
-                editor = dlg.contentWindow.getEditor();
+                editor = new IMSoftcrop.Editor(
+                        'crop_impl',
+                        {
+                            autocrop: true,
+                            detectWorkerUrl: '/cropjs/js/imcrop.worker.detect.js',
+                            detectThreshold: 50,
+                            detectStepSize: 1.7,
+                            debug: false,
+                            debugElement: document.getElementById('imc_debug')
+                        }
+                );
 
                 // Add save handler
                 editor.onSave(function (cropdata) {
-                    dlg.classList.remove('open');
+                    div.classList.remove('open');
                     addImageToDocument(cropdata);
                 });
 
                 // Add cancel handelr
                 editor.onCancel(function (cropdata) {
-                    dlg.classList.remove('open');
+                    div.classList.remove('open');
                 });
             }
 
@@ -128,7 +146,7 @@
         <progress min="0" max="100" value="0">0% complete</progress>
     </form>
 
-    <iframe src="cropjs/" id="dialog" seamless="seamless"></iframe>
+    <div id="crop_impl"></div>
 
     <ol id="imagelist"></ol>
 </body>

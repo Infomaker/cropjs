@@ -37,6 +37,11 @@ var IMSoftcrop = (function() {
                 this._autocrop = true;
             }
 
+            // Options.detectWorkerUrl
+            if (typeof options.detectWorkerUrl === 'string') {
+                this._detectWorkerUrl = options.detectWorkerUrl;
+            }
+
             // Options.detectThreshold for detect corners
             if (typeof options.detectThreshold === 'number') {
                 this._detectThreshold = options.detectThreshold;
@@ -146,6 +151,9 @@ var IMSoftcrop = (function() {
         // Option, detect and autocrop images
         _autocrop: false,
 
+        // Option, detect worker script url
+        _detectWorkerUrl: undefined,
+
         // Option, detect corners threshold for difference between colours
         _detectThreshold: 60,
 
@@ -186,9 +194,11 @@ var IMSoftcrop = (function() {
          * @private
          */
         setupUI: function () {
-            this._container = document.getElementById(this._id);
+            this.injectHTML();
+
+            this._container = document.getElementById('imc_container');
             if (!this._container) {
-                throw new Error('Container element with id <' + this._id + '> not found');
+                throw new Error('Container element with id <imc_container> not found');
             }
 
             this._previewContainer = document.getElementById('imc_preview_container');
@@ -204,6 +214,61 @@ var IMSoftcrop = (function() {
             this._ctx = this._canvas.getContext('2d');
         },
 
+
+        injectHTML: function() {
+            var injectElement = document.getElementById(this._id);
+            if (!injectElement) {
+                throw new Error('Could not find element with id <' + this._id + '> to inject crop editor into');
+            }
+
+            injectElement.innerHTML =
+                '<div id="imc">' +
+                    '<div id="imc_container">' +
+                        '<canvas id="imc_canvas"></canvas>' +
+
+                        '<div id="imc_work_container">' +
+                            '<div id="imc_preview_container" class="imc_preview_container"></div>' +
+                        '</div>' +
+
+                        '<div id="imc_loading">' +
+                            '<i class="fa fa-cog fa-spin"></i>' +
+                        '</div>' +
+
+                        '<a href="#" id="imc_croplocked" class="toggle">' +
+                            '<em class="hint">Låst till användare</em>' +
+                            '<span>' +
+                                '<span class="on"><i class="fa fa-lock"></i></span>' +
+                                '<span class="off"><i class="fa fa-unlock"></i></span>' +
+                            '</span>' +
+                        '</a>' +
+
+                        '<div class="toolbar">' +
+                            '<div class="group">' +
+                                '<a href="#" id="imc_focuspoints" class="toggle">' +
+                                    '<em class="hint">Detaljer</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-object-group"></i></span>' +
+                                        '<span class="off"><i class="fa fa-object-group"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
+
+                                '<a href="#" id="imc_guides" class="toggle on">' +
+                                    '<em class="hint">Guide lines</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-th"></i></span>' +
+                                        '<span class="off"><i class="fa fa-th"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
+                            '</div>' +
+
+                            '<div class="group right">' +
+                                '<a href="#" id="imc_cancel" class="button left secondary">Avbryt</a>' +
+                                '<a href="#" id="imc_save" class="button right">Spara</a>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        },
 
         /**
          * Setup animation through either native requestAnimationFrame or fallback
@@ -653,7 +718,8 @@ var IMSoftcrop = (function() {
 
             if (window.Worker) {
                 // If workers are available, thread detection of faces
-                var detectWorker = new Worker('js/imcrop.worker.detect.js');
+                var detectWorker = new Worker(this._detectWorkerUrl);
+
                 detectWorker.postMessage([
                     'details',
                     imageData,
@@ -714,7 +780,8 @@ var IMSoftcrop = (function() {
 
             if (window.Worker) {
                 // If workers are available, thread it
-                var featureWorker = new Worker('js/imcrop.worker.detect.js');
+                var featureWorker = new Worker(this._detectWorkerUrl);
+
                 featureWorker.postMessage([
                     'features',
                     this.getImageData(),

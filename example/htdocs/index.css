@@ -29,10 +29,10 @@ form progress {
 /**
  * Crop dialog
  */
-#dialog {
+#crop_impl {
     display: none;
     position: absolute;
-    top: 4%;
+    top: 8%;
     left: 10%;
     width: 80%;
     height: 540px;
@@ -42,9 +42,10 @@ form progress {
     box-shadow: 1px 2px 8px 0px rgba(201, 201, 201, 0.4);
     border-radius: 2px;
     overflow: hidden;
+    background: #fff;
 }
 
-#dialog.open {
+#crop_impl.open {
     display: block;
 }
 

@@ -1,3 +1,8 @@
+/**
+ * Detect/feature worker
+ */
+
+
 //
 // Add dummy window object so tracking.js works outside ui context
 //
@@ -7,9 +12,8 @@ Win = function () {};
 window = new Win();
 window.tracking = tracking;
 
-
 importScripts(
-    "tracking.js"
+    'tracking-min.js'
 );
 
 
