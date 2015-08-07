@@ -52,13 +52,13 @@ gulp.task('bower', function() {
 // Concatenate detect workers
 gulp.task('scripts-trackingjs', function() {
     var files = [
-        'bower_components/tracking.js/dist/tracking-min.js',
-        'bower_components/tracking.js/dist/data/face-min.js',
-        'bower_components/tracking.js/dist/data/eye-min.js'
+        'bower_components/tracking.js/build/tracking-min.js',
+        'bower_components/tracking.js/build/data/face-min.js',
+        'bower_components/tracking.js/build/data/eye-min.js'
     ];
 
     return gulp.src(files)
-        .pipe(concat('tracking.js'))
+        .pipe(concat('tracking-min.js'))
         .pipe(gulp.dest('dist/js'));
 });
 
