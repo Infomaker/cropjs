@@ -954,9 +954,7 @@ var IMSoftcrop = (function() {
                 y: rect.y
             };
 
-            console.log(rect.width / this._image.w);
-            if (rect.width / this._image.w > 0.5) {
-                console.log('large face');
+            if (rect.width / this._image.w > 0.45) {
                 // Feature point (face) takes up a large portion of the image
                 rect.height *= 1.2;
 
