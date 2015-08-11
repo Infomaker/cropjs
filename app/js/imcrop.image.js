@@ -164,7 +164,7 @@
 
             detectionReady: {
                 value: function () {
-                    return (typeof this.detailArea != 'undefined' && typeof this.focusArea != 'undefined');
+                    return (typeof this.detailArea != 'undefined');
                 }
             },
 
@@ -423,22 +423,25 @@
              */
             autoCropCrop: {
                 value: function (crop) {
+                    var detailArea = this.detailArea;
+                    var focusArea = (typeof this.focusArea != 'undefined') ? this.focusArea : this.detailArea;
+
                     // Calculate full detail + focus area
-                    var x1 = (this.detailArea.point1.x < this.focusArea.point1.x)
-                        ? this.detailArea.point1.x
-                        : this.focusArea.point1.x;
+                    var x1 = (detailArea.point1.x < focusArea.point1.x)
+                        ? detailArea.point1.x
+                        : focusArea.point1.x;
 
-                    var x2 = (this.detailArea.point2.x > this.focusArea.point2.x)
-                        ? this.detailArea.point2.x
-                        : this.focusArea.point2.x;
+                    var x2 = (detailArea.point2.x > focusArea.point2.x)
+                        ? detailArea.point2.x
+                        : focusArea.point2.x;
 
-                    var y1 = (this.detailArea.point1.y < this.focusArea.point1.x)
-                        ? this.detailArea.point1.y
-                        : this.focusArea.point1.y;
+                    var y1 = (detailArea.point1.y < focusArea.point1.x)
+                        ? detailArea.point1.y
+                        : focusArea.point1.y;
 
-                    var y2 = (this.detailArea.point2.y > this.focusArea.point2.y)
-                        ? this.detailArea.point2.y
-                        : this.focusArea.point2.y;
+                    var y2 = (detailArea.point2.y > focusArea.point2.y)
+                        ? detailArea.point2.y
+                        : focusArea.point2.y;
 
                     var area = {
                         point1: {
@@ -489,8 +492,8 @@
                             y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
                         },
                         focusCenter = {
-                            x: this.focusArea.point1.x + ((this.focusArea.point2.x - this.focusArea.point1.x) / 2),
-                            y: this.focusArea.point1.y + ((this.focusArea.point2.y - this.focusArea.point1.y) / 2)
+                            x: focusArea.point1.x + ((focusArea.point2.x - focusArea.point1.x) / 2),
+                            y: focusArea.point1.y + ((focusArea.point2.y - focusArea.point1.y) / 2)
                         },
                         cropCenter = {
                             x: crop.x + (crop.w / 2),
@@ -529,8 +532,8 @@
 
                         // If we completely cover focus area and at least 80%
                         // of the detail area is covered, be bold and remove warning.
-                        if (crop.w >= this.focusArea.point2.x - this.focusArea.point1.x &&
-                            crop.h >= this.focusArea.point2.y - this.focusArea.point1.y &&
+                        if (crop.w >= focusArea.point2.x - focusArea.point1.x &&
+                            crop.h >= focusArea.point2.y - focusArea.point1.y &&
                             0.8 <= crop.w / (area.point2.x - area.point1.x) &&
                             0.8 <= crop.h / (area.point2.y - area.point1.y)) {
                             crop.autoCropWarning = false;

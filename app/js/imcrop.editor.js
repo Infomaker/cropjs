@@ -143,6 +143,7 @@ var IMSoftcrop = (function() {
         _keepCenter: false,
         _scale: 1,
         _margin: 5,
+        _waitForWorkers: 0, // Number of workers active
 
         // "Constants"
         _zoomMax: 5,
@@ -663,6 +664,9 @@ var IMSoftcrop = (function() {
 
                 if (this._image.autocrop()) {
                     this.redraw();
+                }
+
+                if (this._waitForWorkers == 0) {
                     this.toggleLoadingImage(false);
                 }
             }
@@ -719,6 +723,8 @@ var IMSoftcrop = (function() {
             var _this = this,
                 imageData = this.getImageData();
 
+            this._waitForWorkers++;
+
             if (window.Worker) {
                 // If workers are available, thread detection of faces
                 var detectWorker = new Worker(this._detectWorkerUrl);
@@ -733,6 +739,7 @@ var IMSoftcrop = (function() {
 
                 detectWorker.onmessage = function(e) {
                     _this.addDetectedDetails(e.data);
+                    _this._waitForWorkers--;
                     _this.autocropImages();
                 };
             }
@@ -750,6 +757,7 @@ var IMSoftcrop = (function() {
                 );
 
                 this.addDetectedDetails(data);
+                this._waitForWorkers--;
                 this.autocropImages();
             }
         },
@@ -779,6 +787,7 @@ var IMSoftcrop = (function() {
                 return;
             }
 
+            this._waitForWorkers++;
             var _this = this;
 
             if (window.Worker) {
@@ -794,7 +803,10 @@ var IMSoftcrop = (function() {
                 ]);
 
                 featureWorker.onmessage = function(e) {
-                    _this.addDetectedFeature(e.data);
+                    for(var n = 0; n < e.data.length; n++) {
+                        _this.addDetectedFeature(e.data[n]);
+                    }
+                    _this._waitForWorkers--;
                     _this.autocropImages();
                 };
             }
@@ -817,6 +829,7 @@ var IMSoftcrop = (function() {
                     event.data.forEach(function (rect) {
                         _this.addDetectedFeature(rect);
                     });
+                    _this._waitForWorkers--;
                     _this.autocropImages();
                 });
 

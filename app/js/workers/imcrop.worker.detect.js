@@ -56,6 +56,7 @@ onmessage = function(e) {
             )
         );
 
+        close();
         return;
     }
 
@@ -65,9 +66,8 @@ onmessage = function(e) {
 
         tracker.setStepSize(byValue);
         tracker.on('track', function (event) {
-            event.data.forEach(function (rect) {
-                _this.postMessage(rect);
-            });
+            _this.postMessage(event.data);
+            close();
         });
 
         tracking.trackData(tracker, imageData, imageWidth, imageHeight);
