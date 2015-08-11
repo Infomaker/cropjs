@@ -332,9 +332,12 @@ var IMSoftcrop = (function() {
                     focuspoints: this._focusPointsToggle.on
                 });
 
-                // Redraw current crop preview
-                if (this._crop instanceof IMSoftcrop.Softcrop) {
-                    this._renderUpdatedPreview(this._crop);
+                // Redraw all crop previews
+                var softcrops = this._image.getSoftCrops();
+                for (var n = 0; n < softcrops.length; n++) {
+                    if (softcrops[n] instanceof IMSoftcrop.Softcrop) {
+                        this._renderUpdatedPreview(softcrops[n]);
+                    }
                 }
             }
 
@@ -1042,7 +1045,7 @@ var IMSoftcrop = (function() {
 
                     // Handle tab key
                     if (keyCode == 9) {
-                        var crops = _this._image.getCrops();
+                        var crops = _this._image.getSoftCrops();
                         var current;
                         for (var n = 0; n < crops.length; n++) {
                             if (_this._crop === crops[n]) {

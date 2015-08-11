@@ -168,7 +168,7 @@
                 }
             },
 
-            getCrops: {
+            getSoftCrops: {
                 value: function () {
                     return this.crops;
                 }

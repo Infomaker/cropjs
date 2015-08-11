@@ -431,9 +431,12 @@ var IMSoftcrop = (function() {
                     focuspoints: this._focusPointsToggle.on
                 });
 
-                // Redraw current crop preview
-                if (this._crop instanceof IMSoftcrop.Softcrop) {
-                    this._renderUpdatedPreview(this._crop);
+                // Redraw all crop previews
+                var softcrops = this._image.getSoftCrops();
+                for (var n = 0; n < softcrops.length; n++) {
+                    if (softcrops[n] instanceof IMSoftcrop.Softcrop) {
+                        this._renderUpdatedPreview(softcrops[n]);
+                    }
                 }
             }
 
@@ -920,6 +923,15 @@ var IMSoftcrop = (function() {
             }
         },
 
+        /**
+         * Add a feature point with radius.
+         *
+         * Heads are important and therefore we naïvely assume features to be faces. Heads
+         * are larger so we need to increase rect height about 40% and then move the y point
+         * so that the forehead can be covered by the full focus point.
+         *
+         * @param rect
+         */
         addDetectedFeature: function(rect) {
             var imageRadius = 0,
                 imagePoint = {
@@ -927,9 +939,6 @@ var IMSoftcrop = (function() {
                 y: rect.y
             };
 
-            // Heads are important and therefore we naïvely assume features to be faces. Heads
-            // are larger so we need to increase rect height about 40% and then move the y point
-            // so that the forehead can be covered by the full focus point.
             rect.height *= 1.4;
 
             imagePoint.x += rect.width / 2;
@@ -1135,7 +1144,7 @@ var IMSoftcrop = (function() {
 
                     // Handle tab key
                     if (keyCode == 9) {
-                        var crops = _this._image.getCrops();
+                        var crops = _this._image.getSoftCrops();
                         var current;
                         for (var n = 0; n < crops.length; n++) {
                             if (_this._crop === crops[n]) {
@@ -2146,7 +2155,7 @@ var IMSoftcrop = (function() {
                 }
             },
 
-            getCrops: {
+            getSoftCrops: {
                 value: function () {
                     return this.crops;
                 }
