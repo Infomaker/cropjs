@@ -148,7 +148,7 @@ var IMSoftcrop = (function() {
 
             // Options.detectStepSize (for detecting faces/features)
             if (typeof options.detectStepSize === 'number') {
-                this._detectStepSize = true;
+                this._detectStepSize = options.detectStepSize;
             }
         }
 
@@ -910,7 +910,7 @@ var IMSoftcrop = (function() {
                     return task.run();
                 };
 
-                var tracker = new tracking.ObjectTracker(['face', 'eye']);
+                var tracker = new tracking.ObjectTracker(['face']);
                 tracker.setStepSize(this._detectStepSize);
                 tracker.on('track', function (event) {
                     event.data.forEach(function (rect) {

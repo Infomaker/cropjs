@@ -60,12 +60,11 @@ onmessage = function(e) {
     }
 
     if (operation == 'features') {
-        var tracker = new tracking.ObjectTracker(['face', 'eye']);
+        var tracker = new tracking.ObjectTracker(['face']);
         var _this = this;
 
         tracker.setStepSize(byValue);
         tracker.on('track', function (event) {
-            console.log(event);
             event.data.forEach(function (rect) {
                 _this.postMessage(rect);
             });
