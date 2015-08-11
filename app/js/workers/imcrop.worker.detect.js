@@ -45,10 +45,15 @@ onmessage = function(e) {
     if (operation == 'details') {
         this.postMessage(
             tracking.Fast.findCorners(
-                tracking.Image.grayscale(
-                    imageData.data,
+                tracking.Image.blur(
+                    tracking.Image.grayscale(
+                        imageData.data,
+                        imageWidth,
+                        imageHeight
+                    ),
                     imageWidth,
-                    imageHeight
+                    imageHeight,
+                    3
                 ),
                 imageWidth,
                 imageHeight,

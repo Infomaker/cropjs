@@ -844,6 +844,8 @@ var IMSoftcrop = (function() {
          * are larger so we need to increase rect height about 40% and then move the y point
          * so that the forehead can be covered by the full focus point.
          *
+         * Then again. If the face covers more than a certain percent of the image (closeup)
+         * we do not want to enlarge the feature point radius that much.
          * @param rect
          */
         addDetectedFeature: function(rect) {
@@ -853,16 +855,33 @@ var IMSoftcrop = (function() {
                 y: rect.y
             };
 
-            rect.height *= 1.4;
+            if (rect.width / this._image.w > 0.45) {
+                // Feature point (face) takes up a large portion of the image
+                rect.height *= 1.2;
 
-            imagePoint.x += rect.width / 2;
-            imagePoint.y += rect.height / 4;
+                imagePoint.x += rect.width / 2;
+                imagePoint.y += rect.height / 2;
 
-            if (rect.height > rect.width) {
-                imageRadius = rect.height / 2;
+                if (rect.height > rect.width) {
+                    imageRadius = rect.height / 2;
+                }
+                else {
+                    imageRadius = rect.width / 2;
+                }
             }
             else {
-                imageRadius = rect.width / 2;
+                // Feature point (face) takes up less of the image
+                rect.height *= 1.4;
+
+                imagePoint.x += rect.width / 2;
+                imagePoint.y += rect.height / 4;
+
+                if (rect.height > rect.width) {
+                    imageRadius = rect.height / 2;
+                }
+                else {
+                    imageRadius = rect.width / 2;
+                }
             }
 
             this._image.addFocusPoint(imagePoint, imageRadius);
