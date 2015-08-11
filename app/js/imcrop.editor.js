@@ -821,18 +821,35 @@ var IMSoftcrop = (function() {
             }
         },
 
+        /**
+         * Add a feature point with radius.
+         *
+         * Heads are important and therefore we naïvely assume features to be faces. Heads
+         * are larger so we need to increase rect height about 40% and then move the y point
+         * so that the forehead can be covered by the full focus point.
+         *
+         * @param rect
+         */
         addDetectedFeature: function(rect) {
-            var imagePoint = {
+            var imageRadius = 0,
+                imagePoint = {
                 x: rect.x,
                 y: rect.y
             };
-            var imageRadius = this.canvasLineInImage(rect.width > rect.height ? (rect.width / 2) / this._scale : (rect.height / 2) / this._scale);
 
-            imagePoint.x += imageRadius;
-            imagePoint.y += imageRadius;
+            rect.height *= 1.4;
 
-            // Increase radius so foreheads are covered as well
-            this._image.addFocusPoint(imagePoint, imageRadius * 1.5);
+            imagePoint.x += rect.width / 2;
+            imagePoint.y += rect.height / 4;
+
+            if (rect.height > rect.width) {
+                imageRadius = rect.height / 2;
+            }
+            else {
+                imageRadius = rect.width / 2;
+            }
+
+            this._image.addFocusPoint(imagePoint, imageRadius);
         },
 
         canvasLineInImage: function(v) {

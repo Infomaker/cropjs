@@ -65,6 +65,7 @@ onmessage = function(e) {
 
         tracker.setStepSize(byValue);
         tracker.on('track', function (event) {
+            console.log(event);
             event.data.forEach(function (rect) {
                 _this.postMessage(rect);
             });
