@@ -362,8 +362,8 @@ var IMSoftcrop = (function() {
                             '</div>' +
 
                             '<div class="group right">' +
-                                '<a href="#" id="imc_cancel" class="button left secondary">Avbryt</a>' +
-                                '<a href="#" id="imc_save" class="button right">Spara</a>' +
+                                '<a href="#" id="imc_cancel" class="button left secondary" style="display: none;">Avbryt</a>' +
+                                '<a href="#" id="imc_save" class="button right" style="display: none;">Spara</a>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -677,6 +677,30 @@ var IMSoftcrop = (function() {
             }
         },
 
+
+        /**
+         * Get soft crop data for image
+         */
+        getSoftcropData: function() {
+            var data = {
+                src: this._image.src,
+                width: this._image.w,
+                height: this._image.h,
+                crops: []
+            };
+
+            for(var n = 0; n < this._image.crops.length; n++) {
+                data.crops.push({
+                    name: this._image.crops[n].id,
+                    x: Math.round(this._image.crops[n].x),
+                    y: Math.round(this._image.crops[n].y),
+                    width: Math.round(this._image.crops[n].w),
+                    height: Math.round(this._image.crops[n].h)
+                });
+            }
+
+            return data;
+        },
 
         /**
          * Apply all soft crops to image
@@ -1214,6 +1238,7 @@ var IMSoftcrop = (function() {
         onSave: function(func) {
             if(typeof func == 'function') {
                 this._onSave = func;
+                document.getElementById('imc_save').style.display = 'inline';
             }
         },
 
@@ -1225,6 +1250,7 @@ var IMSoftcrop = (function() {
         onCancel: function(func) {
             if(typeof func == 'function') {
                 this._onCancel = func;
+                document.getElementById('imc_cancel').style.display = 'inline';
             }
         },
 
@@ -1238,24 +1264,7 @@ var IMSoftcrop = (function() {
                 return;
             }
 
-            var data = {
-                src: this._image.src,
-                width: this._image.w,
-                height: this._image.h,
-                crops: []
-            };
-
-            for(var n = 0; n < this._image.crops.length; n++) {
-                data.crops.push({
-                    name: this._image.crops[n].id,
-                    x: Math.round(this._image.crops[n].x),
-                    y: Math.round(this._image.crops[n].y),
-                    width: Math.round(this._image.crops[n].w),
-                    height: Math.round(this._image.crops[n].h)
-                });
-            }
-
-            this._onSave(data);
+            this._onSave(this.getSoftcropData());
         },
 
         /**
