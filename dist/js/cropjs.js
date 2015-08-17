@@ -1033,24 +1033,15 @@ var IMSoftcrop = (function() {
         },
 
         /**
-         * Center image around a point in the drawing area
+         * Center image around the middle point of the drawing area
          * @param redraw
-         * @param point
-         * @param factor
          */
-        centerImage: function (redraw, point, factor) {
+        centerImage: function (redraw) {
             var cx, cy;
 
-            // Normal zoom
-            //if (typeof point === 'undefined') {
-                this._keepCenter = true;
-                cx = this._container.clientWidth / 2;
-                cy = this._container.clientHeight / 2;
-            //}
-            //else {
-            //    cx = point.x;
-            //    cy = point.y;
-            //}
+            this._keepCenter = true;
+            cx = this._container.clientWidth / 2;
+            cy = this._container.clientHeight / 2;
 
             var ix = ((this._image.w * this._zoomLevel) / 2) + (this._image.x * this._zoomLevel) + this._margin;
             var iy = ((this._image.h * this._zoomLevel) / 2) + (this._image.y * this._zoomLevel) + this._margin;
@@ -1446,37 +1437,33 @@ var IMSoftcrop = (function() {
          * @param event
          */
         onMouseWheel: function (event) {
-            var point = this.getMousePoint(event);
             var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
             var zoom = 0;
-            var prevZoom = this._zoomLevel;
 
             if (delta < 0 && this._zoomLevel < this._zoomMax) {
                 // Zoom in
                 zoom = this._zoomLevel < 1 ? 0.01 : 0.03;
-                this._zoomLevel += zoom;
             }
             else if (delta > 0 && this._zoomLevel > this._zoomMin) {
                 // Zoom out
                 zoom = this._zoomLevel < 1 ? -0.01 : -0.03;
-                this._zoomLevel += zoom;
             }
             else {
                 return;
             }
 
-            if (0 && this._keepCenter) {
-                this.centerImage(false);
-            }
-            else {
-                // FIXME: Calcuation is not correct
-                var wDiff = (this._image.w * prevZoom) - (this._image.w * this._zoomLevel);
-                var hDiff = (this._image.h * prevZoom) - (this._image.h * this._zoomLevel);
-                this._image.move({
-                    x: wDiff / 2,
-                    y: hDiff / 2
-                });
-            }
+            // Calculate middle point change for zoom change
+            var x = ((this._image.w / 2) + this._image.x) * zoom;
+            var y = ((this._image.h / 2) + this._image.y) * zoom;
+
+            // Adjust zoom
+            this._zoomLevel += zoom;
+
+            // Then move back to old middle point
+            this._image.move({
+              x: -x / this._zoomLevel,
+              y: -y / this._zoomLevel
+            });
 
             this.redraw();
         },
@@ -1589,7 +1576,6 @@ var IMSoftcrop = (function() {
 
     return this;
 })();
-
 
 (function(IMSoftcrop) {
     IMSoftcrop.Ratio = function(){};
