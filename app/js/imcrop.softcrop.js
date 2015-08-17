@@ -422,7 +422,8 @@
 
                     // Draw guidelines inside crop
                     if (typeof options == 'object' && options.guides === true) {
-                        this.drawCropGuidelines();
+                        this.drawCropGuidelines(0, 'rgba(55, 55, 55, 0.45)');
+                        this.drawCropGuidelines(-0.5, 'rgba(255, 255, 255, 0.6)');
                     }
                 }
             },
@@ -434,34 +435,34 @@
              * @private
              */
             drawCropGuidelines: {
-                value: function () {
+                value: function (offset, strokeStyle) {
                     this.ctx.closePath();
                     this.ctx.beginPath();
 
                     if (this.ctx.setLineDash) {
                         this.ctx.setLineDash([3, 3]);
                     }
-                    this.ctx.strokeStyle = 'rgba(55, 55, 55, 0.5)';
+                    this.ctx.strokeStyle = strokeStyle;
                     this.ctx.lineWidth = 1;
 
                     var stepY = this.drawH / 3,
                         stepX = this.drawW / 3;
 
                     // Horizontal line 1
-                    this.ctx.moveTo(this.drawX, this.drawY + stepY);
-                    this.ctx.lineTo(this.drawX + this.drawW, this.drawY + stepY);
+                    this.ctx.moveTo(this.drawX, offset + this.drawY + stepY);
+                    this.ctx.lineTo(this.drawX + this.drawW, offset + this.drawY + stepY);
 
                     // Horizontal line 2
-                    this.ctx.moveTo(this.drawX, this.drawY + stepY + stepY);
-                    this.ctx.lineTo(this.drawX + this.drawW, this.drawY + stepY + stepY);
+                    this.ctx.moveTo(this.drawX, offset + this.drawY + stepY + stepY);
+                    this.ctx.lineTo(this.drawX + this.drawW, offset + this.drawY + stepY + stepY);
 
                     // Vertical line 1
-                    this.ctx.moveTo(this.drawX + stepX, this.drawY);
-                    this.ctx.lineTo(this.drawX + stepX, this.drawY + this.drawH);
+                    this.ctx.moveTo(offset + this.drawX + stepX, this.drawY);
+                    this.ctx.lineTo(offset + this.drawX + stepX, this.drawY + this.drawH);
 
                     // Horizontal line 2
-                    this.ctx.moveTo(this.drawX + stepX + stepX, this.drawY);
-                    this.ctx.lineTo(this.drawX + stepX + stepX, this.drawY + this.drawH);
+                    this.ctx.moveTo(offset + this.drawX + stepX + stepX, this.drawY);
+                    this.ctx.lineTo(offset + this.drawX + stepX + stepX, this.drawY + this.drawH);
 
                     this.ctx.stroke();
 
