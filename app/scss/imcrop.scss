@@ -64,6 +64,7 @@ body {
 .imc_preview_container {
   white-space: nowrap;
   position: relative;
+  text-align: left;
 
   &:after {
     display: block;

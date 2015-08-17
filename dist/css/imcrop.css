@@ -51,7 +51,8 @@ body {
  */
 .imc_preview_container {
   white-space: nowrap;
-  position: relative; }
+  position: relative;
+  text-align: left; }
   .imc_preview_container:after {
     display: block;
     position: absolute;
