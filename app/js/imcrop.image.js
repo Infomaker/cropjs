@@ -111,28 +111,41 @@
              * Add soft crop to this image
              *
              * @param id
-             * @param hRatio
-             * @param vRatio
              * @param setAsCurrent
+             * @param hRatio Horizontal ratio, or actual width (if x/y coordinates)
+             * @param vRatio Vertical ratio, or actual height (if x/y coordinates)
+             * @param x
+             * @param y
              */
             addSoftcrop: {
-                value: function (id, hRatio, vRatio, setAsCurrent) {
+                value: function (id, setAsCurrent, hRatio, vRatio, x, y) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
                         return crop;
                     }
 
-                    var area = IMSoftcrop.Ratio.fitInto(
-                        {
+                    var area;
+                    if (x === null || y === null) {
+                        // Create new ratio based area
+                        area = IMSoftcrop.Ratio.fitInto({
                             w: this.w,
                             h: this.h
                         },
                         {
                             w: hRatio,
                             h: vRatio
-                        }
-                    );
+                        });
+                    }
+                    else {
+                        // Create new area with already specified dimension
+                        area = {
+                            x: x,
+                            y: y,
+                            w: hRatio,
+                            h: vRatio
+                        };
+                    }
 
                     crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true);
                     this.crops.push(crop);

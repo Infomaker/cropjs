@@ -58,6 +58,6 @@ uploadHandler.prototype.handle = function(fileElement) {
 uploadHandler.prototype.respond = function() {
     return {
         name: this.name,
-        url: this.virtualPath
+        src: this.virtualPath
     };
 };

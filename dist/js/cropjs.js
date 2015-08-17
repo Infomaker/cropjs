@@ -108,6 +108,8 @@ var IMSoftcrop = (function() {
      */
     this.Editor = function (id, options) {
         this._id = id;
+        this._crops = [];
+
         this.setupUI();
         this.adjustForPixelRatio();
 
@@ -222,7 +224,7 @@ var IMSoftcrop = (function() {
         _image: undefined,
 
         // All crops
-        _crops: [],
+        _crops: undefined,
 
         // Current selected crop object
         _crop: undefined,
@@ -250,6 +252,9 @@ var IMSoftcrop = (function() {
 
         // Option, detect and autocrop images
         _autocrop: false,
+
+        // Image loading specific option, true if autocrop should actually be applied
+        _applyAutocrop: true,
 
         // Option, detect worker script url
         _detectWorkerUrl: undefined,
@@ -618,12 +623,14 @@ var IMSoftcrop = (function() {
          * Load image from url
          * @param url
          * @param onImageReady Callback after image has been loaded
+         * @param autocropImage Optional, default true, if autocrops should be applied
          */
-        addImage: function (url, onImageReady) {
+        addImage: function (url, onImageReady, applyAutocrop) {
             var _this = this;
 
             this.toggleLoadingImage(true);
             this.clear();
+            this._applyAutocrop = (applyAutocrop !== false);
 
             this._image = new IMSoftcrop.Image(
                 IMSoftcrop.Ratio.hashFnv32a(url),
@@ -658,18 +665,23 @@ var IMSoftcrop = (function() {
         /**
          * Add soft crop to available soft crops
          *
+         * @param id
          * @param hRatio
          * @param vRatio
          * @param setAsCurrent
+         * @param x Optional
+         * @param y Optional
          */
-        addSoftcrop: function (hRatio, vRatio, setAsCurrent) {
+        addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y) {
 
             // Add uninitialized crop to list of available crops
             this._crops.push({
-                id: hRatio + ':' + vRatio,
+                id: id,
+                setAsCurrent: setAsCurrent,
                 hRatio: hRatio,
                 vRatio: vRatio,
-                setAsCurrent: setAsCurrent
+                x: (typeof x == 'undefined') ? null : x,
+                y: (typeof y == 'undefined') ? null : y
             });
 
             if (this._image instanceof IMSoftcrop.Image && this._image.ready) {
@@ -691,7 +703,7 @@ var IMSoftcrop = (function() {
 
             for(var n = 0; n < this._image.crops.length; n++) {
                 data.crops.push({
-                    name: this._image.crops[n].id,
+                    id: this._image.crops[n].id,
                     x: Math.round(this._image.crops[n].x),
                     y: Math.round(this._image.crops[n].y),
                     width: Math.round(this._image.crops[n].w),
@@ -717,9 +729,11 @@ var IMSoftcrop = (function() {
                 if (crop == null) {
                     var crop = this._image.addSoftcrop(
                         this._crops[n].id,
+                        this._crops[n].setAsCurrent,
                         this._crops[n].hRatio,
                         this._crops[n].vRatio,
-                        this._crops[n].setAsCurrent
+                        this._crops[n].x,
+                        this._crops[n].y
                     );
 
                     if (this._autocrop) {
@@ -769,6 +783,7 @@ var IMSoftcrop = (function() {
             }
 
             this._image.clear();
+            this._crops = [];
             this._crop = undefined;
             this._image = undefined;
             this._previewContainer.innerHTML = '';
@@ -780,7 +795,7 @@ var IMSoftcrop = (function() {
          * Auto crop images
          */
         autocropImages: function() {
-            if (this._autocrop) {
+            if (this._autocrop && this._applyAutocrop) {
                 if (!this.toggleLoadingImage()) {
                     this.toggleLoadingImage(true)
                 }
@@ -788,10 +803,10 @@ var IMSoftcrop = (function() {
                 if (this._image.autocrop()) {
                     this.redraw();
                 }
+            }
 
-                if (this._waitForWorkers == 0) {
-                    this.toggleLoadingImage(false);
-                }
+            if (this._waitForWorkers == 0) {
+                this.toggleLoadingImage(false);
             }
         },
 
@@ -1262,7 +1277,7 @@ var IMSoftcrop = (function() {
          * Cancel function
          */
         onButtonCancel: function() {
-            if (typeof this._onSave != 'function') {
+            if (typeof this._onCancel != 'function') {
                 console.log('User cancel function not defined');
                 return;
             }
@@ -2125,28 +2140,41 @@ var IMSoftcrop = (function() {
              * Add soft crop to this image
              *
              * @param id
-             * @param hRatio
-             * @param vRatio
              * @param setAsCurrent
+             * @param hRatio Horizontal ratio, or actual width (if x/y coordinates)
+             * @param vRatio Vertical ratio, or actual height (if x/y coordinates)
+             * @param x
+             * @param y
              */
             addSoftcrop: {
-                value: function (id, hRatio, vRatio, setAsCurrent) {
+                value: function (id, setAsCurrent, hRatio, vRatio, x, y) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
                         return crop;
                     }
 
-                    var area = IMSoftcrop.Ratio.fitInto(
-                        {
+                    var area;
+                    if (x === null || y === null) {
+                        // Create new ratio based area
+                        area = IMSoftcrop.Ratio.fitInto({
                             w: this.w,
                             h: this.h
                         },
                         {
                             w: hRatio,
                             h: vRatio
-                        }
-                    );
+                        });
+                    }
+                    else {
+                        // Create new area with already specified dimension
+                        area = {
+                            x: x,
+                            y: y,
+                            w: hRatio,
+                            h: vRatio
+                        };
+                    }
 
                     crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true);
                     this.crops.push(crop);
@@ -2582,6 +2610,7 @@ var IMSoftcrop = (function() {
 
 
 })(IMSoftcrop);
+
 (function(IMSoftcrop) {
     /**
      * Soft crop constructor

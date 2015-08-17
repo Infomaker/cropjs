@@ -23,7 +23,7 @@
         /**
          * Open CropJS dialog
          */
-        function openCropJS(image) {
+        function openCropJS() {
             // Get div where cropjs is loaded
             var div = document.getElementById('crop_impl');
 
@@ -55,16 +55,47 @@
                     div.classList.remove('open');
                 });
             }
+        }
 
+        /**
+         * Open a new image in CropJS
+         */
+        function openNewImageInCropJS(image) {
+            openCropJS();
 
             // Load image with crops
             editor.addImage(
-                    image.url,
-                    function (image) {
-                        this.addSoftcrop(1, 1, true);
-                        this.addSoftcrop(16, 9, false);
-                        this.addSoftcrop(3, 2, false);
+                    image.src,
+                    function (addedImage) {
+                        this.addSoftcrop('1:1', true, 1, 1);
+                        this.addSoftcrop('16:9', false, 16, 9);
+                        this.addSoftcrop('3:2', false, 3, 2);
                     }
+            );
+        }
+
+        /**
+         * Open already cropped image in CropJS
+         */
+        function openCroppedImageInCropJS(image) {
+            openCropJS();
+
+            // Load image with existing crops
+            editor.addImage(
+                    image.src,
+                    function (addedImage) {
+                        for(var n = 0; n < image.crops.length; n++) {
+                            this.addSoftcrop(
+                                image.crops[n].id,
+                                n == 0, // Set first crop as active
+                                image.crops[n].width,
+                                image.crops[n].height,
+                                image.crops[n].x,
+                                image.crops[n].y
+                            )
+                        }
+                    },
+                    false // Disable autocrop for this image
             );
         }
 
@@ -94,10 +125,25 @@
                 img.style.marginTop = '-' + crop.y * cropRatio + 'px';
                 img.style.marginLeft = '-' + crop.x * cropRatio + 'px';
 
+                // Store crop data as dataset
+                img.dataset.id = crop.id;
+                img.dataset.y = crop.y;
+                img.dataset.x = crop.x;
+                img.dataset.width = crop.width;
+                img.dataset.height = crop.height;
 
                 div.appendChild(img);
                 li.appendChild(div);
             }
+
+            // Store image as dataset
+            li.dataset.src = image.src;
+            li.dataset.width = image.width;
+            li.dataset.height = image.height;
+
+            li.addEventListener('click', function(e) {
+                openCroppedImageInCropJS(image);
+            });
 
             var list = document.getElementById('imagelist');
             list.appendChild(li);
@@ -117,7 +163,7 @@
                 xhr.onload = function(event) {
                     if (xhr.status == 200) {
                         // Open crop dialog
-                        openCropJS(JSON.parse(xhr.responseText));
+                        openNewImageInCropJS(JSON.parse(xhr.responseText));
                     }
                 };
 
