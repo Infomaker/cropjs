@@ -131,7 +131,7 @@ gulp.task('sass', function() {
 // Watch files for changes
 gulp.task('watch', function() {
     gulp.watch('app/scss/*.scss', ['sass']);
-    gulp.watch('**/*.js', ['scripts-cropjs', 'scripts-worker-detect']);
+    gulp.watch('app/**/*.js', ['scripts-cropjs', 'scripts-worker-detect']);
     gulp.watch('app/*.html', ['copy']);
 });
 
