@@ -422,8 +422,8 @@
 
                     // Draw guidelines inside crop
                     if (typeof options == 'object' && options.guides === true) {
-                        this.drawCropGuidelines(0, 'rgba(55, 55, 55, 0.45)');
-                        this.drawCropGuidelines(-0.5, 'rgba(255, 255, 255, 0.6)');
+                        this.drawCropGuidelines(0, 'rgba(55, 55, 55, 0.25)');
+                        this.drawCropGuidelines(-0.5, 'rgba(255, 255, 255, 0.5)');
                     }
                 }
             },
@@ -484,7 +484,7 @@
                 value: function () {
                     this.ctx.beginPath();
 
-                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.lineWidth = 1;
                     this.ctx.rect(
                         this.drawX - 0.5,
