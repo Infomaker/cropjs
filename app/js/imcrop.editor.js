@@ -61,6 +61,7 @@ var IMSoftcrop = (function() {
             function () {
                 if (_this._crop instanceof IMSoftcrop.Softcrop) {
                     _this._crop.locked = this.on;
+                    _this._renderUpdatedPreview(_this._crop);
                 }
             }
         );
@@ -428,8 +429,12 @@ var IMSoftcrop = (function() {
             var pvWarning = document.createElement('i');
             pvWarning.className = 'fa fa-warning';
 
+            var pvLocked = document.createElement('b');
+            pvLocked.className = 'fa fa-lock';
+
             pvSpan.appendChild(pvSpanTxt);
             pvSpan.appendChild(pvWarning);
+            pvSpan.appendChild(pvLocked);
 
 
             // Create image element
@@ -475,6 +480,13 @@ var IMSoftcrop = (function() {
             }
             else {
                 pvDiv.classList.remove('warning');
+            }
+
+            if (crop.locked == true) {
+                pvDiv.classList.add('locked');
+            }
+            else {
+                pvDiv.classList.remove('locked');
             }
         },
 
@@ -615,7 +627,9 @@ var IMSoftcrop = (function() {
 
 
         /**
-         * Add soft crop to available soft crops
+         * Add soft crop to available soft crops. If x/y is set, the crop will
+         * be set to the actual dimensions specified by w/h. If no x/y values are
+         * set the w/h will be treated as ratio dimensions and be scaled.
          *
          * @param id
          * @param hRatio
@@ -633,7 +647,8 @@ var IMSoftcrop = (function() {
                 hRatio: hRatio,
                 vRatio: vRatio,
                 x: (typeof x == 'undefined') ? null : x,
-                y: (typeof y == 'undefined') ? null : y
+                y: (typeof y == 'undefined') ? null : y,
+                exact: (typeof x != 'undefined')
             });
 
             if (this._image instanceof IMSoftcrop.Image && this._image.ready) {
@@ -685,7 +700,8 @@ var IMSoftcrop = (function() {
                         this._crops[n].hRatio,
                         this._crops[n].vRatio,
                         this._crops[n].x,
-                        this._crops[n].y
+                        this._crops[n].y,
+                        this._crops[n].exact
                     );
 
                     if (this._autocrop) {

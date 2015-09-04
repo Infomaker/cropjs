@@ -132,14 +132,20 @@ body {
         background: rgba(0, 0, 0, 0.4);
         border-radius: 3px;
         padding: 0 3px; }
-        .imc_preview_container .imc_preview_image_container .imc_preview_image span i {
+        .imc_preview_container .imc_preview_image_container .imc_preview_image span i, .imc_preview_container .imc_preview_image_container .imc_preview_image span b {
           display: none; }
     .imc_preview_container .imc_preview_image_container.warning .imc_preview_image span i {
       display: inline-block;
       padding-left: 4px;
       color: #FF4E66;
       background: none;
-      text-shadow: 0px 0px 1px rgba(255, 255, 255, 0.7); }
+      text-shadow: 0 0 1px rgba(255, 255, 255, 0.7); }
+    .imc_preview_container .imc_preview_image_container.locked .imc_preview_image span b {
+      display: inline-block;
+      padding-left: 4px;
+      color: #fff;
+      background: none;
+      text-shadow: 0 0 1px rgba(255, 255, 255, 0.7); }
 
 /**
  * Default toolbar

@@ -116,9 +116,10 @@
              * @param vRatio Vertical ratio, or actual height (if x/y coordinates)
              * @param x
              * @param y
+             * @param exact Treat h/vRatio as exact dimensions (don't autocrop)
              */
             addSoftcrop: {
-                value: function (id, setAsCurrent, hRatio, vRatio, x, y) {
+                value: function (id, setAsCurrent, hRatio, vRatio, x, y, exact) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
@@ -147,7 +148,7 @@
                         };
                     }
 
-                    crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true);
+                    crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true, exact);
                     this.crops.push(crop);
 
                     if (setAsCurrent) {
@@ -423,7 +424,9 @@
                     var crops = (typeof crop != 'undefined') ? new Array(crop) : this.crops;
 
                     for (var n = 0; n < crops.length; n++) {
-                        this.autoCropCrop(crops[n]);
+                        if (!crops[n].locked) {
+                            this.autoCropCrop(crops[n]);
+                        }
                     }
 
                     return true;
