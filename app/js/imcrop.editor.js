@@ -133,6 +133,9 @@ var IMSoftcrop = (function() {
         // Current handle name
         handle: undefined,
 
+        // Currently displayed info (crop || image)
+        info: 'image',
+
         // Object being dragged
         _dragObject: undefined,
 
@@ -236,17 +239,22 @@ var IMSoftcrop = (function() {
                             '<div id="imc_preview_container" class="imc_preview_container"></div>' +
                         '</div>' +
 
-                        '<div id="imc_loading">' +
-                            '<i class="fa fa-cog fa-spin"></i>' +
-                        '</div>' +
 
-                        '<a href="#" id="imc_croplocked" class="toggle">' +
-                            '<em class="hint">Låst till användare</em>' +
-                            '<span>' +
-                                '<span class="on"><i class="fa fa-lock"></i></span>' +
-                                '<span class="off"><i class="fa fa-unlock"></i></span>' +
-                            '</span>' +
-                        '</a>' +
+                        '<div id="imc_image_inline">' +
+                            '<a href="#" id="imc_croplocked" class="toggle">' +
+                                '<em class="hint">Låst till användare</em>' +
+                                '<span>' +
+                                    '<span class="on"><i class="fa fa-lock"></i></span>' +
+                                    '<span class="off"><i class="fa fa-unlock"></i></span>' +
+                                '</span>' +
+                            '</a>' +
+
+                            '<div id="imc_image_info" class="display"></div>' +
+
+                            '<div id="imc_loading">' +
+                                '<i class="fa fa-cog fa-spin"></i>' +
+                            '</div>' +
+                        '</div>' +
 
                         '<div class="toolbar">' +
                             '<div class="group">' +
@@ -482,6 +490,48 @@ var IMSoftcrop = (function() {
             };
         },
 
+        updateImageInfo: function(useCrop) {
+            var dim,
+                w,
+                h,
+                className = (useCrop) ? 'crop' : 'image';
+                var e = document.getElementById('imc_image_info');
+
+            if (!e) {
+                return;
+            }
+
+
+            if (useCrop) {
+                if (this._crop instanceof IMSoftcrop.Softcrop == false) {
+                    return;
+                }
+                dim = this._crop.getDimensions();
+            }
+            else {
+                if (this._image instanceof IMSoftcrop.Image == false) {
+                    return;
+                }
+                dim = this._image.getDimensions();
+            }
+
+            w = Math.round(dim.w);
+            h = Math.round(dim.h);
+
+            if (this.info == className) {
+                e.innerHTML = w + 'x' + h;
+                return;
+            }
+
+            this.info = className;
+            e.className = '';
+            setTimeout(function() {
+                e.innerHTML = w + 'x' + h;
+                e.className = 'display ' + className;
+            }, 200);
+
+        },
+
         /**
          * Adjust canvas for pixel ratio
          * @param canvas
@@ -543,6 +593,7 @@ var IMSoftcrop = (function() {
                 function () {
                     _this.setZoomToImage(false);
                     _this.centerImage(false);
+                    _this.updateImageInfo(false);
 
                     if (_this._autocrop) {
                         _this.detectDetails();
@@ -672,6 +723,7 @@ var IMSoftcrop = (function() {
             this._image.setActiveCrop(crop);
             this._cropLockedToggle.on = crop.locked;
             this.redraw();
+            this.updateImageInfo(true);
         },
 
 
@@ -1243,14 +1295,17 @@ var IMSoftcrop = (function() {
             var point = this.getMousePoint(event);
 
             if (this._crop instanceof IMSoftcrop.Softcrop && typeof this.handle === 'string') {
+                this.updateImageInfo(true);
                 this._dragPoint = point;
                 this._dragObject = this.handle;
             }
             else if (this._crop instanceof IMSoftcrop.Softcrop && this._crop.inArea(point)) {
+                this.updateImageInfo(true);
                 this._dragObject = this._crop;
                 this._dragPoint = point;
             }
             else if (this._image instanceof IMSoftcrop.Image && this._image.inArea(point)) {
+                this.updateImageInfo(false);
                 this._dragObject = this._image;
                 this._dragPoint = point;
             }
@@ -1286,6 +1341,7 @@ var IMSoftcrop = (function() {
                             y: (point.y - this._dragPoint.y) / this._zoomLevel
                         }
                     );
+                    this.updateImageInfo(true);
                 }
                 else {
                     if (this._dragObject instanceof IMSoftcrop.Image) {
@@ -1299,6 +1355,7 @@ var IMSoftcrop = (function() {
                     );
                 }
 
+                this.updateImageInfo(true);
                 this.redraw();
                 this._dragPoint = point;
                 return;
