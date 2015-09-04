@@ -639,6 +639,21 @@ var IMSoftcrop = (function() {
          * @param y Optional
          */
         addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y) {
+            var exact = false;
+            
+            // Make sure all values are numbers
+            hRatio = parseInt(hRatio);
+            vRatio = parseInt(vRatio);
+
+            if (typeof x == 'undefined' || typeof y == 'undefined') {
+                x = null;
+                y = null;
+            }
+            else {
+                x = parseInt(x);
+                y = parseInt(y);
+                exact = true;
+            }
 
             // Add uninitialized crop to list of available crops
             this._crops.push({
@@ -646,9 +661,9 @@ var IMSoftcrop = (function() {
                 setAsCurrent: (this._crops.length == 0 || setAsCurrent),
                 hRatio: hRatio,
                 vRatio: vRatio,
-                x: (typeof x == 'undefined') ? null : x,
-                y: (typeof y == 'undefined') ? null : y,
-                exact: (typeof x != 'undefined')
+                x: x,
+                y: y,
+                exact: exact
             });
 
             if (this._image instanceof IMSoftcrop.Image && this._image.ready) {
