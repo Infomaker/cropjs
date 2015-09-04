@@ -728,7 +728,7 @@ var IMSoftcrop = (function() {
             // Add uninitialized crop to list of available crops
             this._crops.push({
                 id: id,
-                setAsCurrent: setAsCurrent,
+                setAsCurrent: (this._crops.length == 0 || setAsCurrent),
                 hRatio: hRatio,
                 vRatio: vRatio,
                 x: (typeof x == 'undefined') ? null : x,
