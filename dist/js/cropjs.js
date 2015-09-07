@@ -739,12 +739,12 @@ var IMSoftcrop = (function() {
          */
         addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y) {
             var exact = false;
-            
+
             // Make sure all values are numbers
             hRatio = parseInt(hRatio);
             vRatio = parseInt(vRatio);
 
-            if (typeof x == 'undefined' || typeof y == 'undefined') {
+            if (typeof x == 'undefined' || typeof y == 'undefined' || x === null || y === null) {
                 x = null;
                 y = null;
             }
