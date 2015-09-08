@@ -1464,6 +1464,11 @@ var IMSoftcrop = (function() {
 
                 if (typeof this._dragObject == 'string') {
                     // Dragging handle
+                    if (!this._image.detectionReady()) {
+                        // Lock crop so that detection does not override users choice
+                        this._crop.locked = true;
+                    }
+
                     this._crop.dragHandle(
                         this._dragObject,
                         {
