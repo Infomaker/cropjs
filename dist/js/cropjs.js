@@ -1890,10 +1890,10 @@ var IMSoftcrop = (function() {
      * @param {object} parent
      */
     IMSoftcrop.Shape = function(id, parent) {
-        if (typeof obj == 'undefined') {
+        if (typeof parent == 'undefined') {
             return;
         }
-        
+
         this.id = id;
 
         // Get access to canvas helper object
