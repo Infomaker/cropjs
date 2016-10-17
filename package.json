@@ -1,17 +1,22 @@
 {
   "name": "cropjs",
-  "version": "0.0.1",
-  "description": "Infomaker image auto cropper. (c) Infomaker",
+  "version": "1.0.0",
+  "description": "Image soft cropper. (c) Infomaker Scandinavia AB",
   "homepage": "http://www.infomaker.se",
   "repository": {
     "type": "git",
-    "url": "http://git.infomaker.se/scm/npjs/cropjs.git"
+    "url": "https://github.com/Infomaker/cropjs.git"
+  },
+  "bugs": "https://github.com/Infomaker/cropjs/issues",
+  "keywords": {
+    "image",
+    "crop",
+    "soft crop"
   },
   "author": {
-    "name": "Danne Lundqvist"
+    "name": "Danne Lundqvist <danne.lundqvist@infomaker.se>"
   },
-  "license": "Unlicense",
-  "private": true,
+  "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-bower": "0.0.10",
