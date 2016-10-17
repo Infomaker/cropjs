@@ -8,11 +8,11 @@
     "url": "https://github.com/Infomaker/cropjs.git"
   },
   "bugs": "https://github.com/Infomaker/cropjs/issues",
-  "keywords": {
+  "keywords": [
     "image",
     "crop",
     "soft crop"
-  },
+  ],
   "author": {
     "name": "Danne Lundqvist <danne.lundqvist@infomaker.se>"
   },
