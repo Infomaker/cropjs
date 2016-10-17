@@ -1,21 +1,21 @@
-#CropJS#
+#CropJS
 
-##About CropJS##
+##About CropJS
 CropJS is a lightweight soft crop tool for to integration into other projects. It uses TrackingJS to enable automatic feature and face detection based cropping for a preset number of predefined crop dimensions.
 
-##Usage##
+##Usage
 
-###Installation###
+###Installation
 ```
 npm install cropjs
 ```
 
-###Define a placeholder for the crop dialog###
+###Define a placeholder for the crop dialog
 ```
 <div id="crop_impl"></div>
 ```
 
-###Instantiate a new crop dialog###
+###Instantiate a new crop dialog
 ```
 // Get div where cropjs is loaded
 var div = document.getElementById('crop_impl');
@@ -46,7 +46,7 @@ if (typeof editor == 'undefined') {
 }
 ```
 
-###Add image and predefined crop dimensions###
+###Add image and predefined crop dimensions
 ```
 editor.addImage(
         image.src,
@@ -60,5 +60,5 @@ editor.addImage(
 );
 ```
 
-##References##
+##References
 Using [tracking.js](https://trackingjs.com/) for feature and face detection.
