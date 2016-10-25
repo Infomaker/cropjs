@@ -332,6 +332,7 @@ var IMSoftcrop = (function() {
             if (!this._redrawCanvas) {
                 return;
             }
+            this.calculateViewport();
             this._redrawCanvas = false;
 
             //this.adjustForPixelRatio();
@@ -1281,7 +1282,6 @@ var IMSoftcrop = (function() {
             }
 
             this.redraw();
-            this.calculateViewport();
         },
 
 

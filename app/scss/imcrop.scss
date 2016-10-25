@@ -96,6 +96,7 @@
   position: relative;
   text-align: left;
   padding-left: 7px;
+  overflow-x: scroll;
 
   &:after {
     display: block;

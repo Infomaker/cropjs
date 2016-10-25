@@ -70,7 +70,8 @@
   white-space: nowrap;
   position: relative;
   text-align: left;
-  padding-left: 7px; }
+  padding-left: 7px;
+  overflow-x: scroll; }
   .imc_preview_container:after {
     display: block;
     position: absolute;

@@ -1,9 +1,9 @@
 /**
- * cropjs - Infomaker image auto cropper. (c) Infomaker
- * @author Danne Lundqvist
- * @version v0.0.1
+ * cropjs - Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB
+ * @author Danne Lundqvist <danne.lundqvist@infomaker.se>
+ * @version v1.0.2
  * @link http://www.infomaker.se
- * @license Unlicense
+ * @license MIT
  */
 (function() {
     this.IMCropUI = function(){};
@@ -431,6 +431,7 @@ var IMSoftcrop = (function() {
             if (!this._redrawCanvas) {
                 return;
             }
+            this.calculateViewport();
             this._redrawCanvas = false;
 
             //this.adjustForPixelRatio();
@@ -1380,7 +1381,6 @@ var IMSoftcrop = (function() {
             }
 
             this.redraw();
-            this.calculateViewport();
         },
 
 

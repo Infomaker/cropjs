@@ -37,10 +37,10 @@
                         {
                             autocrop: true,
                             detectWorkerUrl: '/cropjs/js/imcrop.worker.detect.js',
-                            detectThreshold: 20,
-                            detectStepSize: 2.5,
-                            debug: false,
-                            debugElement: document.getElementById('imc_debug')
+                            detectThreshold: 5,
+                            detectStepSize: 3.5,
+                            debug: true,
+                            debugElement: document.getElementById('crop_debug')
                         }
                 );
 
@@ -67,9 +67,10 @@
             editor.addImage(
                     image.src,
                     function (addedImage) {
-                        this.addSoftcrop('1:1', true, 1, 1);
-                        this.addSoftcrop('16:9', false, 16, 9);
-                        this.addSoftcrop('3:2', false, 3, 2);
+                        this.addSoftcrop('16:9', true, 16, 9);
+                        this.addSoftcrop('8:5', false, 8, 5);
+                        this.addSoftcrop('4:3', false, 3, 2);
+                        this.addSoftcrop('1:1', false, 1, 1);
 
                         this.addSoftcrop('test', false, 800, 400, 100, 20);
                     }
@@ -195,6 +196,8 @@
     </form>
 
     <div id="crop_impl"></div>
+
+    <div id="crop_debug"></div>
 
     <ol id="imagelist"></ol>
 </body>
