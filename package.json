@@ -1,8 +1,11 @@
 {
   "name": "cropjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB",
   "homepage": "http://www.infomaker.se",
+  "author": {
+    "name": "Danne Lundqvist <danne.lundqvist@infomaker.se>"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Infomaker/cropjs.git"
@@ -13,9 +16,6 @@
     "crop",
     "soft crop"
   ],
-  "author": {
-    "name": "Danne Lundqvist <danne.lundqvist@infomaker.se>"
-  },
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.1",
