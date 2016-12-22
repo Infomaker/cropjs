@@ -643,8 +643,8 @@ var IMSoftcrop = (function() {
             var exact = false;
 
             // Make sure all values are numbers
-            hRatio = parseInt(hRatio);
-            vRatio = parseInt(vRatio);
+            hRatio = parseFloat(hRatio);
+            vRatio = parseFloat(vRatio);
 
             if (typeof x == 'undefined' || typeof y == 'undefined' || x === null || y === null) {
                 x = null;
