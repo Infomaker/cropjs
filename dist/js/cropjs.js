@@ -1,7 +1,7 @@
 /**
  * cropjs - Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB
  * @author Danne Lundqvist <danne.lundqvist@infomaker.se>
- * @version v1.0.4
+ * @version v1.1.0
  * @link http://www.infomaker.se
  * @license MIT
  */
@@ -110,6 +110,12 @@ var IMSoftcrop = (function() {
         this._id = id;
         this._crops = [];
 
+        if (typeof options == 'object') {
+            if (options.debug === true) {
+                this._debug = true;
+            }
+        }
+
         this.setupUI();
         this.adjustForPixelRatio();
 
@@ -126,11 +132,9 @@ var IMSoftcrop = (function() {
             // Options.debug
             // Options.debugElement
             if (options.debug === true) {
-                if (typeof options.debug != 'undefined') {
+                if (this._debug) {
                     this._debugContainer = options.debugElement;
                 }
-
-                this._debug = true;
             }
 
             // Options.autodectect
@@ -165,6 +169,17 @@ var IMSoftcrop = (function() {
             }
         );
 
+        // Mark crop as usable
+        this._cropUsableToggle = new IMCropUI.Toggle(
+            'imc_cropusable',
+            function () {
+                if (_this._crop instanceof IMSoftcrop.Softcrop) {
+                    _this._crop.usable = this.on;
+                    _this._renderUpdatedPreview(_this._crop);
+                }
+            }
+        );
+
         // Draw guides toggle
         this._guidesToggle = new IMCropUI.Toggle(
             'imc_guides',
@@ -178,22 +193,6 @@ var IMSoftcrop = (function() {
             'imc_focuspoints',
             function () {
                 _this.redraw();
-            }
-        );
-
-        // Save button
-        this._saveButton = new IMCropUI.Button(
-            'imc_save',
-            function () {
-                _this.onButtonSave();
-            }
-        );
-
-        // Save button
-        this._cancelButton = new IMCropUI.Button(
-            'imc_cancel',
-            function () {
-                _this.onButtonCancel();
             }
         );
     };
@@ -285,11 +284,8 @@ var IMSoftcrop = (function() {
         // IMCropUI.Toggle for locking crops
         _cropLockedToggle: undefined,
 
-        // IMCropUI.Button for saving
-        _saveButton: undefined,
-
-        // IMCropUI.Button for cancelling
-        _cancelButton: undefined,
+        // IMCropUI.Toggle for marking crops as usable
+        _cropUsableToggle: undefined,
 
 
         /**
@@ -330,8 +326,10 @@ var IMSoftcrop = (function() {
                 throw new Error('Could not find element with id <' + this._id + '> to inject crop editor into');
             }
 
+            var debugClass = (this._debug) ? 'imc_debug' : '';
+
             injectElement.innerHTML =
-                '<div id="imc">' +
+                '<div id="imc" class="' + debugClass + '">' +
                     '<div id="imc_container">' +
                         '<canvas id="imc_canvas"></canvas>' +
 
@@ -341,23 +339,7 @@ var IMSoftcrop = (function() {
 
 
                         '<div id="imc_image_inline">' +
-                            '<a href="#" id="imc_croplocked" class="toggle">' +
-                                '<em class="hint">Låst till användare</em>' +
-                                '<span>' +
-                                    '<span class="on"><i class="fa fa-lock"></i></span>' +
-                                    '<span class="off"><i class="fa fa-unlock"></i></span>' +
-                                '</span>' +
-                            '</a>' +
-
-                            '<div id="imc_image_info" class="display"></div>' +
-
-                            '<div id="imc_loading">' +
-                                '<i class="fa fa-cog fa-spin"></i>' +
-                            '</div>' +
-                        '</div>' +
-
-                        '<div class="toolbar">' +
-                            '<div class="group">' +
+                            '<div class="imc_debug_group">' +
                                 '<a href="#" id="imc_focuspoints" class="toggle">' +
                                     '<em class="hint">Detaljer</em>' +
                                     '<span>' +
@@ -373,11 +355,29 @@ var IMSoftcrop = (function() {
                                         '<span class="off"><i class="fa fa-th"></i></span>' +
                                     '</span>' +
                                 '</a>' +
+
+                                '<a href="#" id="imc_croplocked" class="toggle">' +
+                                    '<em class="hint">Låst till användare</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-lock"></i></span>' +
+                                        '<span class="off"><i class="fa fa-unlock"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
+
+                                '<a href="#" id="imc_cropusable" class="toggle">' +
+                                    '<em class="hint">Använd denna crop</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-check"></i></span>' +
+                                        '<span class="off"><i class="fa fa-ban"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
+
                             '</div>' +
 
-                            '<div class="group right">' +
-                                '<a href="#" id="imc_cancel" class="button left secondary" style="display: none;">Avbryt</a>' +
-                                '<a href="#" id="imc_save" class="button right" style="display: none;">Spara</a>' +
+                            '<div id="imc_image_info" class="display"></div>' +
+
+                            '<div id="imc_loading">' +
+                                '<i class="fa fa-cog fa-spin"></i>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
@@ -529,12 +529,20 @@ var IMSoftcrop = (function() {
             var pvWarning = document.createElement('i');
             pvWarning.className = 'fa fa-warning';
 
-            var pvLocked = document.createElement('b');
-            pvLocked.className = 'fa fa-lock';
-
+            var pvUsed = document.createElement('b');
+            pvUsed.className = 'fa fa-check';
+            pvUsed.addEventListener(
+                'click',
+                function(e) {
+                    _this.toggleCropUsable(crop)
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            )
             pvSpan.appendChild(pvSpanTxt);
             pvSpan.appendChild(pvWarning);
-            pvSpan.appendChild(pvLocked);
+            pvSpan.appendChild(pvUsed);
 
 
             // Create image element
@@ -565,7 +573,7 @@ var IMSoftcrop = (function() {
             }
 
             var imgDim = this._image.getDimensions();
-            var previewHeight = 80;
+            var previewHeight = 90; // ATTENTION: Must match
             var previewWidth = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f);
             var cropDim = crop.getDimensions();
             var cropRatio = previewWidth / cropDim.w;
@@ -582,11 +590,13 @@ var IMSoftcrop = (function() {
                 pvDiv.classList.remove('warning');
             }
 
-            if (crop.locked == true) {
-                pvDiv.classList.add('locked');
+            if (crop.usable == true) {
+                pvDiv.classList.add('usable');
+                pvDiv.classList.remove('unusable');
             }
             else {
-                pvDiv.classList.remove('locked');
+                pvDiv.classList.add('unusable');
+                pvDiv.classList.remove('usable');
             }
         },
 
@@ -853,10 +863,26 @@ var IMSoftcrop = (function() {
             this._crop = crop;
             this._image.setActiveCrop(crop);
             this._cropLockedToggle.on = crop.locked;
+            this._cropUsableToggle.on = crop.usable;
             this.redraw();
             this.updateImageInfo(true);
         },
 
+        /**
+         * Toggle a specified crops usable field, or the current crop if left out
+         * @param crop
+         */
+        toggleCropUsable: function(crop) {
+            if(typeof crop === 'undefined') {
+                crop = this._crop;
+            }
+            crop.usable = this._crop.usable ? false : true;
+            this._renderUpdatedPreview(crop);
+
+            if (crop.id === this._crop.id) {
+                this._cropUsableToggle.on = crop.usable;
+            }
+        },
 
         /**
          * Clear image and all image crops
@@ -1280,16 +1306,24 @@ var IMSoftcrop = (function() {
                     var keyCode = e.keyCode || e.which;
 
                     // Handle escape key
-                    if (keyCode == 27) {
-                        _this.onCancel();
+                    if (keyCode === 13) {
+                        _this._onSave(
+                            _this.getSoftcropData()
+                        );
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
 
+                    if (keyCode === 27) {
+                        _this._onCancel();
                         e.preventDefault();
                         e.stopPropagation();
                         return false;
                     }
 
                     // Handle tab key
-                    if (keyCode == 9) {
+                    if (keyCode === 9) {
                         var crops = _this._image.getSoftCrops();
                         var current;
                         for (var n = 0; n < crops.length; n++) {
@@ -1328,7 +1362,6 @@ var IMSoftcrop = (function() {
         onSave: function(func) {
             if(typeof func == 'function') {
                 this._onSave = func;
-                document.getElementById('imc_save').style.display = 'inline';
             }
         },
 
@@ -1340,33 +1373,7 @@ var IMSoftcrop = (function() {
         onCancel: function(func) {
             if(typeof func == 'function') {
                 this._onCancel = func;
-                document.getElementById('imc_cancel').style.display = 'inline';
             }
-        },
-
-
-        /**
-         * Save image crops
-         */
-        onButtonSave: function() {
-            if (typeof this._onSave != 'function') {
-                console.log('User save function not defined');
-                return;
-            }
-
-            this._onSave(this.getSoftcropData());
-        },
-
-        /**
-         * Cancel function
-         */
-        onButtonCancel: function() {
-            if (typeof this._onCancel != 'function') {
-                console.log('User cancel function not defined');
-                return;
-            }
-
-            this._onCancel();
         },
 
 
@@ -1397,10 +1404,6 @@ var IMSoftcrop = (function() {
             }
 
             this.toggleLoadingImage(true);
-
-            if(!this._focusPointsToggle.on) {
-                this._focusPointsToggle.on = true;
-            }
 
             var point = this.getMousePoint(event);
             this._image.addFocusPoint(
@@ -2818,7 +2821,10 @@ var IMSoftcrop = (function() {
                 writable: true
             },
 
-
+            usable: {
+                value: true,
+                writable: true
+            },
 
 
             /**

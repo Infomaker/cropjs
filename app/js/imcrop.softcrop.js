@@ -103,7 +103,10 @@
                 writable: true
             },
 
-
+            usable: {
+                value: true,
+                writable: true
+            },
 
 
             /**

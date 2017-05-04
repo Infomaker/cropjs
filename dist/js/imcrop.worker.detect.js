@@ -1,7 +1,7 @@
 /**
  * cropjs - Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB
  * @author Danne Lundqvist <danne.lundqvist@infomaker.se>
- * @version v1.0.4
+ * @version v1.1.0
  * @link http://www.infomaker.se
  * @license MIT
  */
