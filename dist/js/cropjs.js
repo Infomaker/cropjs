@@ -527,24 +527,27 @@ var IMSoftcrop = (function() {
 
             // Create span (title) element, including warning element
             var pvSpan = document.createElement('span');
-            var pvSpanTxt = document.createTextNode(crop.id);
+            var pvSpanEm = document.createElement('em');
             var pvWarning = document.createElement('i');
             pvWarning.className = 'fa fa-warning';
 
             var pvUsed = document.createElement('b');
+            var pvUsedCrop = crop;
             pvUsed.className = 'fa fa-check';
             pvUsed.addEventListener(
                 'click',
                 function(e) {
-                    _this.toggleCropUsable(crop)
+                    _this.toggleCropUsable(pvUsedCrop)
                     e.preventDefault();
                     e.stopPropagation();
                     return false;
                 }
             )
-            pvSpan.appendChild(pvSpanTxt);
-            pvSpan.appendChild(pvWarning);
+
+            pvSpanEm.appendChild(document.createTextNode(crop.id))
             pvSpan.appendChild(pvUsed);
+            pvSpan.appendChild(pvSpanEm);
+            pvSpan.appendChild(pvWarning);
 
 
             // Create image element
@@ -888,7 +891,7 @@ var IMSoftcrop = (function() {
             if(typeof crop === 'undefined') {
                 crop = this._crop;
             }
-            crop.usable = this._crop.usable ? false : true;
+            crop.usable = !crop.usable;
             this._renderUpdatedPreview(crop);
 
             if (crop.id === this._crop.id) {
