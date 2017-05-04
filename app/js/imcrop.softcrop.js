@@ -11,10 +11,11 @@
      * @param {object} area
      * @param {boolean} respectRatio
      * @param {boolean} locked
+     * @param {boolean} usable
      *
      * @extends IMSoftcrop.Shape
      */
-    IMSoftcrop.Softcrop = function (id, parent, hRatio, vRatio, area, respectRatio, locked) {
+    IMSoftcrop.Softcrop = function (id, parent, hRatio, vRatio, area, respectRatio, locked, usable) {
         // Call super constructor
         IMSoftcrop.Shape.call(this, id, parent);
 
@@ -23,7 +24,8 @@
         this.w = area.w;
         this.h = area.h;
 
-        this.locked = locked;
+        this.usable = usable ? true : false;
+        this.locked = locked ? true : false;
         this.respectRatio = respectRatio;
         this.ratio = {
             w: hRatio,
@@ -104,7 +106,6 @@
             },
 
             usable: {
-                value: true,
                 writable: true
             },
 

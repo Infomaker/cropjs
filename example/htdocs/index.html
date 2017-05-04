@@ -68,7 +68,7 @@
                     image.src,
                     function (addedImage) {
                         this.addSoftcrop('16:9', true, 16, 9);
-                        this.addSoftcrop('8:5', false, 8, 5);
+                        this.addSoftcrop('8:5', false, 8, 5, null, null, false);
                         this.addSoftcrop('4:3', false, 3, 2);
                         this.addSoftcrop('1:198', false, 1, 1.48);
 
@@ -116,7 +116,6 @@
                 var previewHeight = 90;
                 var previewWidth = 90 * (crop.width / crop.height);
                 var cropRatio = previewWidth / crop.width;
-
 
                 var div = document.createElement('div');
                 div.style.height = previewHeight + 'px';

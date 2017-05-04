@@ -654,8 +654,9 @@ var IMSoftcrop = (function() {
          * @param setAsCurrent
          * @param x Optional
          * @param y Optional
+         * @parmam usable Optional
          */
-        addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y) {
+        addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y, usable) {
             var exact = false;
 
             // Make sure all values are numbers
@@ -672,6 +673,8 @@ var IMSoftcrop = (function() {
                 exact = true;
             }
 
+            usable = (typeof usable === 'undefined') ? true : usable;
+
             // Add uninitialized crop to list of available crops
             this._crops.push({
                 id: id,
@@ -680,7 +683,8 @@ var IMSoftcrop = (function() {
                 vRatio: vRatio,
                 x: x,
                 y: y,
-                exact: exact
+                exact: exact,
+                usable: usable ? true : false
             });
 
             if (this._image instanceof IMSoftcrop.Image && this._image.ready) {
@@ -706,7 +710,8 @@ var IMSoftcrop = (function() {
                     x: Math.round(this._image.crops[n].x),
                     y: Math.round(this._image.crops[n].y),
                     width: Math.round(this._image.crops[n].w),
-                    height: Math.round(this._image.crops[n].h)
+                    height: Math.round(this._image.crops[n].h),
+                    usable: this._image.crops[n].usable
                 });
             }
 
@@ -733,7 +738,8 @@ var IMSoftcrop = (function() {
                         this._crops[n].vRatio,
                         this._crops[n].x,
                         this._crops[n].y,
-                        this._crops[n].exact
+                        this._crops[n].exact,
+                        this._crops[n].usable
                     );
 
                     if (this._autocrop) {

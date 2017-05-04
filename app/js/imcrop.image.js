@@ -117,9 +117,10 @@
              * @param x
              * @param y
              * @param exact Treat h/vRatio as exact dimensions (don't autocrop)
+             * @param usable If crop is defined as usable by the user
              */
             addSoftcrop: {
-                value: function (id, setAsCurrent, hRatio, vRatio, x, y, exact) {
+                value: function (id, setAsCurrent, hRatio, vRatio, x, y, exact, usable) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
@@ -148,7 +149,7 @@
                         };
                     }
 
-                    crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true, exact);
+                    crop = new IMSoftcrop.Softcrop(id, this, hRatio, vRatio, area, true, exact, usable);
                     this.crops.push(crop);
 
                     if (setAsCurrent) {
