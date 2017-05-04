@@ -400,7 +400,6 @@ var IMSoftcrop = (function() {
          * @private
          */
         _renderNewCropPreview: function (crop, setAsCurrent) {
-            var previewHeight = 80;
             var _this = this;
 
             // Create image container element
@@ -422,6 +421,9 @@ var IMSoftcrop = (function() {
             // Create inner container element
             var pvDivInner = document.createElement('div');
             pvDivInner.classList.add('imc_preview_image');
+
+            var previewHeight = 90; // Dummy default, will be overriden in _renderUpdatedPreview
+            var previewWidth = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f);
             pvDivInner.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
             // Create span (title) element, including warning element
@@ -473,16 +475,20 @@ var IMSoftcrop = (function() {
                 return;
             }
 
+            var pvDivInner = pvDiv.getElementsByTagName('DIV')[0]
+            var pvImg = pvDiv.getElementsByTagName('IMG')[0];
+            var previewHeight = window.getComputedStyle(pvDivInner).height.slice(0, -2)
             var imgDim = this._image.getDimensions();
-            var previewHeight = 90; // ATTENTION: Must match
+
             var previewWidth = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f);
+            pvDivInner.style.width = previewWidth + 'px';
+
             var cropDim = crop.getDimensions();
             var cropRatio = previewWidth / cropDim.w;
-            var pvImg = pvDiv.getElementsByTagName('IMG');
 
-            pvImg[0].style.height = imgDim.h * cropRatio + 'px';
-            pvImg[0].style.marginTop = '-' + cropDim.y * cropRatio + 'px';
-            pvImg[0].style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
+            pvImg.style.height = imgDim.h * cropRatio + 'px';
+            pvImg.style.marginTop = '-' + cropDim.y * cropRatio + 'px';
+            pvImg.style.marginLeft = '-' + cropDim.x * cropRatio + 'px';
 
             if (crop.autoCropWarning == true) {
                 pvDiv.classList.add('warning');

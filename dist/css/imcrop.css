@@ -24,6 +24,16 @@
     right: 0;
     bottom: -103px;
     height: 104px; }
+    #imc #imc_work_container:after {
+      display: block;
+      position: absolute;
+      content: "";
+      width: 0;
+      top: 6px;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      box-shadow: 0 0 8px 6px #fff; }
   #imc #imc_container #imc_image_inline {
     position: absolute;
     bottom: 10px;
@@ -85,16 +95,6 @@
   text-align: left;
   padding-left: 7px;
   overflow-x: scroll; }
-  .imc_preview_container:after {
-    display: block;
-    position: absolute;
-    content: "";
-    width: 4px;
-    top: 6px;
-    right: 0;
-    bottom: 0;
-    background: #fff;
-    box-shadow: 0 0 8px 6px #fff; }
   .imc_preview_container .imc_preview_image_container {
     position: relative;
     display: inline-block; }
