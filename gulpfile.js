@@ -1,20 +1,15 @@
-// Include gulp
-var gulp = require('gulp');
+"use strict";
 
-// Include our plugins
-var jshint = require('gulp-jshint');
-var sass = require('gulp-sass');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var header = require('gulp-header');
-var jsdoc = require('gulp-jsdoc');
-var bower = require('gulp-bower');
-var pkg = require('./package.json');
-
+const gulp = require('gulp');
+const sass = require('gulp-sass');
+const concat = require('gulp-concat');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
+const header = require('gulp-header');
+const pkg = require('./package.json');
 
 function banner() {
-    var stamp = [
+    const stamp = [
         '/**',
         ' * <%= pkg.name %> - <%= pkg.description %>',
         ' * @author <%= pkg.author.name %>',
@@ -25,70 +20,33 @@ function banner() {
         ''
     ].join('\n');
 
-    return header(stamp, { pkg: pkg });
+    return header(stamp, {pkg: pkg});
 }
 
-// Lint task
-gulp.task('lint', function() {
-    return gulp.src('app/js/**/*.js')
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'));
-});
+function css() {
+    return gulp
+        .src('app/scss/*.scss')
+        .pipe(sass())
+        .pipe(gulp.dest('dist/css'));
+}
 
-// Generate docs
-gulp.task('docs', function() {
-    return gulp.src('app/js/**/*.js')
-        .pipe(jsdoc('build/docs'));
-});
-
-
-
-// Get bower dependencies
-gulp.task('bower', function() {
-    return bower();
-});
-
-
-// Concatenate detect workers
-gulp.task('scripts-trackingjs', function() {
-    var files = [
-        'bower_components/tracking.js/build/tracking.js',
-        'bower_components/tracking.js/build/data/face.js',
-        'bower_components/tracking.js/build/data/eye.js'
+function scriptTrackingJs() {
+    const files = [
+        'node_modules/tracking/build/tracking.js',
+        'node_modules/tracking/build/data/face.js',
+        'node_modules/tracking/build/data/eye.js'
     ];
 
     return gulp.src(files)
         .pipe(concat('tracking.js'))
-        .pipe(gulp.dest('dist/js'));
-});
-
-
-// Concatenate detect workers
-gulp.task('scripts-trackingjs-min', function() {
-    var files = [
-        'bower_components/tracking.js/build/tracking-min.js',
-        'bower_components/tracking.js/build/data/face-min.js',
-        'bower_components/tracking.js/build/data/eye-min.js'
-    ];
-
-    return gulp.src(files)
-        .pipe(concat('tracking-min.js'))
-        .pipe(gulp.dest('dist/js'));
-});
-
-
-// Uglify detect worker
-gulp.task('scripts-worker-detect', function() {
-    return gulp.src('app/js/workers/imcrop.worker.detect.js')
+        .pipe(gulp.dest('dist/js'))
+        .pipe(rename('tracking.min.js'))
         .pipe(uglify())
-        .pipe(banner())
         .pipe(gulp.dest('dist/js'));
-});
+}
 
-
-// Concatenate and uglify cropjs core files
-gulp.task('scripts-cropjs', function() {
-    var files = [
+function scriptCropJs() {
+    const files = [
         'app/js/imcrop.ui.js',
         'app/js/imcrop.editor.js',
         'app/js/imcrop.ratio.js',
@@ -97,43 +55,32 @@ gulp.task('scripts-cropjs', function() {
         'app/js/imcrop.softcrop.js'
     ];
 
-    return gulp.src(files)
+    return gulp
+        .src(files)
         .pipe(concat('cropjs.js'))
         .pipe(banner())
         .pipe(gulp.dest('dist/js'))
         .pipe(rename('cropjs.min.js'))
         .pipe(uglify())
         .pipe(banner())
+        .pipe(gulp.dest('dist/js'))
+}
+
+function scriptWorkerDetect() {
+    return gulp.src('app/js/workers/imcrop.worker.detect.js')
+        .pipe(uglify())
+        .pipe(banner())
         .pipe(gulp.dest('dist/js'));
-});
+}
 
+function watchFiles() {
+    gulp.watch('app/scss/*.scss', css)
+    gulp.watch('app/**/*.js', gulp.parallel(scriptCropJs, scriptWorkerDetect))
+}
 
-// Handle all javascript files
-gulp.task('scripts', ['scripts-cropjs', 'scripts-worker-detect', 'scripts-trackingjs', 'scripts-trackingjs-min']);
+const scripts = gulp.parallel(scriptCropJs, scriptWorkerDetect, scriptTrackingJs)
+const watch = gulp.parallel(watchFiles);
+const build = gulp.parallel(css, scripts)
 
-
-// Copy necessary files
-gulp.task('copy', function() {
-    gulp.src('app/index.html')
-        .pipe(gulp.dest('dist/'));
-});
-
-
-// Compile our sass
-gulp.task('sass', function() {
-    return gulp.src('app/scss/*.scss')
-        .pipe(sass())
-        .pipe(gulp.dest('dist/css'));
-});
-
-
-
-// Watch files for changes
-gulp.task('watch', function() {
-    gulp.watch('app/scss/*.scss', ['sass', 'copy']);
-    gulp.watch('app/**/*.js', ['scripts-cropjs', 'scripts-worker-detect', 'copy']);
-    gulp.watch('app/*.html', ['copy']);
-});
-
-// Default Task
-gulp.task('default', ['bower', 'sass', 'scripts', 'copy']);
+exports.watch = watch;
+exports.default = build;

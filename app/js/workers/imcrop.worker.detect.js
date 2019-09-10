@@ -7,13 +7,13 @@
 // Add dummy window object so tracking.js works outside ui context
 //
 tracking = {};
-Win = function () {};
+Win = function() {};
 
 window = new Win();
 window.tracking = tracking;
 
 importScripts(
-    'tracking-min.js'
+    'tracking.min.js'
 );
 
 
@@ -70,7 +70,7 @@ onmessage = function(e) {
         var _this = this;
 
         tracker.setStepSize(byValue);
-        tracker.on('track', function (event) {
+        tracker.on('track', function(event) {
             _this.postMessage(event.data);
             close();
         });
