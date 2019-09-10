@@ -98,6 +98,7 @@
 
 
 var IMSoftcrop = (function() {
+    var IMSoftcrop = {};
 
     /**
      * Editor constructor
@@ -106,7 +107,7 @@ var IMSoftcrop = (function() {
      * @param {string} id
      * @param {object} [options]
      */
-    this.Editor = function (id, options) {
+    IMSoftcrop.Editor = function (id, options) {
         this._id = id;
         this._crops = [];
 
@@ -197,7 +198,7 @@ var IMSoftcrop = (function() {
         );
     };
 
-    this.Editor.prototype = {
+    IMSoftcrop.Editor.prototype = {
 
         // Editor container element id
         _id: '',
@@ -1700,7 +1701,7 @@ var IMSoftcrop = (function() {
         }
     };
 
-    return this;
+    return IMSoftcrop;
 })();
 
 (function(IMSoftcrop) {
@@ -2168,7 +2169,7 @@ var IMSoftcrop = (function() {
      * IMSoftcrop.Image prototype
      */
     IMSoftcrop.Image.prototype = Object.create(
-        Shape.prototype,
+        IMSoftcrop.Shape.prototype,
         {
             // Image src
             src: {
@@ -2785,7 +2786,7 @@ var IMSoftcrop = (function() {
      * IMSoftcrop.Softcrop prototype
      */
     IMSoftcrop.Softcrop.prototype = Object.create(
-        Shape.prototype,
+        IMSoftcrop.Shape.prototype,
         {
             lineWidth: {
                 value: 1

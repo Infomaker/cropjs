@@ -22,7 +22,7 @@
      * IMSoftcrop.Image prototype
      */
     IMSoftcrop.Image.prototype = Object.create(
-        Shape.prototype,
+        IMSoftcrop.Shape.prototype,
         {
             // Image src
             src: {

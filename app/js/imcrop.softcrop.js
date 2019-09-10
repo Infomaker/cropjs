@@ -51,7 +51,7 @@
      * IMSoftcrop.Softcrop prototype
      */
     IMSoftcrop.Softcrop.prototype = Object.create(
-        Shape.prototype,
+        IMSoftcrop.Shape.prototype,
         {
             lineWidth: {
                 value: 1
