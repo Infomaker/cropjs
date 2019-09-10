@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,8 +15,6 @@
     <link rel="stylesheet" href="cropjs/css/imcrop.css">
     <script src="cropjs/js/tracking.js"></script>
     <script src="cropjs/js/cropjs.js"></script>
-
-
 
     <script>
         var editor;
@@ -33,25 +32,25 @@
             // Get access to the editor object
             if (typeof editor == 'undefined') {
                 editor = new IMSoftcrop.Editor(
-                        'crop_impl',
-                        {
-                            autocrop: true,
-                            detectWorkerUrl: '/cropjs/js/imcrop.worker.detect.js',
-                            detectThreshold: 5,
-                            detectStepSize: 3.5,
-                            debug: false,
-                            debugElement: document.getElementById('crop_debug')
-                        }
+                    'crop_impl',
+                    {
+                        autocrop: true,
+                        detectWorkerUrl: '/cropjs/js/imcrop.worker.detect.js',
+                        detectThreshold: 5,
+                        detectStepSize: 3.5,
+                        debug: true,
+                        debugElement: document.getElementById('crop_debug')
+                    }
                 );
 
                 // Add save handler
-                editor.onSave(function (cropdata) {
+                editor.onSave(function(cropdata) {
                     div.classList.remove('open');
                     addImageToDocument(cropdata);
                 });
 
                 // Add cancel handelr
-                editor.onCancel(function (cropdata) {
+                editor.onCancel(function(cropdata) {
                     div.classList.remove('open');
                 });
             }
@@ -65,15 +64,15 @@
 
             // Load image with crops
             editor.addImage(
-                    image.src,
-                    function (addedImage) {
-                        this.addSoftcrop('16:9', true, 16, 9);
-                        this.addSoftcrop('8:5', false, 8, 5, null, null, false);
-                        this.addSoftcrop('4:3', false, 3, 2);
-                        this.addSoftcrop('1:198', false, 1, 1.48);
+                image.src,
+                function(addedImage) {
+                    this.addSoftcrop('16:9', true, 16, 9);
+                    this.addSoftcrop('8:5', false, 8, 5, null, null, false);
+                    this.addSoftcrop('4:3', false, 3, 2);
+                    this.addSoftcrop('1:198', false, 1, 1.48);
 
-                        this.addSoftcrop('test', false, 800, 400, 100, 20);
-                    }
+                    this.addSoftcrop('test', false, 800, 400, 100, 20);
+                }
             );
         }
 
@@ -85,23 +84,22 @@
 
             // Load image with existing crops
             editor.addImage(
-                    image.src,
-                    function (addedImage) {
-                        for(var n = 0; n < image.crops.length; n++) {
-                            this.addSoftcrop(
-                                image.crops[n].id,
-                                n == 0, // Set first crop as active
-                                image.crops[n].width,
-                                image.crops[n].height,
-                                image.crops[n].x,
-                                image.crops[n].y
-                            )
-                        }
-                    },
-                    false // Disable autocrop for this image
+                image.src,
+                function(addedImage) {
+                    for (var n = 0;n < image.crops.length;n++) {
+                        this.addSoftcrop(
+                            image.crops[n].id,
+                            n == 0, // Set first crop as active
+                            image.crops[n].width,
+                            image.crops[n].height,
+                            image.crops[n].x,
+                            image.crops[n].y
+                        )
+                    }
+                },
+                false // Disable autocrop for this image
             );
         }
-
 
         /**
          * Add image to document and display all crops
@@ -110,7 +108,7 @@
 
             var li = document.createElement('li');
 
-            for (var n = 0; n < image.crops.length; n++) {
+            for (var n = 0;n < image.crops.length;n++) {
                 var crop = image.crops[n];
 
                 var previewHeight = 90;
@@ -185,8 +183,6 @@
     </script>
 </head>
 
-
-
 <body>
     <form enctype="multipart/form-data" method="post" action="/upload" id="imageform">
         <label for="imageinput">Add image</label>
@@ -200,4 +196,5 @@
 
     <ol id="imagelist"></ol>
 </body>
+
 </html>

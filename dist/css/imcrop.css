@@ -115,7 +115,9 @@
       border-radius: 2px;
       display: flex;
       flex-direction: row; }
-      .imc_preview_container .imc_preview_image_container .imc_preview_image > span i, .imc_preview_container .imc_preview_image_container .imc_preview_image > span b, .imc_preview_container .imc_preview_image_container .imc_preview_image > span em {
+      .imc_preview_container .imc_preview_image_container .imc_preview_image > span i,
+      .imc_preview_container .imc_preview_image_container .imc_preview_image > span b,
+      .imc_preview_container .imc_preview_image_container .imc_preview_image > span em {
         display: block;
         font-style: normal;
         margin-right: 6px;
@@ -156,7 +158,7 @@ a.toggle {
   vertical-align: middle; }
 
 a.button {
-  background: #3498DC;
+  background: #3498dc;
   color: #fff;
   line-height: 22px;
   padding: 0 8px;
@@ -165,14 +167,14 @@ a.button {
   display: block;
   float: left; }
   a.button.secondary {
-    background-color: #3498DC; }
+    background-color: #3498dc; }
   a.button.left, a.button.right {
     padding: 0 16px;
     text-align: center; }
   a.button.left {
     border-radius: 8px 0 0 8px;
     margin-right: 0;
-    border-right: 1px solid #3498DC; }
+    border-right: 1px solid #3498dc; }
   a.button.right {
     border-radius: 0 8px 8px 0;
     margin-right: 0; }
@@ -186,7 +188,7 @@ a.button {
  */
 a.toggle {
   height: 20px;
-  color: #3498DC;
+  color: #3498dc;
   border-radius: 12px;
   padding: 0;
   /* Toggle label */
@@ -210,7 +212,7 @@ a.toggle {
     height: 20px;
     border-radius: 10px;
     line-height: 14px;
-    background: #3A99D9;
+    background: #3a99d9;
     /* Toggle option, default off */ }
     a.toggle > span span {
       display: block;
@@ -222,7 +224,7 @@ a.toggle {
       left: 3px;
       border-radius: 7px;
       text-indent: 20px;
-      background: #2274AC;
+      background: #2274ac;
       color: #cfddde;
       /* Font awesome vector icon handling */
       /* On defaults to hidden */ }
@@ -231,10 +233,10 @@ a.toggle {
       a.toggle > span span.on {
         display: none; }
   a.toggle.toggle.on > span {
-    background: #3498DC; }
+    background: #3498dc; }
     a.toggle.toggle.on > span span.on {
       display: block;
-      background: #2274AC;
+      background: #2274ac;
       color: #ffffff;
       left: auto;
       right: 3px;

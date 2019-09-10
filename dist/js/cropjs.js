@@ -6,7 +6,7 @@
  * @license MIT
  */
 (function() {
-    this.IMCropUI = function(){};
+    this.IMCropUI = function() {};
 
     IMCropUI.Toggle = function(id, onClick) {
         var _id = id;
