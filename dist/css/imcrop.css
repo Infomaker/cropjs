@@ -15,25 +15,11 @@
     position: absolute;
     top: 0;
     right: 0;
-    bottom: 104px;
+    bottom: 120px;
     left: 0;
     background: #000; }
   #imc #imc_work_container {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -110px;
-    height: 110px; }
-    #imc #imc_work_container:after {
-      display: block;
-      position: absolute;
-      content: "";
-      width: 0;
-      top: 6px;
-      right: 0;
-      bottom: 0;
-      background: #fff;
-      box-shadow: 0 0 8px 6px #fff; }
+    position: relative; }
   #imc #imc_container #imc_image_inline {
     position: absolute;
     bottom: 10px;
@@ -58,19 +44,21 @@
     #imc #imc_container #imc_image_inline #imc_loading.loading {
       display: inline-block; }
     #imc #imc_container #imc_image_inline #imc_image_info {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      color: #e5e5e5;
       display: block;
-      align-self: flex-end;
-      font-size: 80%;
-      font-weight: 100;
+      font-size: 13px;
+      font-weight: 400;
       line-height: 20px;
-      letter-spacing: 0.11em;
-      color: #fff;
-      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.9);
+      letter-spacing: 1.4px;
+      margin-left: 0;
+      padding: 1px 4px;
       opacity: 0.1;
-      padding-top: 1px;
+      align-self: flex-end;
       transition: opacity ease-out 0.3s; }
     #imc #imc_container #imc_image_inline #imc_image_info.display {
-      opacity: 0.9;
+      opacity: 1;
       transition: opacity ease-out 0.3s; }
     #imc #imc_container #imc_image_inline #imc_image_info.display:before {
       font-family: FontAwesome;
@@ -92,9 +80,23 @@
 .imc_preview_container {
   display: flex;
   white-space: nowrap;
-  padding-left: 7px;
   overflow-x: scroll;
-  height: 115px; }
+  height: 110px;
+  -webkit-overflow-scrolling: touch; }
+  .imc_preview_container::-webkit-scrollbar {
+    -webkit-appearance: none; }
+  .imc_preview_container::-webkit-scrollbar:vertical {
+    width: 11px; }
+  .imc_preview_container::-webkit-scrollbar:horizontal {
+    height: 11px; }
+  .imc_preview_container::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid #333;
+    /* should match background, can't be transparent */
+    background-color: rgba(0, 0, 0, 0.5); }
+  .imc_preview_container::-webkit-scrollbar-track {
+    background-color: #333;
+    border-radius: 8px; }
   .imc_preview_container .imc_preview_image_container .imc_preview_image {
     position: relative;
     margin: 5px 5px 0 0;
@@ -102,6 +104,8 @@
     width: 90px;
     overflow: hidden;
     border: 2px solid transparent; }
+    .imc_preview_container .imc_preview_image_container .imc_preview_image:last-child {
+      margin-right: 0; }
     .imc_preview_container .imc_preview_image_container .imc_preview_image > span {
       position: absolute;
       bottom: 3px;
