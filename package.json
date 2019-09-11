@@ -19,7 +19,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "npm-run-all --parallel server gulp",
-    "build": "",
+    "build": "gulp build",
     "gulp": "gulp watch",
     "server": "node ./example/index.js"
   },
