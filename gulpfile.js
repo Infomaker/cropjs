@@ -6,6 +6,7 @@ const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const header = require('gulp-header');
+const cleanCss = require('gulp-clean-css');
 const pkg = require('./package.json');
 
 function banner() {
@@ -27,6 +28,9 @@ function css() {
     return gulp
         .src('app/scss/*.scss')
         .pipe(sass())
+        .pipe(gulp.dest('dist/css'))
+        .pipe(rename('imcrop.min.css'))
+        .pipe(cleanCss())
         .pipe(gulp.dest('dist/css'));
 }
 
@@ -78,9 +82,10 @@ function watchFiles() {
     gulp.watch('app/**/*.js', gulp.parallel(scriptCropJs, scriptWorkerDetect))
 }
 
-const scripts = gulp.parallel(scriptCropJs, scriptWorkerDetect, scriptTrackingJs)
-const watch = gulp.parallel(watchFiles);
-const build = gulp.parallel(css, scripts)
+const scripts = gulp.parallel(scriptCropJs, scriptWorkerDetect, scriptTrackingJs);
+const build = gulp.parallel(css, scripts);
+const watch = gulp.series(build, watchFiles);
 
 exports.watch = watch;
+exports.build = build;
 exports.default = build;
