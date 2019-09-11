@@ -44,7 +44,7 @@ function scriptTrackingJs() {
     return gulp.src(files)
         .pipe(concat('tracking.js'))
         .pipe(gulp.dest('dist/js'))
-        .pipe(rename('tracking-min.js'))
+        .pipe(rename('tracking.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest('dist/js'));
 }
