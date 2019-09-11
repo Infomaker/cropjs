@@ -9,7 +9,7 @@ CropJS is a lightweight soft crop tool for to integration into other projects. I
 ### Installation
 
 ```bash
-npm install cropjs
+npm install @infomaker/cropjs
 ```
 
 ### Define a placeholder for the crop dialog
