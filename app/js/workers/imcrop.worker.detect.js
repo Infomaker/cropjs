@@ -13,7 +13,7 @@ window = new Win();
 window.tracking = tracking;
 
 importScripts(
-    'tracking.min.js'
+    'tracking-min.js'
 );
 
 
