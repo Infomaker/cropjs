@@ -1,6 +1,8 @@
-var Hapi = require('hapi');
-var Path = require('path');
-var UploadHandler = require('./handlers/upload');
+'use strict';
+
+const Hapi = require('@hapi/hapi');
+const Path = require('path');
+const UploadHandler = require('./handlers/upload');
 
 const start = async () => {
     const server = new Hapi.Server({
@@ -13,7 +15,7 @@ const start = async () => {
         }
     });
 
-    await server.register(require('inert'));
+    await server.register(require('@hapi/inert'));
 
     // Default route
     server.route({
@@ -89,5 +91,11 @@ const start = async () => {
 
     console.log('Server running at:', server.info.uri);
 }
+
+process.on('unhandledRejection', (err) => {
+
+    console.log(err);
+    process.exit(1);
+});
 
 start();

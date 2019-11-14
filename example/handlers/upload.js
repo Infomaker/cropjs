@@ -1,5 +1,5 @@
 var fs = require('fs');
-var Hapi = require('hapi');
+var Hapi = require('@hapi/hapi');
 
 /**
  * File upload handler
@@ -33,17 +33,17 @@ uploadHandler.prototype.handle = function(fileElement) {
 
         try {
             var fd = fs.createWriteStream(this.localPath);
-            fd.on('error', function (err) {
+            fd.on('error', function(err) {
                 console.log('Error: ' + err);
                 _this.onError(err);
             });
 
             fileElement.pipe(fd);
-            fileElement.on('end', function () {
+            fileElement.on('end', function() {
                 _this.onUpload(_this.respond());
             });
         }
-        catch(ex) {
+        catch (ex) {
             console.log('Exception: ' + ex);
             _this.onError(ex);
         }
