@@ -100,6 +100,9 @@
 var IMSoftcrop = (function() {
     var IMSoftcrop = {};
 
+    // Event handler collection for add and remove with references
+    var handlers = {}
+
     /**
      * Editor constructor
      * @constructor
@@ -107,9 +110,18 @@ var IMSoftcrop = (function() {
      * @param {string} id
      * @param {object} [options]
      */
-    IMSoftcrop.Editor = function (id, options) {
+    IMSoftcrop.Editor = function(id, options) {
         this._id = id;
         this._crops = [];
+        handlers = {
+            'onKeyDown': this.onKeyDown.bind(this),
+            'onResize': this.onResize.bind(this),
+            'onDoubleClick': this.onDoubleClick.bind(this),
+            'onMouseMove': this.onMouseMove.bind(this),
+            'onMouseUp': this.onMouseUp.bind(this),
+            'onMouseDown': this.onMouseDown.bind(this),
+            'onMouseWheel': this.onMouseWheel.bind(this),
+        }
 
         if (typeof options == 'object') {
             if (options.debug === true) {
@@ -162,7 +174,7 @@ var IMSoftcrop = (function() {
         // Lock crop
         this._cropLockedToggle = new IMCropUI.Toggle(
             'imc_croplocked',
-            function () {
+            function() {
                 if (_this._crop instanceof IMSoftcrop.Softcrop) {
                     _this._crop.locked = this.on;
                     _this._renderUpdatedPreview(_this._crop);
@@ -173,7 +185,7 @@ var IMSoftcrop = (function() {
         // Mark crop as usable
         this._cropUsableToggle = new IMCropUI.Toggle(
             'imc_cropusable',
-            function () {
+            function() {
                 if (_this._crop instanceof IMSoftcrop.Softcrop) {
                     _this._crop.usable = this.on;
                     _this._renderUpdatedPreview(_this._crop);
@@ -184,7 +196,7 @@ var IMSoftcrop = (function() {
         // Draw guides toggle
         this._guidesToggle = new IMCropUI.Toggle(
             'imc_guides',
-            function () {
+            function() {
                 _this.redraw();
             }
         );
@@ -192,7 +204,7 @@ var IMSoftcrop = (function() {
         // Draw focuspoints toggle
         this._focusPointsToggle = new IMCropUI.Toggle(
             'imc_focuspoints',
-            function () {
+            function() {
                 _this.redraw();
             }
         );
@@ -299,7 +311,7 @@ var IMSoftcrop = (function() {
          *
          * @private
          */
-        setupUI: function () {
+        setupUI: function() {
             this.injectHTML();
 
             this._container = document.getElementById('imc_container');
@@ -392,19 +404,19 @@ var IMSoftcrop = (function() {
             var lastTime = 0;
             var vendors = ['webkit', 'moz'];
 
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+            for (var x = 0;x < vendors.length && !window.requestAnimationFrame;++x) {
+                window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
                 window.cancelAnimationFrame =
-                    window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+                    window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
             }
 
             if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function (callback, element) {
+                window.requestAnimationFrame = function(callback, element) {
                     var currTime = new Date().getTime();
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function () {
-                            callback(currTime + timeToCall);
-                        },
+                    var id = window.setTimeout(function() {
+                        callback(currTime + timeToCall);
+                    },
                         timeToCall);
                     lastTime = currTime + timeToCall;
                     return id;
@@ -412,7 +424,7 @@ var IMSoftcrop = (function() {
             }
 
             if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function (id) {
+                window.cancelAnimationFrame = function(id) {
                     clearTimeout(id);
                 };
             }
@@ -450,7 +462,7 @@ var IMSoftcrop = (function() {
 
                 // Redraw all crop previews
                 var softcrops = this._image.getSoftCrops();
-                for (var n = 0; n < softcrops.length; n++) {
+                for (var n = 0;n < softcrops.length;n++) {
                     if (softcrops[n] instanceof IMSoftcrop.Softcrop) {
                         this._renderUpdatedPreview(softcrops[n]);
                     }
@@ -467,7 +479,7 @@ var IMSoftcrop = (function() {
         /**
          * Tell editor a redraw is necessary
          */
-        redraw: function () {
+        redraw: function() {
             this._redrawCanvas = true;
         },
 
@@ -499,7 +511,7 @@ var IMSoftcrop = (function() {
          * @param setAsCurrent
          * @private
          */
-        _renderNewCropPreview: function (crop, setAsCurrent) {
+        _renderNewCropPreview: function(crop, setAsCurrent) {
             var _this = this;
 
             // Create image container element
@@ -513,7 +525,7 @@ var IMSoftcrop = (function() {
 
             pvDivOuter.addEventListener(
                 'click',
-                function () {
+                function() {
                     _this.setActiveCrop(crop);
                 }
             );
@@ -527,15 +539,21 @@ var IMSoftcrop = (function() {
             pvDivInner.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
             // Create span (title) element, including warning element
-            var pvSpan = document.createElement('span');
-            var pvSpanEm = document.createElement('em');
+            var cropWrapper = document.createElement('span');
+            cropWrapper.classList.add('crop-ratio-wrapper')
+
+            var ratioText = document.createElement('span');
+            ratioText.classList.add('crop-ratio-text');
+
             var pvWarning = document.createElement('i');
             pvWarning.className = 'fa fa-warning';
 
-            var pvUsed = document.createElement('b');
+            var icon = document.createElement('span');
+
             var pvUsedCrop = crop;
-            pvUsed.className = 'fa fa-check';
-            pvUsed.addEventListener(
+            icon.className = 'fa fa-check';
+            icon.classList.add('crop-ratio-icon')
+            icon.addEventListener(
                 'click',
                 function(e) {
                     _this.toggleCropUsable(pvUsedCrop)
@@ -545,19 +563,21 @@ var IMSoftcrop = (function() {
                 }
             )
 
-            pvSpanEm.appendChild(document.createTextNode(crop.id))
-            pvSpan.appendChild(pvUsed);
-            pvSpan.appendChild(pvSpanEm);
-            pvSpan.appendChild(pvWarning);
-
+            ratioText.appendChild(document.createTextNode(crop.id))
+            cropWrapper.appendChild(ratioText);
+            cropWrapper.appendChild(icon);
+            cropWrapper.appendChild(pvWarning);
 
             // Create image element
-            var pvImg = document.createElement('img');
+            var pvImg = new Image();
+            pvImg.onload = function() {
+                pvDivInner.classList.add('loaded');
+            }
             pvImg.src = this._image.src;
 
             // Put it together
             pvDivInner.appendChild(pvImg);
-            pvDivInner.appendChild(pvSpan);
+            pvDivInner.appendChild(cropWrapper);
             pvDivOuter.appendChild(pvDivInner);
             this._previewContainer.appendChild(pvDivOuter);
 
@@ -572,7 +592,7 @@ var IMSoftcrop = (function() {
          * @param crop
          * @private
          */
-        _renderUpdatedPreview: function (crop) {
+        _renderUpdatedPreview: function(crop) {
             var pvDiv = document.getElementById(this._image.id + '_' + crop.id);
             if (pvDiv == null || typeof pvDiv != 'object') {
                 return;
@@ -614,7 +634,7 @@ var IMSoftcrop = (function() {
          * Get dimensions
          * @returns {{margin: number, width: number, height: number}}
          */
-        getDimensions: function () {
+        getDimensions: function() {
             return {
                 margin: this._margin,
                 width: this._canvas.width,
@@ -627,7 +647,7 @@ var IMSoftcrop = (function() {
                 w,
                 h,
                 className = (useCrop) ? 'crop' : 'image';
-                var e = document.getElementById('imc_image_info');
+            var e = document.getElementById('imc_image_info');
 
             if (!e) {
                 return;
@@ -668,7 +688,7 @@ var IMSoftcrop = (function() {
          * Adjust canvas for pixel ratio
          * @param canvas
          */
-        adjustForPixelRatio: function (canvas) {
+        adjustForPixelRatio: function(canvas) {
             var c = canvas || this._canvas;
             var ctx = c.getContext('2d');
             var devicePixelRatio = window.devicePixelRatio || 1;
@@ -708,7 +728,7 @@ var IMSoftcrop = (function() {
          * @param onImageReady Callback after image has been loaded
          * @param autocropImage Optional, default true, if autocrops should be applied
          */
-        addImage: function (url, onImageReady, applyAutocrop) {
+        addImage: function(url, onImageReady, applyAutocrop) {
             var _this = this;
 
             this.toggleLoadingImage(true);
@@ -722,7 +742,7 @@ var IMSoftcrop = (function() {
 
             this._image.load(
                 url,
-                function () {
+                function() {
                     _this.setZoomToImage(false);
                     _this.centerImage(false);
                     _this.updateImageInfo(false);
@@ -759,7 +779,7 @@ var IMSoftcrop = (function() {
          * @param y Optional
          * @parmam usable Optional
          */
-        addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y, usable) {
+        addSoftcrop: function(id, setAsCurrent, hRatio, vRatio, x, y, usable) {
             var exact = false;
 
             // Make sure all values are numbers
@@ -807,7 +827,7 @@ var IMSoftcrop = (function() {
                 crops: []
             };
 
-            for(var n = 0; n < this._image.crops.length; n++) {
+            for (var n = 0;n < this._image.crops.length;n++) {
                 data.crops.push({
                     id: this._image.crops[n].id,
                     x: Math.round(this._image.crops[n].x),
@@ -830,7 +850,7 @@ var IMSoftcrop = (function() {
             }
 
             // Always make sure all crops are added
-            for(var n = 0; n < this._crops.length; n++) {
+            for (var n = 0;n < this._crops.length;n++) {
                 var crop = this._image.getSoftcrop(this._crops[n].id);
 
                 if (crop == null) {
@@ -863,14 +883,14 @@ var IMSoftcrop = (function() {
          * Set active crop
          * @param crop
          */
-        setActiveCrop: function (crop) {
+        setActiveCrop: function(crop) {
             if (crop instanceof IMSoftcrop.Softcrop !== true) {
                 return;
             }
 
             var div = document.getElementById(this._image.id + '_' + crop.id);
             var divs = this._previewContainer.getElementsByClassName('imc_preview_image_container');
-            for (var n = 0; n < divs.length; n++) {
+            for (var n = 0;n < divs.length;n++) {
                 divs[n].classList.remove('active');
             }
 
@@ -889,7 +909,7 @@ var IMSoftcrop = (function() {
          * @param crop
          */
         toggleCropUsable: function(crop) {
-            if(typeof crop === 'undefined') {
+            if (typeof crop === 'undefined') {
                 crop = this._crop;
             }
             crop.usable = !crop.usable;
@@ -1032,7 +1052,7 @@ var IMSoftcrop = (function() {
          */
         addDetectedDetails: function(data) {
             var corners = [];
-            for (var i = 0; i < data.length; i += 2) {
+            for (var i = 0;i < data.length;i += 2) {
                 corners.push({
                     x: data[i],
                     y: data[i + 1]
@@ -1046,7 +1066,7 @@ var IMSoftcrop = (function() {
         /**
          * Detect faces in image
          */
-        detectFaces: function () {
+        detectFaces: function() {
             if (!this._image instanceof IMSoftcrop.Image || !this._image.ready) {
                 return;
             }
@@ -1067,7 +1087,7 @@ var IMSoftcrop = (function() {
                 ]);
 
                 featureWorker.onmessage = function(e) {
-                    for(var n = 0; n < e.data.length; n++) {
+                    for (var n = 0;n < e.data.length;n++) {
                         _this.addDetectedFeature(e.data[n]);
                     }
                     _this._waitForWorkers--;
@@ -1089,8 +1109,8 @@ var IMSoftcrop = (function() {
 
                 var tracker = new tracking.ObjectTracker(['face']);
                 tracker.setStepSize(this._detectStepSize);
-                tracker.on('track', function (event) {
-                    event.data.forEach(function (rect) {
+                tracker.on('track', function(event) {
+                    event.data.forEach(function(rect) {
                         _this.addDetectedFeature(rect);
                     });
                     _this._waitForWorkers--;
@@ -1115,9 +1135,9 @@ var IMSoftcrop = (function() {
         addDetectedFeature: function(rect) {
             var imageRadius = 0,
                 imagePoint = {
-                x: rect.x,
-                y: rect.y
-            };
+                    x: rect.x,
+                    y: rect.y
+                };
 
             if (rect.width / this._image.w > 0.45) {
                 // Feature point (face) takes up a large portion of the image
@@ -1169,7 +1189,7 @@ var IMSoftcrop = (function() {
         canvasPointInImage: function(x, y) {
             return {
                 x: Math.round((x - this._margin) / this._zoomLevel) - this._image.x,
-                y: Math.round((y- this._margin) / this._zoomLevel) - this._image.y
+                y: Math.round((y - this._margin) / this._zoomLevel) - this._image.y
             };
         },
 
@@ -1177,7 +1197,7 @@ var IMSoftcrop = (function() {
          * Center image around the middle point of the drawing area
          * @param redraw
          */
-        centerImage: function (redraw) {
+        centerImage: function(redraw) {
             var cx, cy;
 
             this._keepCenter = true;
@@ -1202,7 +1222,7 @@ var IMSoftcrop = (function() {
          * @param decimal
          * @returns {number}
          */
-        getZoom: function (decimal) {
+        getZoom: function(decimal) {
             return decimal === true ? this._zoomLevel : this._zoomLevel * 100;
         },
 
@@ -1213,7 +1233,7 @@ var IMSoftcrop = (function() {
          * @param zoomLevel
          * @param redraw
          */
-        setZoom: function (zoomLevel, redraw) {
+        setZoom: function(zoomLevel, redraw) {
             this._zoomLevel = zoomLevel / 100;
 
             if (this._keepCenter) {
@@ -1229,7 +1249,7 @@ var IMSoftcrop = (function() {
          * Fill drawing area with image as best as possible
          * @param redraw
          */
-        setZoomToImage: function (redraw) {
+        setZoomToImage: function(redraw) {
             var imgDim = this._image.getDimensions();
             var vFactor = (this._container.clientHeight - this._margin * 2) / imgDim.h;
             var hFactor = (this._container.clientWidth - this._margin * 2) / imgDim.w;
@@ -1255,128 +1275,40 @@ var IMSoftcrop = (function() {
             }
         },
 
+        /**
+         * Dispose function to remove all listeners
+         */
+        removeEventListeners: function() {
+            window.removeEventListener('resize', handlers.onResize)
+            window.removeEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.removeEventListener('dblclick', handlers.onDoubleClick)
+            this._canvas.removeEventListener('mousedown', handlers.onMouseDown)
+            this._canvas.removeEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.removeEventListener('mousemove', handlers.onMouseMove)
+            this._canvas.removeEventListener('mousewheel', handlers.onMouseWheel, false)
+            document.removeEventListener('keydown', handlers.onKeyDown, false)
+        },
 
         /**
          * Add all event listeners required for drawing and dragging
          */
-        addCanvasEventListeners: function () {
-            var _this = this;
-
-            window.addEventListener(
-                'resize',
-                function () {
-                    _this.onResize(event);
-                },
-                false
-            );
-
-            this._canvas.addEventListener(
-                'dblclick',
-                function(event) {
-                    return _this.onDoubleClick(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousedown',
-                function (event) {
-                    _this.onMouseDown(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mouseup',
-                function (event) {
-                    _this.onMouseUp(event);
-                }
-            );
-
-            window.addEventListener(
-                'mouseup',
-                function (event) {
-                    _this.onMouseUp(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousemove',
-                function (event) {
-                    _this.onMouseMove(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousewheel',
-                function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    _this.onMouseWheel(event);
-                    return false;
-                },
-                false
-            );
-
-            document.addEventListener(
-                'keydown',
-                function (e) {
-                    var keyCode = e.keyCode || e.which;
-
-                    // Handle escape key
-                    if (keyCode === 13) {
-                        _this._onSave(
-                            _this.getSoftcropData()
-                        );
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-
-                    if (keyCode === 27) {
-                        _this._onCancel();
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-
-                    // Handle tab key
-                    if (keyCode === 9) {
-                        var crops = _this._image.getSoftCrops();
-                        var current;
-                        for (var n = 0; n < crops.length; n++) {
-                            if (_this._crop === crops[n]) {
-                                current = n;
-                                break;
-                            }
-                        }
-
-                        if (typeof current != 'undefined') {
-                            n += (!e.shiftKey) ? 1 : -1;
-
-                            if (n < 0) {
-                                n = crops.length - 1;
-                            }
-                            else if (n + 1 > crops.length) {
-                                n = 0;
-                            }
-                            _this.setActiveCrop(crops[n]);
-                        }
-
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-                },
-                false
-            );
+        addCanvasEventListeners: function() {
+            window.addEventListener('resize', handlers.onResize, false)
+            window.addEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.addEventListener('dblclick', handlers.dblclick)
+            this._canvas.addEventListener('mousedown', handlers.onMouseDown)
+            this._canvas.addEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.addEventListener('mousemove', handlers.onMouseMove)
+            this._canvas.addEventListener('mousewheel', handlers.onMouseWheel, false)
+            document.addEventListener('keydown', handlers.onKeyDown, false)
         },
-
 
         /**
          * Add onSave callback function
          * @param {function} func
          */
         onSave: function(func) {
-            if(typeof func == 'function') {
+            if (typeof func == 'function') {
                 this._onSave = func;
             }
         },
@@ -1387,7 +1319,7 @@ var IMSoftcrop = (function() {
          * @param {function} func
          */
         onCancel: function(func) {
-            if(typeof func == 'function') {
+            if (typeof func == 'function') {
                 this._onCancel = func;
             }
         },
@@ -1398,7 +1330,7 @@ var IMSoftcrop = (function() {
          *
          * @todo Should use zoomToImage(false) for keepCenter
          */
-        onResize: function () {
+        onResize: function() {
             if (this._keepCenter) {
                 this.centerImage(false);
             }
@@ -1440,7 +1372,7 @@ var IMSoftcrop = (function() {
          * On mouse down event handler
          * @param event
          */
-        onMouseDown: function (event) {
+        onMouseDown: function(event) {
             var point = this.getMousePoint(event);
 
             if (this._crop instanceof IMSoftcrop.Softcrop && typeof this.handle === 'string') {
@@ -1460,22 +1392,20 @@ var IMSoftcrop = (function() {
             }
         },
 
-
         /**
          * On mouse up event handler
          */
-        onMouseUp: function () {
+        onMouseUp: function() {
             this._dragObject = undefined;
             this._dragPoint = undefined;
         },
-
 
         /**
          * On mouse move event handler.
          * Calculate mouse coordinates in canvas (starting with border).
          * @param event
          */
-        onMouseMove: function (event) {
+        onMouseMove: function(event) {
             var point = this.getMousePoint(event);
 
             // Move dragged object
@@ -1503,9 +1433,9 @@ var IMSoftcrop = (function() {
                     }
 
                     this._dragObject.move({
-                            x: (point.x - this._dragPoint.x) / this._zoomLevel,
-                            y: (point.y - this._dragPoint.y) / this._zoomLevel
-                        }
+                        x: (point.x - this._dragPoint.x) / this._zoomLevel,
+                        y: (point.y - this._dragPoint.y) / this._zoomLevel
+                    }
                     );
                 }
 
@@ -1555,7 +1485,6 @@ var IMSoftcrop = (function() {
             this._canvas.style.cursor = 'default';
         },
 
-
         /**
          * On mouse wheel event handler.
          *
@@ -1563,7 +1492,10 @@ var IMSoftcrop = (function() {
          *
          * @param event
          */
-        onMouseWheel: function (event) {
+        onMouseWheel: function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+
             var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
             var zoom = 0;
 
@@ -1588,8 +1520,8 @@ var IMSoftcrop = (function() {
 
             // Then move back to old middle point
             this._image.move({
-              x: -x / this._zoomLevel,
-              y: -y / this._zoomLevel
+                x: -x / this._zoomLevel,
+                y: -y / this._zoomLevel
             });
 
             this.redraw();
@@ -1601,7 +1533,7 @@ var IMSoftcrop = (function() {
          * @param event
          * @returns {{x: number, y: number}}
          */
-        getMousePoint: function (event) {
+        getMousePoint: function(event) {
             return {
                 x: event.pageX - this._position.x,
                 y: event.pageY - this._position.y
@@ -1612,7 +1544,7 @@ var IMSoftcrop = (function() {
          * Get canvas
          * @returns {*}
          */
-        getCanvas: function () {
+        getCanvas: function() {
             return this._canvas;
         },
 
@@ -1629,12 +1561,62 @@ var IMSoftcrop = (function() {
             this._position.y = offset.y;
         },
 
+        onKeyDown: function(e) {
+            var keyCode = e.keyCode || e.which;
+            var _this = this;
+
+            // Handle escape key
+            if (keyCode === 13) {
+                _this._onSave(
+                    _this.getSoftcropData()
+                );
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            if (keyCode === 27) {
+                _this._onCancel();
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Handle tab key
+            if (keyCode === 9) {
+                var crops = _this._image.getSoftCrops();
+                var current;
+                for (var n = 0;n < crops.length;n++) {
+                    if (_this._crop === crops[n]) {
+                        current = n;
+                        break;
+                    }
+                }
+
+                if (typeof current != 'undefined') {
+                    n += (!e.shiftKey) ? 1 : -1;
+
+                    if (n < 0) {
+                        n = crops.length - 1;
+                    }
+                    else if (n + 1 > crops.length) {
+                        n = 0;
+                    }
+                    _this.setActiveCrop(crops[n]);
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        },
+
 
         /**
          * Render and output debug position and dimensions
          * @private
          */
-        _renderDebug: function () {
+        _renderDebug: function() {
             this._drawCross(
                 'red',
                 {
@@ -1678,7 +1660,7 @@ var IMSoftcrop = (function() {
          * @param color
          * @param point
          */
-        _drawCross: function (color, point) {
+        _drawCross: function(color, point) {
             var ctx = this._canvas.getContext('2d');
 
             ctx.beginPath();
@@ -2157,7 +2139,7 @@ var IMSoftcrop = (function() {
      *
      * @extends IMSoftcrop.Shape
      */
-    IMSoftcrop.Image = function(id, parent){
+    IMSoftcrop.Image = function(id, parent) {
         IMSoftcrop.Shape.call(this, id, parent);
 
         this.crops = [];
@@ -2214,19 +2196,21 @@ var IMSoftcrop = (function() {
              * @param {function} cbFunc
              */
             load: {
-                value: function (url, cbFunc) {
+                value: function(url, cbFunc) {
                     var image = document.createElement('img');
                     var _this = this;
 
                     image.crossOrigin = '*';
                     image.addEventListener(
                         'load',
-                        function () {
+                        function() {
                             _this.w = this.naturalWidth;
                             _this.h = this.naturalHeight;
                             _this.image = this;
 
                             _this.ready = true;
+                            console.log('Loaded');
+
                             cbFunc();
                         },
                         false
@@ -2242,8 +2226,8 @@ var IMSoftcrop = (function() {
              * Clear image and it's defined crops
              */
             clear: {
-                value: function () {
-                    for (var n = 0; n < this.crops.length; n++) {
+                value: function() {
+                    for (var n = 0;n < this.crops.length;n++) {
                         this.crops[n] = null;
                     }
 
@@ -2267,7 +2251,7 @@ var IMSoftcrop = (function() {
              * @param usable If crop is defined as usable by the user
              */
             addSoftcrop: {
-                value: function (id, setAsCurrent, hRatio, vRatio, x, y, exact, usable) {
+                value: function(id, setAsCurrent, hRatio, vRatio, x, y, exact, usable) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
@@ -2281,10 +2265,10 @@ var IMSoftcrop = (function() {
                             w: this.w,
                             h: this.h
                         },
-                        {
-                            w: hRatio,
-                            h: vRatio
-                        });
+                            {
+                                w: hRatio,
+                                h: vRatio
+                            });
                     }
                     else {
                         // Create new area with already specified dimension
@@ -2313,8 +2297,8 @@ var IMSoftcrop = (function() {
              * @returns {object}
              */
             getSoftcrop: {
-                value: function (id) {
-                    for (var n = 0; n < this.crops.length; n++) {
+                value: function(id) {
+                    for (var n = 0;n < this.crops.length;n++) {
                         if (this.crops[n].id == id) {
                             return this.crops[n];
                         }
@@ -2325,26 +2309,26 @@ var IMSoftcrop = (function() {
             },
 
             detectionReady: {
-                value: function () {
+                value: function() {
                     return (typeof this.detailArea != 'undefined');
                 }
             },
 
             getSoftCrops: {
-                value: function () {
+                value: function() {
                     return this.crops;
                 }
             },
 
 
             setActiveCrop: {
-                value: function (crop) {
+                value: function(crop) {
                     this.crop = crop;
                 }
             },
 
             getSrc: {
-                value: function () {
+                value: function() {
                     return this.src;
                 }
             },
@@ -2354,7 +2338,7 @@ var IMSoftcrop = (function() {
              * @param data Pixel data
              */
             addDetailData: {
-                value: function (data) {
+                value: function(data) {
                     this.detailData = data;
 
                     // Init structure with first x,y values
@@ -2370,7 +2354,7 @@ var IMSoftcrop = (function() {
                     };
 
                     // Then go through the rest
-                    for (var n = 1; n < data.length; n++) {
+                    for (var n = 1;n < data.length;n++) {
                         if (data[n].x < detailArea.point1.x) {
                             detailArea.point1.x = data[n].x;
                         }
@@ -2397,7 +2381,7 @@ var IMSoftcrop = (function() {
              * @param radius
              */
             addFocusPoint: {
-                value: function (point, radius) {
+                value: function(point, radius) {
                     point.r = radius; // Add radius to point
                     this.focusPoints.push(point);
 
@@ -2443,7 +2427,7 @@ var IMSoftcrop = (function() {
              * @param area
              */
             constrainArea: {
-                value: function (area) {
+                value: function(area) {
                     if (area.point1.x < 0) {
                         area.point1.x = 0;
                     }
@@ -2466,7 +2450,7 @@ var IMSoftcrop = (function() {
              * Redraw image
              */
             redraw: {
-                value: function (options) {
+                value: function(options) {
                     if (!this.ready) {
                         return;
                     }
@@ -2499,13 +2483,13 @@ var IMSoftcrop = (function() {
              * Draw focus points
              */
             drawFocusPoints: {
-                value: function () {
+                value: function() {
                     // Draw area with detected details/corners
                     if (typeof this.detailArea != 'undefined') {
                         this.drawArea(this.detailArea, 'rgba(255, 121, 255, 0.4)');
 
                         this.ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
-                        for (var i = 0; i < this.detailData.length; i++) {
+                        for (var i = 0;i < this.detailData.length;i++) {
                             var pt = this.editor.imagePointInCanvas(
                                 this.detailData[i].x, this.detailData[i].y
                             );
@@ -2517,7 +2501,7 @@ var IMSoftcrop = (function() {
                     if (typeof this.focusArea != 'undefined') {
                         this.drawArea(this.focusArea, 'rgba(121, 121, 255, 0.4)');
 
-                        for (var n = 0; n < this.focusPoints.length; n++) {
+                        for (var n = 0;n < this.focusPoints.length;n++) {
                             var drawPoint = this.editor.imagePointInCanvas(
                                 this.focusPoints[n].x,
                                 this.focusPoints[n].y
@@ -2543,7 +2527,7 @@ var IMSoftcrop = (function() {
              * @param color
              */
             drawArea: {
-                value: function (area, color) {
+                value: function(area, color) {
                     var point1 = this.editor.imagePointInCanvas(area.point1.x, area.point1.y),
                         point2 = this.editor.imagePointInCanvas(area.point2.x, area.point2.y);
 
@@ -2564,14 +2548,14 @@ var IMSoftcrop = (function() {
              * @returns boolean
              */
             autocrop: {
-                value: function (crop) {
+                value: function(crop) {
                     if (!this.detectionReady()) {
                         return false;
                     }
 
                     var crops = (typeof crop != 'undefined') ? new Array(crop) : this.crops;
 
-                    for (var n = 0; n < crops.length; n++) {
+                    for (var n = 0;n < crops.length;n++) {
                         if (!crops[n].locked) {
                             this.autoCropCrop(crops[n]);
                         }
@@ -2586,7 +2570,7 @@ var IMSoftcrop = (function() {
              * @param crop
              */
             autoCropCrop: {
-                value: function (crop) {
+                value: function(crop) {
                     var detailArea = this.detailArea;
                     var focusArea = (typeof this.focusArea != 'undefined') ? this.focusArea : this.detailArea;
 
@@ -2652,9 +2636,9 @@ var IMSoftcrop = (function() {
 
                     // Center crop over area while making sure it's not outside image boundaries.
                     var areaCenter = {
-                            x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
-                            y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
-                        },
+                        x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
+                        y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
+                    },
                         focusCenter = {
                             x: focusArea.point1.x + ((focusArea.point2.x - focusArea.point1.x) / 2),
                             y: focusArea.point1.y + ((focusArea.point2.y - focusArea.point1.y) / 2)
