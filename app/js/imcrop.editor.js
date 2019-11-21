@@ -1,6 +1,9 @@
 var IMSoftcrop = (function() {
     var IMSoftcrop = {};
 
+    // Event handler collection for add and remove with references
+    var handlers = {}
+
     /**
      * Editor constructor
      * @constructor
@@ -8,9 +11,18 @@ var IMSoftcrop = (function() {
      * @param {string} id
      * @param {object} [options]
      */
-    IMSoftcrop.Editor = function (id, options) {
+    IMSoftcrop.Editor = function(id, options) {
         this._id = id;
         this._crops = [];
+        handlers = {
+            'onKeyDown': this.onKeyDown.bind(this),
+            'onResize': this.onResize.bind(this),
+            'onDoubleClick': this.onDoubleClick.bind(this),
+            'onMouseMove': this.onMouseMove.bind(this),
+            'onMouseUp': this.onMouseUp.bind(this),
+            'onMouseDown': this.onMouseDown.bind(this),
+            'onMouseWheel': this.onMouseWheel.bind(this),
+        }
 
         if (typeof options == 'object') {
             if (options.debug === true) {
@@ -1156,128 +1168,40 @@ var IMSoftcrop = (function() {
             }
         },
 
+        /**
+         * Dispose function to remove all listeners
+         */
+        removeEventListeners: function() {
+            window.removeEventListener('resize', handlers.onResize)
+            window.removeEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.removeEventListener('dblclick', handlers.onDoubleClick)
+            this._canvas.removeEventListener('mousedown', handlers.onMouseDown)
+            this._canvas.removeEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.removeEventListener('mousemove', handlers.onMouseMove)
+            this._canvas.removeEventListener('mousewheel', handlers.onMouseWheel, false)
+            document.removeEventListener('keydown', handlers.onKeyDown, false)
+        },
 
         /**
          * Add all event listeners required for drawing and dragging
          */
-        addCanvasEventListeners: function () {
-            var _this = this;
-
-            window.addEventListener(
-                'resize',
-                function () {
-                    _this.onResize(event);
-                },
-                false
-            );
-
-            this._canvas.addEventListener(
-                'dblclick',
-                function(event) {
-                    return _this.onDoubleClick(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousedown',
-                function (event) {
-                    _this.onMouseDown(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mouseup',
-                function (event) {
-                    _this.onMouseUp(event);
-                }
-            );
-
-            window.addEventListener(
-                'mouseup',
-                function (event) {
-                    _this.onMouseUp(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousemove',
-                function (event) {
-                    _this.onMouseMove(event);
-                }
-            );
-
-            this._canvas.addEventListener(
-                'mousewheel',
-                function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    _this.onMouseWheel(event);
-                    return false;
-                },
-                false
-            );
-
-            document.addEventListener(
-                'keydown',
-                function (e) {
-                    var keyCode = e.keyCode || e.which;
-
-                    // Handle escape key
-                    if (keyCode === 13) {
-                        _this._onSave(
-                            _this.getSoftcropData()
-                        );
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-
-                    if (keyCode === 27) {
-                        _this._onCancel();
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-
-                    // Handle tab key
-                    if (keyCode === 9) {
-                        var crops = _this._image.getSoftCrops();
-                        var current;
-                        for (var n = 0; n < crops.length; n++) {
-                            if (_this._crop === crops[n]) {
-                                current = n;
-                                break;
-                            }
-                        }
-
-                        if (typeof current != 'undefined') {
-                            n += (!e.shiftKey) ? 1 : -1;
-
-                            if (n < 0) {
-                                n = crops.length - 1;
-                            }
-                            else if (n + 1 > crops.length) {
-                                n = 0;
-                            }
-                            _this.setActiveCrop(crops[n]);
-                        }
-
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }
-                },
-                false
-            );
+        addCanvasEventListeners: function() {
+            window.addEventListener('resize', handlers.onResize, false)
+            window.addEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.addEventListener('dblclick', handlers.dblclick)
+            this._canvas.addEventListener('mousedown', handlers.onMouseDown)
+            this._canvas.addEventListener('mouseup', handlers.onMouseUp)
+            this._canvas.addEventListener('mousemove', handlers.onMouseMove)
+            this._canvas.addEventListener('mousewheel', handlers.onMouseWheel, false)
+            document.addEventListener('keydown', handlers.onKeyDown, false)
         },
-
 
         /**
          * Add onSave callback function
          * @param {function} func
          */
         onSave: function(func) {
-            if(typeof func == 'function') {
+            if (typeof func == 'function') {
                 this._onSave = func;
             }
         },
@@ -1464,7 +1388,10 @@ var IMSoftcrop = (function() {
          *
          * @param event
          */
-        onMouseWheel: function (event) {
+        onMouseWheel: function(event) {
+            event.preventDefault()
+            event.stopPropagation()
+
             var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
             var zoom = 0;
 
@@ -1530,12 +1457,62 @@ var IMSoftcrop = (function() {
             this._position.y = offset.y;
         },
 
+        onKeyDown: function(e) {
+            var keyCode = e.keyCode || e.which;
+            var _this = this;
+
+            // Handle escape key
+            if (keyCode === 13) {
+                _this._onSave(
+                    _this.getSoftcropData()
+                );
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            if (keyCode === 27) {
+                _this._onCancel();
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
+            // Handle tab key
+            if (keyCode === 9) {
+                var crops = _this._image.getSoftCrops();
+                var current;
+                for (var n = 0;n < crops.length;n++) {
+                    if (_this._crop === crops[n]) {
+                        current = n;
+                        break;
+                    }
+                }
+
+                if (typeof current != 'undefined') {
+                    n += (!e.shiftKey) ? 1 : -1;
+
+                    if (n < 0) {
+                        n = crops.length - 1;
+                    }
+                    else if (n + 1 > crops.length) {
+                        n = 0;
+                    }
+                    _this.setActiveCrop(crops[n]);
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        },
+
 
         /**
          * Render and output debug position and dimensions
          * @private
          */
-        _renderDebug: function () {
+        _renderDebug: function() {
             this._drawCross(
                 'red',
                 {
