@@ -10,7 +10,7 @@
      *
      * @extends IMSoftcrop.Shape
      */
-    IMSoftcrop.Image = function(id, parent){
+    IMSoftcrop.Image = function(id, parent) {
         IMSoftcrop.Shape.call(this, id, parent);
 
         this.crops = [];
@@ -67,19 +67,21 @@
              * @param {function} cbFunc
              */
             load: {
-                value: function (url, cbFunc) {
+                value: function(url, cbFunc) {
                     var image = document.createElement('img');
                     var _this = this;
 
                     image.crossOrigin = '*';
                     image.addEventListener(
                         'load',
-                        function () {
+                        function() {
                             _this.w = this.naturalWidth;
                             _this.h = this.naturalHeight;
                             _this.image = this;
 
                             _this.ready = true;
+                            console.log('Loaded');
+
                             cbFunc();
                         },
                         false
@@ -95,8 +97,8 @@
              * Clear image and it's defined crops
              */
             clear: {
-                value: function () {
-                    for (var n = 0; n < this.crops.length; n++) {
+                value: function() {
+                    for (var n = 0;n < this.crops.length;n++) {
                         this.crops[n] = null;
                     }
 
@@ -120,7 +122,7 @@
              * @param usable If crop is defined as usable by the user
              */
             addSoftcrop: {
-                value: function (id, setAsCurrent, hRatio, vRatio, x, y, exact, usable) {
+                value: function(id, setAsCurrent, hRatio, vRatio, x, y, exact, usable) {
                     // Make sure there are no duplicates
                     var crop;
                     if (null != (crop = this.getSoftcrop(id))) {
@@ -134,10 +136,10 @@
                             w: this.w,
                             h: this.h
                         },
-                        {
-                            w: hRatio,
-                            h: vRatio
-                        });
+                            {
+                                w: hRatio,
+                                h: vRatio
+                            });
                     }
                     else {
                         // Create new area with already specified dimension
@@ -166,8 +168,8 @@
              * @returns {object}
              */
             getSoftcrop: {
-                value: function (id) {
-                    for (var n = 0; n < this.crops.length; n++) {
+                value: function(id) {
+                    for (var n = 0;n < this.crops.length;n++) {
                         if (this.crops[n].id == id) {
                             return this.crops[n];
                         }
@@ -178,26 +180,26 @@
             },
 
             detectionReady: {
-                value: function () {
+                value: function() {
                     return (typeof this.detailArea != 'undefined');
                 }
             },
 
             getSoftCrops: {
-                value: function () {
+                value: function() {
                     return this.crops;
                 }
             },
 
 
             setActiveCrop: {
-                value: function (crop) {
+                value: function(crop) {
                     this.crop = crop;
                 }
             },
 
             getSrc: {
-                value: function () {
+                value: function() {
                     return this.src;
                 }
             },
@@ -207,7 +209,7 @@
              * @param data Pixel data
              */
             addDetailData: {
-                value: function (data) {
+                value: function(data) {
                     this.detailData = data;
 
                     // Init structure with first x,y values
@@ -223,7 +225,7 @@
                     };
 
                     // Then go through the rest
-                    for (var n = 1; n < data.length; n++) {
+                    for (var n = 1;n < data.length;n++) {
                         if (data[n].x < detailArea.point1.x) {
                             detailArea.point1.x = data[n].x;
                         }
@@ -250,7 +252,7 @@
              * @param radius
              */
             addFocusPoint: {
-                value: function (point, radius) {
+                value: function(point, radius) {
                     point.r = radius; // Add radius to point
                     this.focusPoints.push(point);
 
@@ -296,7 +298,7 @@
              * @param area
              */
             constrainArea: {
-                value: function (area) {
+                value: function(area) {
                     if (area.point1.x < 0) {
                         area.point1.x = 0;
                     }
@@ -319,7 +321,7 @@
              * Redraw image
              */
             redraw: {
-                value: function (options) {
+                value: function(options) {
                     if (!this.ready) {
                         return;
                     }
@@ -352,13 +354,13 @@
              * Draw focus points
              */
             drawFocusPoints: {
-                value: function () {
+                value: function() {
                     // Draw area with detected details/corners
                     if (typeof this.detailArea != 'undefined') {
                         this.drawArea(this.detailArea, 'rgba(255, 121, 255, 0.4)');
 
                         this.ctx.fillStyle = 'rgba(255, 121, 255, 0.5)';
-                        for (var i = 0; i < this.detailData.length; i++) {
+                        for (var i = 0;i < this.detailData.length;i++) {
                             var pt = this.editor.imagePointInCanvas(
                                 this.detailData[i].x, this.detailData[i].y
                             );
@@ -370,7 +372,7 @@
                     if (typeof this.focusArea != 'undefined') {
                         this.drawArea(this.focusArea, 'rgba(121, 121, 255, 0.4)');
 
-                        for (var n = 0; n < this.focusPoints.length; n++) {
+                        for (var n = 0;n < this.focusPoints.length;n++) {
                             var drawPoint = this.editor.imagePointInCanvas(
                                 this.focusPoints[n].x,
                                 this.focusPoints[n].y
@@ -396,7 +398,7 @@
              * @param color
              */
             drawArea: {
-                value: function (area, color) {
+                value: function(area, color) {
                     var point1 = this.editor.imagePointInCanvas(area.point1.x, area.point1.y),
                         point2 = this.editor.imagePointInCanvas(area.point2.x, area.point2.y);
 
@@ -417,14 +419,14 @@
              * @returns boolean
              */
             autocrop: {
-                value: function (crop) {
+                value: function(crop) {
                     if (!this.detectionReady()) {
                         return false;
                     }
 
                     var crops = (typeof crop != 'undefined') ? new Array(crop) : this.crops;
 
-                    for (var n = 0; n < crops.length; n++) {
+                    for (var n = 0;n < crops.length;n++) {
                         if (!crops[n].locked) {
                             this.autoCropCrop(crops[n]);
                         }
@@ -439,7 +441,7 @@
              * @param crop
              */
             autoCropCrop: {
-                value: function (crop) {
+                value: function(crop) {
                     var detailArea = this.detailArea;
                     var focusArea = (typeof this.focusArea != 'undefined') ? this.focusArea : this.detailArea;
 
@@ -505,9 +507,9 @@
 
                     // Center crop over area while making sure it's not outside image boundaries.
                     var areaCenter = {
-                            x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
-                            y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
-                        },
+                        x: area.point1.x + ((area.point2.x - area.point1.x) / 2),
+                        y: area.point1.y + ((area.point2.y - area.point1.y) / 2)
+                    },
                         focusCenter = {
                             x: focusArea.point1.x + ((focusArea.point2.x - focusArea.point1.x) / 2),
                             y: focusArea.point1.y + ((focusArea.point2.y - focusArea.point1.y) / 2)
