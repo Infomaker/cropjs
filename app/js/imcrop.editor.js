@@ -469,9 +469,11 @@ var IMSoftcrop = (function() {
             cropWrapper.appendChild(icon);
             cropWrapper.appendChild(pvWarning);
 
-
             // Create image element
-            var pvImg = document.createElement('img');
+            var pvImg = new Image();
+            pvImg.onload = function() {
+                pvDivInner.classList.add('loaded');
+            }
             pvImg.src = this._image.src;
 
             // Put it together
