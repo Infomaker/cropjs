@@ -2209,7 +2209,6 @@ var IMSoftcrop = (function() {
                             _this.image = this;
 
                             _this.ready = true;
-                            console.log('Loaded');
 
                             cbFunc();
                         },
