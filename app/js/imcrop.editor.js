@@ -75,7 +75,7 @@ var IMSoftcrop = (function() {
         // Lock crop
         this._cropLockedToggle = new IMCropUI.Toggle(
             'imc_croplocked',
-            function () {
+            function() {
                 if (_this._crop instanceof IMSoftcrop.Softcrop) {
                     _this._crop.locked = this.on;
                     _this._renderUpdatedPreview(_this._crop);
@@ -86,7 +86,7 @@ var IMSoftcrop = (function() {
         // Mark crop as usable
         this._cropUsableToggle = new IMCropUI.Toggle(
             'imc_cropusable',
-            function () {
+            function() {
                 if (_this._crop instanceof IMSoftcrop.Softcrop) {
                     _this._crop.usable = this.on;
                     _this._renderUpdatedPreview(_this._crop);
@@ -97,7 +97,7 @@ var IMSoftcrop = (function() {
         // Draw guides toggle
         this._guidesToggle = new IMCropUI.Toggle(
             'imc_guides',
-            function () {
+            function() {
                 _this.redraw();
             }
         );
@@ -105,7 +105,7 @@ var IMSoftcrop = (function() {
         // Draw focuspoints toggle
         this._focusPointsToggle = new IMCropUI.Toggle(
             'imc_focuspoints',
-            function () {
+            function() {
                 _this.redraw();
             }
         );
@@ -212,7 +212,7 @@ var IMSoftcrop = (function() {
          *
          * @private
          */
-        setupUI: function () {
+        setupUI: function() {
             this.injectHTML();
 
             this._container = document.getElementById('imc_container');
@@ -305,19 +305,19 @@ var IMSoftcrop = (function() {
             var lastTime = 0;
             var vendors = ['webkit', 'moz'];
 
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+            for (var x = 0;x < vendors.length && !window.requestAnimationFrame;++x) {
+                window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
                 window.cancelAnimationFrame =
-                    window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+                    window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
             }
 
             if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function (callback, element) {
+                window.requestAnimationFrame = function(callback, element) {
                     var currTime = new Date().getTime();
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function () {
-                            callback(currTime + timeToCall);
-                        },
+                    var id = window.setTimeout(function() {
+                        callback(currTime + timeToCall);
+                    },
                         timeToCall);
                     lastTime = currTime + timeToCall;
                     return id;
@@ -325,7 +325,7 @@ var IMSoftcrop = (function() {
             }
 
             if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function (id) {
+                window.cancelAnimationFrame = function(id) {
                     clearTimeout(id);
                 };
             }
@@ -363,7 +363,7 @@ var IMSoftcrop = (function() {
 
                 // Redraw all crop previews
                 var softcrops = this._image.getSoftCrops();
-                for (var n = 0; n < softcrops.length; n++) {
+                for (var n = 0;n < softcrops.length;n++) {
                     if (softcrops[n] instanceof IMSoftcrop.Softcrop) {
                         this._renderUpdatedPreview(softcrops[n]);
                     }
@@ -380,7 +380,7 @@ var IMSoftcrop = (function() {
         /**
          * Tell editor a redraw is necessary
          */
-        redraw: function () {
+        redraw: function() {
             this._redrawCanvas = true;
         },
 
@@ -412,7 +412,7 @@ var IMSoftcrop = (function() {
          * @param setAsCurrent
          * @private
          */
-        _renderNewCropPreview: function (crop, setAsCurrent) {
+        _renderNewCropPreview: function(crop, setAsCurrent) {
             var _this = this;
 
             // Create image container element
@@ -426,7 +426,7 @@ var IMSoftcrop = (function() {
 
             pvDivOuter.addEventListener(
                 'click',
-                function () {
+                function() {
                     _this.setActiveCrop(crop);
                 }
             );
@@ -440,15 +440,21 @@ var IMSoftcrop = (function() {
             pvDivInner.style.width = IMSoftcrop.Ratio.width(previewHeight, crop.ratio.f) + 'px';
 
             // Create span (title) element, including warning element
-            var pvSpan = document.createElement('span');
-            var pvSpanEm = document.createElement('em');
+            var cropWrapper = document.createElement('span');
+            cropWrapper.classList.add('crop-ratio-wrapper')
+
+            var ratioText = document.createElement('span');
+            ratioText.classList.add('crop-ratio-text');
+
             var pvWarning = document.createElement('i');
             pvWarning.className = 'fa fa-warning';
 
-            var pvUsed = document.createElement('b');
+            var icon = document.createElement('span');
+
             var pvUsedCrop = crop;
-            pvUsed.className = 'fa fa-check';
-            pvUsed.addEventListener(
+            icon.className = 'fa fa-check';
+            icon.classList.add('crop-ratio-icon')
+            icon.addEventListener(
                 'click',
                 function(e) {
                     _this.toggleCropUsable(pvUsedCrop)
@@ -458,10 +464,10 @@ var IMSoftcrop = (function() {
                 }
             )
 
-            pvSpanEm.appendChild(document.createTextNode(crop.id))
-            pvSpan.appendChild(pvUsed);
-            pvSpan.appendChild(pvSpanEm);
-            pvSpan.appendChild(pvWarning);
+            ratioText.appendChild(document.createTextNode(crop.id))
+            cropWrapper.appendChild(ratioText);
+            cropWrapper.appendChild(icon);
+            cropWrapper.appendChild(pvWarning);
 
 
             // Create image element
@@ -470,7 +476,7 @@ var IMSoftcrop = (function() {
 
             // Put it together
             pvDivInner.appendChild(pvImg);
-            pvDivInner.appendChild(pvSpan);
+            pvDivInner.appendChild(cropWrapper);
             pvDivOuter.appendChild(pvDivInner);
             this._previewContainer.appendChild(pvDivOuter);
 
@@ -485,7 +491,7 @@ var IMSoftcrop = (function() {
          * @param crop
          * @private
          */
-        _renderUpdatedPreview: function (crop) {
+        _renderUpdatedPreview: function(crop) {
             var pvDiv = document.getElementById(this._image.id + '_' + crop.id);
             if (pvDiv == null || typeof pvDiv != 'object') {
                 return;
@@ -527,7 +533,7 @@ var IMSoftcrop = (function() {
          * Get dimensions
          * @returns {{margin: number, width: number, height: number}}
          */
-        getDimensions: function () {
+        getDimensions: function() {
             return {
                 margin: this._margin,
                 width: this._canvas.width,
@@ -540,7 +546,7 @@ var IMSoftcrop = (function() {
                 w,
                 h,
                 className = (useCrop) ? 'crop' : 'image';
-                var e = document.getElementById('imc_image_info');
+            var e = document.getElementById('imc_image_info');
 
             if (!e) {
                 return;
@@ -581,7 +587,7 @@ var IMSoftcrop = (function() {
          * Adjust canvas for pixel ratio
          * @param canvas
          */
-        adjustForPixelRatio: function (canvas) {
+        adjustForPixelRatio: function(canvas) {
             var c = canvas || this._canvas;
             var ctx = c.getContext('2d');
             var devicePixelRatio = window.devicePixelRatio || 1;
@@ -621,7 +627,7 @@ var IMSoftcrop = (function() {
          * @param onImageReady Callback after image has been loaded
          * @param autocropImage Optional, default true, if autocrops should be applied
          */
-        addImage: function (url, onImageReady, applyAutocrop) {
+        addImage: function(url, onImageReady, applyAutocrop) {
             var _this = this;
 
             this.toggleLoadingImage(true);
@@ -635,7 +641,7 @@ var IMSoftcrop = (function() {
 
             this._image.load(
                 url,
-                function () {
+                function() {
                     _this.setZoomToImage(false);
                     _this.centerImage(false);
                     _this.updateImageInfo(false);
@@ -672,7 +678,7 @@ var IMSoftcrop = (function() {
          * @param y Optional
          * @parmam usable Optional
          */
-        addSoftcrop: function (id, setAsCurrent, hRatio, vRatio, x, y, usable) {
+        addSoftcrop: function(id, setAsCurrent, hRatio, vRatio, x, y, usable) {
             var exact = false;
 
             // Make sure all values are numbers
@@ -720,7 +726,7 @@ var IMSoftcrop = (function() {
                 crops: []
             };
 
-            for(var n = 0; n < this._image.crops.length; n++) {
+            for (var n = 0;n < this._image.crops.length;n++) {
                 data.crops.push({
                     id: this._image.crops[n].id,
                     x: Math.round(this._image.crops[n].x),
@@ -743,7 +749,7 @@ var IMSoftcrop = (function() {
             }
 
             // Always make sure all crops are added
-            for(var n = 0; n < this._crops.length; n++) {
+            for (var n = 0;n < this._crops.length;n++) {
                 var crop = this._image.getSoftcrop(this._crops[n].id);
 
                 if (crop == null) {
@@ -776,14 +782,14 @@ var IMSoftcrop = (function() {
          * Set active crop
          * @param crop
          */
-        setActiveCrop: function (crop) {
+        setActiveCrop: function(crop) {
             if (crop instanceof IMSoftcrop.Softcrop !== true) {
                 return;
             }
 
             var div = document.getElementById(this._image.id + '_' + crop.id);
             var divs = this._previewContainer.getElementsByClassName('imc_preview_image_container');
-            for (var n = 0; n < divs.length; n++) {
+            for (var n = 0;n < divs.length;n++) {
                 divs[n].classList.remove('active');
             }
 
@@ -802,7 +808,7 @@ var IMSoftcrop = (function() {
          * @param crop
          */
         toggleCropUsable: function(crop) {
-            if(typeof crop === 'undefined') {
+            if (typeof crop === 'undefined') {
                 crop = this._crop;
             }
             crop.usable = !crop.usable;
@@ -945,7 +951,7 @@ var IMSoftcrop = (function() {
          */
         addDetectedDetails: function(data) {
             var corners = [];
-            for (var i = 0; i < data.length; i += 2) {
+            for (var i = 0;i < data.length;i += 2) {
                 corners.push({
                     x: data[i],
                     y: data[i + 1]
@@ -959,7 +965,7 @@ var IMSoftcrop = (function() {
         /**
          * Detect faces in image
          */
-        detectFaces: function () {
+        detectFaces: function() {
             if (!this._image instanceof IMSoftcrop.Image || !this._image.ready) {
                 return;
             }
@@ -980,7 +986,7 @@ var IMSoftcrop = (function() {
                 ]);
 
                 featureWorker.onmessage = function(e) {
-                    for(var n = 0; n < e.data.length; n++) {
+                    for (var n = 0;n < e.data.length;n++) {
                         _this.addDetectedFeature(e.data[n]);
                     }
                     _this._waitForWorkers--;
@@ -1002,8 +1008,8 @@ var IMSoftcrop = (function() {
 
                 var tracker = new tracking.ObjectTracker(['face']);
                 tracker.setStepSize(this._detectStepSize);
-                tracker.on('track', function (event) {
-                    event.data.forEach(function (rect) {
+                tracker.on('track', function(event) {
+                    event.data.forEach(function(rect) {
                         _this.addDetectedFeature(rect);
                     });
                     _this._waitForWorkers--;
@@ -1028,9 +1034,9 @@ var IMSoftcrop = (function() {
         addDetectedFeature: function(rect) {
             var imageRadius = 0,
                 imagePoint = {
-                x: rect.x,
-                y: rect.y
-            };
+                    x: rect.x,
+                    y: rect.y
+                };
 
             if (rect.width / this._image.w > 0.45) {
                 // Feature point (face) takes up a large portion of the image
@@ -1082,7 +1088,7 @@ var IMSoftcrop = (function() {
         canvasPointInImage: function(x, y) {
             return {
                 x: Math.round((x - this._margin) / this._zoomLevel) - this._image.x,
-                y: Math.round((y- this._margin) / this._zoomLevel) - this._image.y
+                y: Math.round((y - this._margin) / this._zoomLevel) - this._image.y
             };
         },
 
@@ -1090,7 +1096,7 @@ var IMSoftcrop = (function() {
          * Center image around the middle point of the drawing area
          * @param redraw
          */
-        centerImage: function (redraw) {
+        centerImage: function(redraw) {
             var cx, cy;
 
             this._keepCenter = true;
@@ -1115,7 +1121,7 @@ var IMSoftcrop = (function() {
          * @param decimal
          * @returns {number}
          */
-        getZoom: function (decimal) {
+        getZoom: function(decimal) {
             return decimal === true ? this._zoomLevel : this._zoomLevel * 100;
         },
 
@@ -1126,7 +1132,7 @@ var IMSoftcrop = (function() {
          * @param zoomLevel
          * @param redraw
          */
-        setZoom: function (zoomLevel, redraw) {
+        setZoom: function(zoomLevel, redraw) {
             this._zoomLevel = zoomLevel / 100;
 
             if (this._keepCenter) {
@@ -1142,7 +1148,7 @@ var IMSoftcrop = (function() {
          * Fill drawing area with image as best as possible
          * @param redraw
          */
-        setZoomToImage: function (redraw) {
+        setZoomToImage: function(redraw) {
             var imgDim = this._image.getDimensions();
             var vFactor = (this._container.clientHeight - this._margin * 2) / imgDim.h;
             var hFactor = (this._container.clientWidth - this._margin * 2) / imgDim.w;
@@ -1212,7 +1218,7 @@ var IMSoftcrop = (function() {
          * @param {function} func
          */
         onCancel: function(func) {
-            if(typeof func == 'function') {
+            if (typeof func == 'function') {
                 this._onCancel = func;
             }
         },
@@ -1223,7 +1229,7 @@ var IMSoftcrop = (function() {
          *
          * @todo Should use zoomToImage(false) for keepCenter
          */
-        onResize: function () {
+        onResize: function() {
             if (this._keepCenter) {
                 this.centerImage(false);
             }
@@ -1265,7 +1271,7 @@ var IMSoftcrop = (function() {
          * On mouse down event handler
          * @param event
          */
-        onMouseDown: function (event) {
+        onMouseDown: function(event) {
             var point = this.getMousePoint(event);
 
             if (this._crop instanceof IMSoftcrop.Softcrop && typeof this.handle === 'string') {
@@ -1285,22 +1291,20 @@ var IMSoftcrop = (function() {
             }
         },
 
-
         /**
          * On mouse up event handler
          */
-        onMouseUp: function () {
+        onMouseUp: function() {
             this._dragObject = undefined;
             this._dragPoint = undefined;
         },
-
 
         /**
          * On mouse move event handler.
          * Calculate mouse coordinates in canvas (starting with border).
          * @param event
          */
-        onMouseMove: function (event) {
+        onMouseMove: function(event) {
             var point = this.getMousePoint(event);
 
             // Move dragged object
@@ -1328,9 +1332,9 @@ var IMSoftcrop = (function() {
                     }
 
                     this._dragObject.move({
-                            x: (point.x - this._dragPoint.x) / this._zoomLevel,
-                            y: (point.y - this._dragPoint.y) / this._zoomLevel
-                        }
+                        x: (point.x - this._dragPoint.x) / this._zoomLevel,
+                        y: (point.y - this._dragPoint.y) / this._zoomLevel
+                    }
                     );
                 }
 
@@ -1380,7 +1384,6 @@ var IMSoftcrop = (function() {
             this._canvas.style.cursor = 'default';
         },
 
-
         /**
          * On mouse wheel event handler.
          *
@@ -1416,8 +1419,8 @@ var IMSoftcrop = (function() {
 
             // Then move back to old middle point
             this._image.move({
-              x: -x / this._zoomLevel,
-              y: -y / this._zoomLevel
+                x: -x / this._zoomLevel,
+                y: -y / this._zoomLevel
             });
 
             this.redraw();
@@ -1429,7 +1432,7 @@ var IMSoftcrop = (function() {
          * @param event
          * @returns {{x: number, y: number}}
          */
-        getMousePoint: function (event) {
+        getMousePoint: function(event) {
             return {
                 x: event.pageX - this._position.x,
                 y: event.pageY - this._position.y
@@ -1440,7 +1443,7 @@ var IMSoftcrop = (function() {
          * Get canvas
          * @returns {*}
          */
-        getCanvas: function () {
+        getCanvas: function() {
             return this._canvas;
         },
 
@@ -1556,7 +1559,7 @@ var IMSoftcrop = (function() {
          * @param color
          * @param point
          */
-        _drawCross: function (color, point) {
+        _drawCross: function(color, point) {
             var ctx = this._canvas.getContext('2d');
 
             ctx.beginPath();
