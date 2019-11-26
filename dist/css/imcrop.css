@@ -100,13 +100,21 @@
     background: #333; }
     .imc_preview_container .imc_preview_image_container:first-child .imc_preview_image {
       transition: margin-left 0.1s; }
+      .dw-dir-rtl .imc_preview_container .imc_preview_image_container:first-child .imc_preview_image {
+        transition: margin-right 0.1s; }
     .imc_preview_container .imc_preview_image_container:first-child.active .imc_preview_image {
       margin-left: 5px; }
+      .dw-dir-rtl .imc_preview_container .imc_preview_image_container:first-child.active .imc_preview_image {
+        margin-left: 8px;
+        margin-right: 5px; }
     .imc_preview_container .imc_preview_image_container:last-child .imc_preview_image {
       transition: margin-left 0.1s;
       margin-right: 0; }
     .imc_preview_container .imc_preview_image_container:last-child.active .imc_preview_image {
       margin-right: 5px; }
+      .dw-dir-rtl .imc_preview_container .imc_preview_image_container:last-child.active .imc_preview_image {
+        margin-left: 5px;
+        margin-right: 0; }
     .imc_preview_container .imc_preview_image_container .imc_preview_image {
       position: relative;
       margin: 20px 8px 8px 0;
@@ -114,6 +122,8 @@
       width: 90px;
       overflow: hidden;
       border-radius: 4px; }
+      .dw-dir-rtl .imc_preview_container .imc_preview_image_container .imc_preview_image {
+        margin: 20px 0 8px 8px; }
       .imc_preview_container .imc_preview_image_container .imc_preview_image .crop-ratio-wrapper {
         background: #000;
         color: #fff;

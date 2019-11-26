@@ -143,11 +143,20 @@
         &:first-child {
             .imc_preview_image {
                 transition: margin-left 0.1s;
+
+                .dw-dir-rtl & {
+                    transition: margin-right 0.1s;
+                }
             }
 
             &.active {
                 .imc_preview_image {
                     margin-left: 5px;
+
+                    .dw-dir-rtl & {
+                        margin-left: 8px;
+                        margin-right: 5px;
+                    }
                 }
             }
         }
@@ -161,6 +170,11 @@
             &.active {
                 .imc_preview_image {
                     margin-right: 5px;
+
+                    .dw-dir-rtl & {
+                        margin-left: 5px;
+                        margin-right: 0;
+                    }
                 }
             }
         }
@@ -172,6 +186,10 @@
             width: 90px;
             overflow: hidden;
             border-radius: 4px;
+
+            .dw-dir-rtl & {
+                margin: 20px 0 8px 8px;
+            }
 
             .crop-ratio-wrapper {
                 background: #000;
