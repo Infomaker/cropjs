@@ -343,57 +343,57 @@ var IMSoftcrop = (function() {
 
             injectElement.innerHTML =
                 '<div id="imc" class="' + debugClass + '">' +
-                '<div id="imc_container">' +
-                '<canvas id="imc_canvas"></canvas>' +
+                    '<div id="imc_container">' +
+                        '<canvas id="imc_canvas"></canvas>' +
 
-                '<div id="imc_work_container">' +
-                '<div id="imc_preview_container" class="imc_preview_container"></div>' +
-                '</div>' +
+                        '<div id="imc_work_container">' +
+                            '<div id="imc_preview_container" class="imc_preview_container"></div>' +
+                        '</div>' +
 
 
-                '<div id="imc_image_inline">' +
-                '<div class="imc_debug_group">' +
-                '<a href="#" id="imc_focuspoints" class="toggle">' +
-                '<em class="hint">Detaljer</em>' +
-                '<span>' +
-                '<span class="on"><i class="fa fa-object-group"></i></span>' +
-                '<span class="off"><i class="fa fa-object-group"></i></span>' +
-                '</span>' +
-                '</a>' +
+                        '<div id="imc_image_inline">' +
+                            '<div class="imc_debug_group">' +
+                                '<a href="#" id="imc_focuspoints" class="toggle">' +
+                                    '<em class="hint">Detaljer</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-object-group"></i></span>' +
+                                        '<span class="off"><i class="fa fa-object-group"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
 
-                '<a href="#" id="imc_guides" class="toggle on">' +
-                '<em class="hint">Guide lines</em>' +
-                '<span>' +
-                '<span class="on"><i class="fa fa-th"></i></span>' +
-                '<span class="off"><i class="fa fa-th"></i></span>' +
-                '</span>' +
-                '</a>' +
+                                '<a href="#" id="imc_guides" class="toggle on">' +
+                                    '<em class="hint">Guide lines</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-th"></i></span>' +
+                                        '<span class="off"><i class="fa fa-th"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
 
-                '<a href="#" id="imc_croplocked" class="toggle">' +
-                '<em class="hint">Låst till användare</em>' +
-                '<span>' +
-                '<span class="on"><i class="fa fa-lock"></i></span>' +
-                '<span class="off"><i class="fa fa-unlock"></i></span>' +
-                '</span>' +
-                '</a>' +
+                                '<a href="#" id="imc_croplocked" class="toggle">' +
+                                    '<em class="hint">Låst till användare</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-lock"></i></span>' +
+                                        '<span class="off"><i class="fa fa-unlock"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
 
-                '<a href="#" id="imc_cropusable" class="toggle">' +
-                '<em class="hint">Använd denna crop</em>' +
-                '<span>' +
-                '<span class="on"><i class="fa fa-check"></i></span>' +
-                '<span class="off"><i class="fa fa-ban"></i></span>' +
-                '</span>' +
-                '</a>' +
+                                '<a href="#" id="imc_cropusable" class="toggle">' +
+                                    '<em class="hint">Använd denna crop</em>' +
+                                    '<span>' +
+                                        '<span class="on"><i class="fa fa-check"></i></span>' +
+                                        '<span class="off"><i class="fa fa-ban"></i></span>' +
+                                    '</span>' +
+                                '</a>' +
 
-                '</div>' +
+                            '</div>' +
 
-                '<div id="imc_image_info" class="display"></div>' +
+                            '<div id="imc_image_info" class="display"></div>' +
 
-                '<div id="imc_loading">' +
-                '<i class="fa fa-cog fa-spin"></i>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
+                            '<div id="imc_loading">' +
+                                '<i class="fa fa-cog fa-spin"></i>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
                 '</div>';
         },
 
@@ -739,10 +739,6 @@ var IMSoftcrop = (function() {
                 IMSoftcrop.Ratio.hashFnv32a(url),
                 this
             );
-
-            console.log(url);
-
-            this._image.crossOrigin = "use-credentials";
 
             this._image.load(
                 url,
@@ -1691,7 +1687,7 @@ var IMSoftcrop = (function() {
 })();
 
 (function(IMSoftcrop) {
-    IMSoftcrop.Ratio = function() {};
+    IMSoftcrop.Ratio = function(){};
 
     /**
      * Return ratio in decimal form (height / width)
@@ -1828,7 +1824,7 @@ var IMSoftcrop = (function() {
         var xoffset = 0,
             yoffset = 0;
 
-        while (e) {
+        while(e) {
             xoffset += (e.offsetLeft - e.scrollLeft + e.clientLeft);
             yoffset += (e.offsetTop - e.scrollTop + e.clientTop);
             e = e.offsetParent;
@@ -1857,7 +1853,7 @@ var IMSoftcrop = (function() {
         var i, l,
             hval = (seed === undefined) ? 0x811c9dc5 : seed;
 
-        for (i = 0, l = str.length;i < l;i++) {
+        for (i = 0, l = str.length; i < l; i++) {
             hval ^= str.charCodeAt(i);
             hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
         }
@@ -1884,7 +1880,7 @@ var IMSoftcrop = (function() {
      * Base object constructor
      * @constructor
      */
-    IMSoftcrop.Base = function() {};
+    IMSoftcrop.Base = function(){};
     IMSoftcrop.Base.prototype = {};
 
 
@@ -1961,10 +1957,10 @@ var IMSoftcrop = (function() {
             },
 
             ready: {
-                get: function() {
+                get: function () {
                     return this._ready;
                 },
-                set: function(value) {
+                set: function (value) {
                     this._ready = (value === true);
                 }
             },
@@ -2023,13 +2019,13 @@ var IMSoftcrop = (function() {
 
 
             getCanvas: {
-                value: function() {
+                value: function () {
                     return this.canvas;
                 }
             },
 
             inArea: {
-                value: function(point) {
+                value: function (point) {
                     if (!this.ready) {
                         return false;
                     }
@@ -2045,7 +2041,7 @@ var IMSoftcrop = (function() {
             },
 
             withinCoordinates: {
-                value: function(point, x1, y1, x2, y2) {
+                value: function (point, x1, y1, x2, y2) {
                     if (point.x < x1 || point.x > x2) {
                         return false;
                     }
@@ -2059,7 +2055,7 @@ var IMSoftcrop = (function() {
             },
 
             inCalculatedArea: {
-                value: function(point, ax, ay, aw, ah) {
+                value: function (point, ax, ay, aw, ah) {
                     if (point.x >= ax && point.x <= ax + aw) {
                         if (point.y >= ay && point.y <= ay + ah) {
                             return true;
@@ -2070,14 +2066,14 @@ var IMSoftcrop = (function() {
             },
 
             move: {
-                value: function(point) {
+                value: function (point) {
                     this.x += Math.round(point.x);
                     this.y += Math.round(point.y);
                 }
             },
 
             getCoordinates: {
-                value: function() {
+                value: function () {
                     return {
                         x: this.x,
                         y: this.y
@@ -2090,7 +2086,7 @@ var IMSoftcrop = (function() {
              * @returns {{x: *, y: *, w: *, h: *}}
              */
             getDimensions: {
-                value: function() {
+                value: function () {
                     return {
                         x: this.x,
                         y: this.y,
@@ -2108,7 +2104,7 @@ var IMSoftcrop = (function() {
              * @private
              */
             getDimensionsInCanvas: {
-                value: function(offset) {
+                value: function (offset) {
                     if (typeof offset == 'undefined') {
                         offset = {x: 0, y: 0};
                     }
@@ -2204,7 +2200,7 @@ var IMSoftcrop = (function() {
                     var image = document.createElement('img');
                     var _this = this;
 
-                    image.crossOrigin = '*';
+                    image.crossOrigin = 'use-credentials';
                     image.addEventListener(
                         'load',
                         function() {
@@ -2737,7 +2733,7 @@ var IMSoftcrop = (function() {
      *
      * @extends IMSoftcrop.Shape
      */
-    IMSoftcrop.Softcrop = function(id, parent, hRatio, vRatio, area, respectRatio, locked, usable) {
+    IMSoftcrop.Softcrop = function (id, parent, hRatio, vRatio, area, respectRatio, locked, usable) {
         // Call super constructor
         IMSoftcrop.Shape.call(this, id, parent);
 
@@ -2841,7 +2837,7 @@ var IMSoftcrop = (function() {
              * @param point
              */
             dragHandle: {
-                value: function(handle, point) {
+                value: function (handle, point) {
                     if (typeof this.handle != 'string') {
                         return;
                     }
@@ -2972,7 +2968,7 @@ var IMSoftcrop = (function() {
              * @param point
              */
             move: {
-                value: function(point) {
+                value: function (point) {
                     var i = this.parent.getDimensions();
 
                     if (this.x + point.x < 0) {
@@ -3008,7 +3004,7 @@ var IMSoftcrop = (function() {
              * @returns {*}
              */
             overHandle: {
-                value: function(point) {
+                value: function (point) {
                     var handle = '';
                     var vDir = this.overVerticalArea(point);
                     var hDir = this.overHorizontalArea(point);
@@ -3044,28 +3040,28 @@ var IMSoftcrop = (function() {
              * @private
              */
             overHorizontalArea: {
-                value: function(point) {
+                value: function (point) {
                     var left = this.drawX - this.handleThickness;
                     var right = this.drawX + this.drawW + this.handleThickness;
 
                     if (this.withinCoordinates(
-                        point,
-                        left, this.drawY + this.drawH - this.handleLength + this.handleThickness,
-                        right, this.drawY + this.drawH + this.handleThickness)) {
+                            point,
+                            left, this.drawY + this.drawH - this.handleLength + this.handleThickness,
+                            right, this.drawY + this.drawH + this.handleThickness)) {
                         // Is in southern area
                         return 's';
                     }
                     else if (this.withinCoordinates(
-                        point,
-                        left, this.drawY + (this.drawH / 2) - this.handleLength,
-                        right, this.drawY + (this.drawH / 2) + this.handleLength)) {
+                            point,
+                            left, this.drawY + (this.drawH / 2) - this.handleLength,
+                            right, this.drawY + (this.drawH / 2) + this.handleLength)) {
                         // Is in middle area
                         return 'm';
                     }
                     else if (this.withinCoordinates(
-                        point,
-                        left, this.drawY - this.handleThickness,
-                        right, this.drawY + this.handleLength)) {
+                            point,
+                            left, this.drawY - this.handleThickness,
+                            right, this.drawY + this.handleLength)) {
                         // Is in northern area
                         return 'n';
                     }
@@ -3081,28 +3077,28 @@ var IMSoftcrop = (function() {
              * @private
              */
             overVerticalArea: {
-                value: function(point) {
+                value: function (point) {
                     var top = this.drawY - this.handleThickness;
                     var bottom = this.drawY + this.drawH + this.handleThickness;
 
                     if (this.withinCoordinates(
-                        point,
-                        this.drawX + this.drawW - this.handleLength, top,
-                        this.drawX + this.drawW + this.handleThickness, bottom)) {
+                            point,
+                            this.drawX + this.drawW - this.handleLength, top,
+                            this.drawX + this.drawW + this.handleThickness, bottom)) {
                         // Is in western drag area
                         return 'e';
                     }
                     else if (this.withinCoordinates(
-                        point,
-                        this.drawX + (this.drawW / 2) - this.handleLength, top,
-                        this.drawX + (this.drawW / 2) + this.handleLength, bottom)) {
+                            point,
+                            this.drawX + (this.drawW / 2) - this.handleLength, top,
+                            this.drawX + (this.drawW / 2) + this.handleLength, bottom)) {
                         // Is in western drag area
                         return 'm';
                     }
                     else if (this.withinCoordinates(
-                        point,
-                        this.drawX - this.handleThickness, top,
-                        this.drawX + this.handleLength, bottom)) {
+                            point,
+                            this.drawX - this.handleThickness, top,
+                            this.drawX + this.handleLength, bottom)) {
                         // Is in western drag area
                         return 'w';
                     }
@@ -3117,7 +3113,7 @@ var IMSoftcrop = (function() {
              * @param options
              */
             redraw: {
-                value: function(options) {
+                value: function (options) {
                     if (!this.ready) {
                         return;
                     }
@@ -3163,7 +3159,7 @@ var IMSoftcrop = (function() {
              * @private
              */
             drawCropGuidelines: {
-                value: function(offset, strokeStyle) {
+                value: function (offset, strokeStyle) {
                     this.ctx.closePath();
                     this.ctx.beginPath();
 
@@ -3209,7 +3205,7 @@ var IMSoftcrop = (function() {
              * @private
              */
             drawCropBorder: {
-                value: function() {
+                value: function () {
                     this.ctx.beginPath();
 
                     this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
@@ -3233,7 +3229,7 @@ var IMSoftcrop = (function() {
              * @private
              */
             drawCropMargins: {
-                value: function() {
+                value: function () {
                     this.ctx.beginPath();
                     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
 
@@ -3283,7 +3279,7 @@ var IMSoftcrop = (function() {
              * @protected
              */
             drawHandle: {
-                value: function(name, active, x, y, length, thickness) {
+                value: function (name, active, x, y, length, thickness) {
                     var wOffset = thickness / 2;
                     var lOffset = length / 2;
 

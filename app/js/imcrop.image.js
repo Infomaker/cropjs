@@ -71,7 +71,7 @@
                     var image = document.createElement('img');
                     var _this = this;
 
-                    image.crossOrigin = '*';
+                    image.crossOrigin = 'use-credentials';
                     image.addEventListener(
                         'load',
                         function() {
