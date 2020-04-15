@@ -21,7 +21,11 @@
     "dev": "npm-run-all --parallel server gulp",
     "build": "gulp build",
     "gulp": "gulp watch",
-    "server": "node ./example/index.js"
+    "server": "node ./example/index.js",
+    "release:major": "npm version major --no-git-tag-version",
+    "release:minor": "npm version minor --no-git-tag-version",
+    "release:hotfix": "npm version patch --no-git-tag-version",
+    "postversion": "git add package.json package-lock.json && git commit -m \"Bump version to v$npm_package_version\""
   },
   "devDependencies": {
     "@hapi/hapi": "^18.4.1",

@@ -76,8 +76,10 @@ npm install
 ### Useful commands
 
 ```bash
-npm run dev         // Start development server and file watch
+npm run dev         // Start development server located at http://localhost:8000, and file watch
 npm run build       // Build and minify files for project
+npm run release:[major||minor||hotfix] // Bump version in package.json and package-lock.json then commit files
+./publish.sh        // Publish a new version to NPM
 ```
 
 ## References
