@@ -82,6 +82,32 @@ npm run release:[major||minor||hotfix] // Bump version in package.json and packa
 ./publish.sh        // Publish a new version to NPM
 ```
 
+### Use in local dev writer
+
+Simply change index.html in Writer project.
+
+Swap this:
+
+```html
+    <script src="/dist/cropjs/js/tracking.min.js?v=2.1.0"></script>
+    <script src="/dist/cropjs/js/cropjs.min.js?v=2.1.0"></script>
+    <link href="/dist/cropjs/css/imcrop.css?v=2.1.0" rel="stylesheet" type="text/css" />
+```
+
+for this:
+
+```html
+    <!--
+    <script src="/dist/cropjs/js/tracking.min.js?v=2.1.0"></script>
+    <script src="/dist/cropjs/js/cropjs.min.js?v=2.1.0"></script>
+    <link href="/dist/cropjs/css/imcrop.css?v=2.1.0" rel="stylesheet" type="text/css" />
+    -->
+
+    <script src="http://localhost:8000/cropjs/js/tracking.js"></script>
+    <script src="http://localhost:8000/cropjs/js/cropjs.js"></script>
+    <link href="http://localhost:8000/cropjs/css/imcrop.css" rel="stylesheet" type="text/css" />
+```
+
 ## References
 
 Using [tracking.js](https://trackingjs.com/) for feature and face detection.
