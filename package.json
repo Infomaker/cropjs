@@ -1,6 +1,6 @@
 {
   "name": "@infomaker/cropjs",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB",
   "homepage": "http://www.infomaker.se",
   "author": {
