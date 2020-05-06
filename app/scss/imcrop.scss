@@ -41,6 +41,21 @@
 
         & > .imc_debug_group {
             display: none;
+            background: white;
+            padding: 5px;
+
+            .toggle {
+                span { margin-left: 5px; }
+                .off { display: none; }
+                &.on {
+                    .on {
+                        display: none;
+                    }
+                    .off {
+                        display: inline;
+                    }
+                }
+            }
         }
 
         #imc_loading {

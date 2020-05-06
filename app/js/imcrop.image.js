@@ -131,14 +131,16 @@
                     var area;
                     if (x === null || y === null) {
                         // Create new ratio based area
-                        area = IMSoftcrop.Ratio.fitInto({
-                            w: this.w,
-                            h: this.h
-                        },
+                        area = IMSoftcrop.Ratio.fitInto(
+                            {
+                                w: this.w,
+                                h: this.h
+                            },
                             {
                                 w: hRatio,
                                 h: vRatio
-                            });
+                            }
+                        );
                     }
                     else {
                         // Create new area with already specified dimension
@@ -251,44 +253,62 @@
              * @param radius
              */
             addFocusPoint: {
-                value: function(point, radius) {
-                    point.r = radius; // Add radius to point
-                    this.focusPoints.push(point);
+                value: function(point) {
+                    this.focusPoints = [point];
+                }
+            },
 
-                    if (typeof this.focusArea == 'undefined') {
-                        // Init focus area
-                        this.focusArea = {
-                            point1: {
-                                x: point.x - radius,
-                                y: point.y - radius
-                            },
-                            point2: {
-                                x: point.x + radius,
-                                y: point.y + radius
-                            }
+            removeFocusPoint: {
+                value: function() {
+                    this.focusPoints[0] = null;
+                    this.focusPoints = [];
+                }
+            },
+
+            getFocusPoint: {
+                value: function() {
+                    return this.focusPoints[0]
+                }
+            },
+
+            getImageCenterPoint: {
+                value: function() {
+                    return {
+                        x: ((this.w * this.parent._zoomLevel) / 2) + (this.x * this.parent._zoomLevel) + this.parent._margin,
+                        y: ((this.h * this.parent._zoomLevel) / 2) + (this.y * this.parent._zoomLevel) + this.parent._margin
+                    }
+                }
+            },
+
+            adjustCropsToFocusPoint: {
+                value: function() {
+                    var focusPoint = this.getFocusPoint();
+                    var self = this;
+
+                    if (!focusPoint) {
+                        focusPoint = {
+                            x: this.w / 2,
+                            y: this.h / 2
                         };
-
-                        return;
                     }
 
-                    // Recalculate focus area
-                    if (point.x - point.r < this.focusArea.point1.x) {
-                        this.focusArea.point1.x = point.x - point.r;
-                    }
+                    this.crops.forEach(function(crop) {
+                        area = IMSoftcrop.Ratio.fitInto(
+                            {
+                                w: self.w,
+                                h: self.h
+                            },
+                            {
+                                w: crop.ratio.w,
+                                h: crop.ratio.h
+                            }
+                        );
 
-                    if (point.x + point.r > this.focusArea.point2.x) {
-                        this.focusArea.point2.x = point.x + point.r;
-                    }
+                        crop.w = area.w
+                        crop.h = area.h
 
-                    if (point.y - point.r < this.focusArea.point1.y) {
-                        this.focusArea.point1.y = point.y - point.r;
-                    }
-
-                    if (point.y + point.r > this.focusArea.point2.y) {
-                        this.focusArea.point2.y = point.y + point.r;
-                    }
-
-                    this.constrainArea(this.focusArea);
+                        crop.adjustToFocusPoint(focusPoint)
+                    })
                 }
             },
 
@@ -319,7 +339,7 @@
             /**
              * Redraw image
              */
-            redraw: {
+                redraw: {
                 value: function(options) {
                     if (!this.ready) {
                         return;
@@ -339,6 +359,10 @@
                         this.drawFocusPoints();
                     }
 
+                    if (typeof options === 'object' && options.focusPointMarker === true) {
+                        this.drawFocusPointMarker();
+                    }
+
                     if (this.crop instanceof IMSoftcrop.Softcrop) {
                         this.crop.redraw(options);
                     }
@@ -348,9 +372,62 @@
                 }
             },
 
+            /**
+             * Draw an actual marker "square"
+             */
+            drawFocusPointMarker: {
+                value: function() {
+                    var drawRoundedRectangle = function(ctx, x, y, width, height, radius, fill) {
+                        if (width < 2 * radius) radius = width / 2
+                        if (height < 2 * radius) radius = height / 2
+
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.lineWidth = 2;
+                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                        ctx.shadowBlur = 3;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x + radius, y);
+                        ctx.arcTo(x + width, y, x + width, y + height, radius);
+                        ctx.arcTo(x + width, y + height, x, y + height, radius);
+                        ctx.arcTo(x, y + height, x, y, radius);
+                        ctx.arcTo(x, y, x + width, y, radius);
+                        ctx.closePath();
+
+                        if (fill) {
+                            ctx.fill();
+                        }
+
+                        ctx.stroke();
+
+                        ctx.shadowColor = '';
+                        ctx.shadowBlur = 0;
+                    }
+
+                    if (this.getFocusPoint()) {
+                        var point = this.getFocusPoint(),
+                            canvasPoint = this.editor.imagePointInCanvas(point.x, point.y),
+                            width = 30,
+                            height = 30;
+
+                        var adjustedPoint = {
+                            x: canvasPoint.x - (width / 2),
+                            y: canvasPoint.y - (height / 2)
+                        }
+
+                        // Outer box
+                        drawRoundedRectangle(this.ctx, adjustedPoint.x, adjustedPoint.y, width, height, 10);
+
+                        // Middle point
+                        drawRoundedRectangle(this.ctx, adjustedPoint.x + (width/2) - 1, adjustedPoint.y + (height/2) -1, 2, 2, 10, true);
+                    }
+                }
+            },
+
 
             /**
-             * Draw focus points
+             * Draw focus points for debug purposes
              */
             drawFocusPoints: {
                 value: function() {

@@ -300,6 +300,13 @@ var IMSoftcrop = (function() {
         // IMCropUI.Toggle for marking crops as usable
         _cropUsableToggle: undefined,
 
+        // Use focus point instead of handles
+        _useFocusPoint: false,
+
+        useFocusPoint: function() {
+            return this._useFocusPoint;
+        },
+
 
         /**
          * Get hold of references to the main gui elements
@@ -416,8 +423,8 @@ var IMSoftcrop = (function() {
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
                     var id = window.setTimeout(function() {
                         callback(currTime + timeToCall);
-                    },
-                        timeToCall);
+                    }, timeToCall);
+
                     lastTime = currTime + timeToCall;
                     return id;
                 };
@@ -457,7 +464,8 @@ var IMSoftcrop = (function() {
             if (this._image instanceof IMSoftcrop.Image) {
                 this._image.redraw({
                     guides: this._guidesToggle.on,
-                    focuspoints: this._focusPointsToggle.on
+                    focuspoints: this._focusPointsToggle.on,
+                    focusPointMarker: this.useFocusPoint()
                 });
 
                 // Redraw all crop previews
@@ -747,13 +755,12 @@ var IMSoftcrop = (function() {
                     _this.centerImage(false);
                     _this.updateImageInfo(false);
 
-                    if (_this._autocrop) {
+                    if (_this._autocrop && _this._detectWorkerUrl) {
                         _this.detectDetails();
                         _this.detectFaces();
                     }
-                    else {
-                        _this.toggleLoadingImage(false);
-                    }
+
+                    _this.toggleLoadingImage(false);
 
                     _this.applySoftcrops();
                     _this.redraw();
@@ -815,6 +822,41 @@ var IMSoftcrop = (function() {
             }
         },
 
+        setUseFocusPoint: function(useFocusPoint) {
+            this._useFocusPoint = Boolean(useFocusPoint);
+
+            if (this._useFocusPoint) {
+                this._image.addFocusPoint({
+                    x: this._image.w / 2,
+                    y: this._image.h / 2
+                });
+            } else {
+                this._image.removeFocusPoint();
+            }
+
+            this.handle = undefined;
+            this._image.adjustCropsToFocusPoint();
+
+            this.redraw();
+        },
+
+        setFocusPoint: function(focusPoint) {
+            this._useFocusPoint = true;
+
+            if (focusPoint) {
+
+                this._image.addFocusPoint(focusPoint);
+                this._image.adjustCropsToFocusPoint();
+            }
+
+            this.redraw();
+        },
+
+        getFocusPoint: function() {
+            return this._useFocusPoint ?
+                this._image.getFocusPoint() :
+                null
+        },
 
         /**
          * Get soft crop data for image
@@ -1355,8 +1397,7 @@ var IMSoftcrop = (function() {
 
             var point = this.getMousePoint(event);
             this._image.addFocusPoint(
-                this.canvasPointInImage(point.x, point.y),
-                40
+                this.canvasPointInImage(point.x, point.y)
             );
 
             if (this._image.autocrop()) {
@@ -1395,9 +1436,27 @@ var IMSoftcrop = (function() {
         /**
          * On mouse up event handler
          */
-        onMouseUp: function() {
+        onMouseUp: function(event) {
             this._dragObject = undefined;
             this._dragPoint = undefined;
+
+            if (this.useFocusPoint()) {
+
+                var point = this.getMousePoint(event);
+
+                if (this._image.inArea(point)) {
+                    this.toggleLoadingImage(true);
+
+                    var focusPoint = this.canvasPointInImage(point.x, point.y);
+
+                    this._image.addFocusPoint(focusPoint);
+                    this._image.adjustCropsToFocusPoint();
+
+                    this.toggleLoadingImage(false);
+                }
+            }
+
+            this.redraw();
         },
 
         /**
@@ -1412,6 +1471,7 @@ var IMSoftcrop = (function() {
             if (typeof this._dragObject != 'undefined') {
 
                 if (typeof this._dragObject == 'string') {
+
                     // Dragging handle
                     if (!this._image.detectionReady()) {
                         // Lock crop so that detection does not override users choice
@@ -1478,7 +1538,12 @@ var IMSoftcrop = (function() {
 
             // Reset hover
             if (this._image instanceof IMSoftcrop.Image && this._image.inArea(point)) {
-                this._canvas.style.cursor = 'move';
+                if (this.useFocusPoint()) {
+                    this._canvas.style.cursor = 'crosshair';
+                } else {
+                    this._canvas.style.cursor = 'move';
+                }
+
                 return;
             }
 
@@ -1627,10 +1692,7 @@ var IMSoftcrop = (function() {
 
             this._drawCross(
                 'green',
-                {
-                    x: ((this._image.w * this._zoomLevel) / 2) + (this._image.x * this._zoomLevel) + this._margin,
-                    y: ((this._image.h * this._zoomLevel) / 2) + (this._image.y * this._zoomLevel) + this._margin
-                }
+                this._image.getImageCenterPoint()
             );
 
             if (typeof this._debugContainer != 'undefined') {
@@ -2260,14 +2322,16 @@ var IMSoftcrop = (function() {
                     var area;
                     if (x === null || y === null) {
                         // Create new ratio based area
-                        area = IMSoftcrop.Ratio.fitInto({
-                            w: this.w,
-                            h: this.h
-                        },
+                        area = IMSoftcrop.Ratio.fitInto(
+                            {
+                                w: this.w,
+                                h: this.h
+                            },
                             {
                                 w: hRatio,
                                 h: vRatio
-                            });
+                            }
+                        );
                     }
                     else {
                         // Create new area with already specified dimension
@@ -2380,44 +2444,62 @@ var IMSoftcrop = (function() {
              * @param radius
              */
             addFocusPoint: {
-                value: function(point, radius) {
-                    point.r = radius; // Add radius to point
-                    this.focusPoints.push(point);
+                value: function(point) {
+                    this.focusPoints = [point];
+                }
+            },
 
-                    if (typeof this.focusArea == 'undefined') {
-                        // Init focus area
-                        this.focusArea = {
-                            point1: {
-                                x: point.x - radius,
-                                y: point.y - radius
-                            },
-                            point2: {
-                                x: point.x + radius,
-                                y: point.y + radius
-                            }
+            removeFocusPoint: {
+                value: function() {
+                    this.focusPoints[0] = null;
+                    this.focusPoints = [];
+                }
+            },
+
+            getFocusPoint: {
+                value: function() {
+                    return this.focusPoints[0]
+                }
+            },
+
+            getImageCenterPoint: {
+                value: function() {
+                    return {
+                        x: ((this.w * this.parent._zoomLevel) / 2) + (this.x * this.parent._zoomLevel) + this.parent._margin,
+                        y: ((this.h * this.parent._zoomLevel) / 2) + (this.y * this.parent._zoomLevel) + this.parent._margin
+                    }
+                }
+            },
+
+            adjustCropsToFocusPoint: {
+                value: function() {
+                    var focusPoint = this.getFocusPoint();
+                    var self = this;
+
+                    if (!focusPoint) {
+                        focusPoint = {
+                            x: this.w / 2,
+                            y: this.h / 2
                         };
-
-                        return;
                     }
 
-                    // Recalculate focus area
-                    if (point.x - point.r < this.focusArea.point1.x) {
-                        this.focusArea.point1.x = point.x - point.r;
-                    }
+                    this.crops.forEach(function(crop) {
+                        area = IMSoftcrop.Ratio.fitInto(
+                            {
+                                w: self.w,
+                                h: self.h
+                            },
+                            {
+                                w: crop.ratio.w,
+                                h: crop.ratio.h
+                            }
+                        );
 
-                    if (point.x + point.r > this.focusArea.point2.x) {
-                        this.focusArea.point2.x = point.x + point.r;
-                    }
+                        crop.w = area.w
+                        crop.h = area.h
 
-                    if (point.y - point.r < this.focusArea.point1.y) {
-                        this.focusArea.point1.y = point.y - point.r;
-                    }
-
-                    if (point.y + point.r > this.focusArea.point2.y) {
-                        this.focusArea.point2.y = point.y + point.r;
-                    }
-
-                    this.constrainArea(this.focusArea);
+                        crop.adjustToFocusPoint(focusPoint)
+                    })
                 }
             },
 
@@ -2448,7 +2530,7 @@ var IMSoftcrop = (function() {
             /**
              * Redraw image
              */
-            redraw: {
+                redraw: {
                 value: function(options) {
                     if (!this.ready) {
                         return;
@@ -2468,6 +2550,10 @@ var IMSoftcrop = (function() {
                         this.drawFocusPoints();
                     }
 
+                    if (typeof options === 'object' && options.focusPointMarker === true) {
+                        this.drawFocusPointMarker();
+                    }
+
                     if (this.crop instanceof IMSoftcrop.Softcrop) {
                         this.crop.redraw(options);
                     }
@@ -2477,9 +2563,62 @@ var IMSoftcrop = (function() {
                 }
             },
 
+            /**
+             * Draw an actual marker "square"
+             */
+            drawFocusPointMarker: {
+                value: function() {
+                    var drawRoundedRectangle = function(ctx, x, y, width, height, radius, fill) {
+                        if (width < 2 * radius) radius = width / 2
+                        if (height < 2 * radius) radius = height / 2
+
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.lineWidth = 2;
+                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                        ctx.shadowBlur = 3;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x + radius, y);
+                        ctx.arcTo(x + width, y, x + width, y + height, radius);
+                        ctx.arcTo(x + width, y + height, x, y + height, radius);
+                        ctx.arcTo(x, y + height, x, y, radius);
+                        ctx.arcTo(x, y, x + width, y, radius);
+                        ctx.closePath();
+
+                        if (fill) {
+                            ctx.fill();
+                        }
+
+                        ctx.stroke();
+
+                        ctx.shadowColor = '';
+                        ctx.shadowBlur = 0;
+                    }
+
+                    if (this.getFocusPoint()) {
+                        var point = this.getFocusPoint(),
+                            canvasPoint = this.editor.imagePointInCanvas(point.x, point.y),
+                            width = 30,
+                            height = 30;
+
+                        var adjustedPoint = {
+                            x: canvasPoint.x - (width / 2),
+                            y: canvasPoint.y - (height / 2)
+                        }
+
+                        // Outer box
+                        drawRoundedRectangle(this.ctx, adjustedPoint.x, adjustedPoint.y, width, height, 10);
+
+                        // Middle point
+                        drawRoundedRectangle(this.ctx, adjustedPoint.x + (width/2) - 1, adjustedPoint.y + (height/2) -1, 2, 2, 10, true);
+                    }
+                }
+            },
+
 
             /**
-             * Draw focus points
+             * Draw focus points for debug purposes
              */
             drawFocusPoints: {
                 value: function() {
@@ -2827,6 +2966,37 @@ var IMSoftcrop = (function() {
                 writable: true
             },
 
+            /**
+             * Adjust crop to new focus point
+             */
+            adjustToFocusPoint: {
+                value: function(focusPoint) {
+
+                    var adjustedPoint = {
+                        x: focusPoint.x - (this.w / 2),
+                        y: focusPoint.y - (this.h / 2)
+                    }
+
+                    // Adjust crop x/w axis to be contained in image width
+                    if (adjustedPoint.x < 0) {
+                        adjustedPoint.x = 0
+                    }
+                    else if (adjustedPoint.x + this.w > this.parent.w) {
+                        adjustedPoint.x = this.parent.w - this.w
+                    }
+
+                    // Adjust crop y/h axis to be contained in image height
+                    if (adjustedPoint.y < 0) {
+                        adjustedPoint.y = 0
+                    }
+                    else if (adjustedPoint.y + this.h > this.parent.h) {
+                        adjustedPoint.y = this.parent.h - this.h
+                    }
+
+                    this.x = adjustedPoint.x
+                    this.y = adjustedPoint.y
+                }
+            },
 
             /**
              * Drag a handle
@@ -3005,6 +3175,10 @@ var IMSoftcrop = (function() {
              */
             overHandle: {
                 value: function (point) {
+                    if (this.parent.parent.useFocusPoint()) {
+                        return '';
+                    }
+
                     var handle = '';
                     var vDir = this.overVerticalArea(point);
                     var hDir = this.overHorizontalArea(point);
@@ -3280,6 +3454,10 @@ var IMSoftcrop = (function() {
              */
             drawHandle: {
                 value: function (name, active, x, y, length, thickness) {
+                    if (this.parent.parent.useFocusPoint()) {
+                        return;
+                    }
+
                     var wOffset = thickness / 2;
                     var lOffset = length / 2;
 

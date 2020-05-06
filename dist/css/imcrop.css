@@ -32,7 +32,17 @@
       #imc #imc_container #imc_image_inline > * > * {
         margin-top: 8px; }
     #imc #imc_container #imc_image_inline > .imc_debug_group {
-      display: none; }
+      display: none;
+      background: white;
+      padding: 5px; }
+      #imc #imc_container #imc_image_inline > .imc_debug_group .toggle span {
+        margin-left: 5px; }
+      #imc #imc_container #imc_image_inline > .imc_debug_group .toggle .off {
+        display: none; }
+      #imc #imc_container #imc_image_inline > .imc_debug_group .toggle.on .on {
+        display: none; }
+      #imc #imc_container #imc_image_inline > .imc_debug_group .toggle.on .off {
+        display: inline; }
     #imc #imc_container #imc_image_inline #imc_loading {
       align-self: flex-end;
       font-size: 20px;
