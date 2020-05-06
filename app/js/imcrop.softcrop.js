@@ -109,6 +109,37 @@
                 writable: true
             },
 
+            /**
+             * Adjust crop to new focus point
+             */
+            adjustToFocusPoint: {
+                value: function(focusPoint) {
+
+                    var adjustedPoint = {
+                        x: focusPoint.x - (this.w / 2),
+                        y: focusPoint.y - (this.h / 2)
+                    }
+
+                    // Adjust crop x/w axis to be contained in image width
+                    if (adjustedPoint.x < 0) {
+                        adjustedPoint.x = 0
+                    }
+                    else if (adjustedPoint.x + this.w > this.parent.w) {
+                        adjustedPoint.x = this.parent.w - this.w
+                    }
+
+                    // Adjust crop y/h axis to be contained in image height
+                    if (adjustedPoint.y < 0) {
+                        adjustedPoint.y = 0
+                    }
+                    else if (adjustedPoint.y + this.h > this.parent.h) {
+                        adjustedPoint.y = this.parent.h - this.h
+                    }
+
+                    this.x = adjustedPoint.x
+                    this.y = adjustedPoint.y
+                }
+            },
 
             /**
              * Drag a handle
@@ -287,6 +318,10 @@
              */
             overHandle: {
                 value: function (point) {
+                    if (this.parent.parent.useFocusPoint()) {
+                        return '';
+                    }
+
                     var handle = '';
                     var vDir = this.overVerticalArea(point);
                     var hDir = this.overHorizontalArea(point);
@@ -562,6 +597,10 @@
              */
             drawHandle: {
                 value: function (name, active, x, y, length, thickness) {
+                    if (this.parent.parent.useFocusPoint()) {
+                        return;
+                    }
+
                     var wOffset = thickness / 2;
                     var lOffset = length / 2;
 

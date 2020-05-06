@@ -38,7 +38,7 @@
                         detectWorkerUrl: '/cropjs/js/imcrop.worker.detect.js',
                         detectThreshold: 5,
                         detectStepSize: 3.5,
-                        debug: false,
+                        debug: true,
                         debugElement: document.getElementById('crop_debug')
                     }
                 );
@@ -71,7 +71,9 @@
                     this.addSoftcrop('4:3', false, 3, 2);
                     this.addSoftcrop('1:198', false, 1, 1.48);
 
-                    this.addSoftcrop('test', false, 800, 400, 100, 20);
+                    // this.addSoftcrop('test', false, 800, 400, 100, 20);
+
+                    editor.setUseFocusPoint(true)
                 }
             );
         }
@@ -96,6 +98,8 @@
                             image.crops[n].y
                         )
                     }
+
+                    editor.setUseFocusPoint(true)
                 },
                 false // Disable autocrop for this image
             );

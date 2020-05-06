@@ -201,6 +201,13 @@ var IMSoftcrop = (function() {
         // IMCropUI.Toggle for marking crops as usable
         _cropUsableToggle: undefined,
 
+        // Use focus point instead of handles
+        _useFocusPoint: false,
+
+        useFocusPoint: function() {
+            return this._useFocusPoint;
+        },
+
 
         /**
          * Get hold of references to the main gui elements
@@ -317,8 +324,8 @@ var IMSoftcrop = (function() {
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
                     var id = window.setTimeout(function() {
                         callback(currTime + timeToCall);
-                    },
-                        timeToCall);
+                    }, timeToCall);
+
                     lastTime = currTime + timeToCall;
                     return id;
                 };
@@ -358,7 +365,8 @@ var IMSoftcrop = (function() {
             if (this._image instanceof IMSoftcrop.Image) {
                 this._image.redraw({
                     guides: this._guidesToggle.on,
-                    focuspoints: this._focusPointsToggle.on
+                    focuspoints: this._focusPointsToggle.on,
+                    focusPointMarker: this.useFocusPoint()
                 });
 
                 // Redraw all crop previews
@@ -648,13 +656,12 @@ var IMSoftcrop = (function() {
                     _this.centerImage(false);
                     _this.updateImageInfo(false);
 
-                    if (_this._autocrop) {
+                    if (_this._autocrop && _this._detectWorkerUrl) {
                         _this.detectDetails();
                         _this.detectFaces();
                     }
-                    else {
-                        _this.toggleLoadingImage(false);
-                    }
+
+                    _this.toggleLoadingImage(false);
 
                     _this.applySoftcrops();
                     _this.redraw();
@@ -716,6 +723,41 @@ var IMSoftcrop = (function() {
             }
         },
 
+        setUseFocusPoint: function(useFocusPoint) {
+            this._useFocusPoint = Boolean(useFocusPoint);
+
+            if (this._useFocusPoint) {
+                this._image.addFocusPoint({
+                    x: this._image.w / 2,
+                    y: this._image.h / 2
+                });
+            } else {
+                this._image.removeFocusPoint();
+            }
+
+            this.handle = undefined;
+            this._image.adjustCropsToFocusPoint();
+
+            this.redraw();
+        },
+
+        setFocusPoint: function(focusPoint) {
+            this._useFocusPoint = true;
+
+            if (focusPoint) {
+
+                this._image.addFocusPoint(focusPoint);
+                this._image.adjustCropsToFocusPoint();
+            }
+
+            this.redraw();
+        },
+
+        getFocusPoint: function() {
+            return this._useFocusPoint ?
+                this._image.getFocusPoint() :
+                null
+        },
 
         /**
          * Get soft crop data for image
@@ -1256,8 +1298,7 @@ var IMSoftcrop = (function() {
 
             var point = this.getMousePoint(event);
             this._image.addFocusPoint(
-                this.canvasPointInImage(point.x, point.y),
-                40
+                this.canvasPointInImage(point.x, point.y)
             );
 
             if (this._image.autocrop()) {
@@ -1296,9 +1337,27 @@ var IMSoftcrop = (function() {
         /**
          * On mouse up event handler
          */
-        onMouseUp: function() {
+        onMouseUp: function(event) {
             this._dragObject = undefined;
             this._dragPoint = undefined;
+
+            if (this.useFocusPoint()) {
+
+                var point = this.getMousePoint(event);
+
+                if (this._image.inArea(point)) {
+                    this.toggleLoadingImage(true);
+
+                    var focusPoint = this.canvasPointInImage(point.x, point.y);
+
+                    this._image.addFocusPoint(focusPoint);
+                    this._image.adjustCropsToFocusPoint();
+
+                    this.toggleLoadingImage(false);
+                }
+            }
+
+            this.redraw();
         },
 
         /**
@@ -1313,6 +1372,7 @@ var IMSoftcrop = (function() {
             if (typeof this._dragObject != 'undefined') {
 
                 if (typeof this._dragObject == 'string') {
+
                     // Dragging handle
                     if (!this._image.detectionReady()) {
                         // Lock crop so that detection does not override users choice
@@ -1379,7 +1439,12 @@ var IMSoftcrop = (function() {
 
             // Reset hover
             if (this._image instanceof IMSoftcrop.Image && this._image.inArea(point)) {
-                this._canvas.style.cursor = 'move';
+                if (this.useFocusPoint()) {
+                    this._canvas.style.cursor = 'crosshair';
+                } else {
+                    this._canvas.style.cursor = 'move';
+                }
+
                 return;
             }
 
@@ -1528,10 +1593,7 @@ var IMSoftcrop = (function() {
 
             this._drawCross(
                 'green',
-                {
-                    x: ((this._image.w * this._zoomLevel) / 2) + (this._image.x * this._zoomLevel) + this._margin,
-                    y: ((this._image.h * this._zoomLevel) / 2) + (this._image.y * this._zoomLevel) + this._margin
-                }
+                this._image.getImageCenterPoint()
             );
 
             if (typeof this._debugContainer != 'undefined') {
