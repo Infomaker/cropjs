@@ -1,7 +1,7 @@
 /**
  * @infomaker/cropjs - Image soft cropper for predefined crop definitions featuring automatic crop suggestions. Created by Infomaker Scandinavia AB
  * @author Danne Lundqvist <danne.lundqvist@infomaker.se>
- * @version v2.2.0
+ * @version v2.2.1
  * @link http://www.infomaker.se
  * @license MIT
  */
@@ -462,10 +462,11 @@ var IMSoftcrop = (function() {
 
             // Redraw current image
             if (this._image instanceof IMSoftcrop.Image) {
+                var useFocusPoint = this.useFocusPoint()
                 this._image.redraw({
-                    guides: this._guidesToggle.on,
+                    guides: this._guidesToggle.on && !useFocusPoint,
                     focuspoints: this._focusPointsToggle.on,
-                    focusPointMarker: this.useFocusPoint()
+                    focusPointMarker: useFocusPoint
                 });
 
                 // Redraw all crop previews
