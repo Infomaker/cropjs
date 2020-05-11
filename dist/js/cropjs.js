@@ -462,10 +462,11 @@ var IMSoftcrop = (function() {
 
             // Redraw current image
             if (this._image instanceof IMSoftcrop.Image) {
+                var useFocusPoint = this.useFocusPoint()
                 this._image.redraw({
-                    guides: this._guidesToggle.on,
+                    guides: this._guidesToggle.on && !useFocusPoint,
                     focuspoints: this._focusPointsToggle.on,
-                    focusPointMarker: this.useFocusPoint()
+                    focusPointMarker: useFocusPoint
                 });
 
                 // Redraw all crop previews
